@@ -69,8 +69,10 @@ public class Taxi {
         // subscribe to the topic(s)
         TaxiComAdmin toAdmin = new TaxiComAdmin(taxi);
         TaxiDriver driver = new TaxiDriver(taxi);
+        Sensor sens = new Sensor();
+        sens.start();
         //toAdmin.start();
-        driver.start();
+        //driver.start();
     }
 
 }

@@ -28,8 +28,7 @@ public class SETA {
         while(true){ // busy waiting
             Thread.sleep(5000); // publish 2 requests each 5 seconds
             for(int i=0; i<2; i++){
-            publishRequest(rand, id, clientId, client, topic);
-            id++;
+            publishRequest(rand, id++, clientId, client, topic);
             }
 
         }
