@@ -1,3 +1,5 @@
+package TaxiPackage;
+
 import seta.smartcity.requestToJoin.RequestToJoinOuterClass.RequestToJoin;
 import seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass.RequestToJoinAccept;
 
@@ -32,13 +34,11 @@ public class TaxiComAdmin extends Thread{
             //System.out.println(t);
             // can just wait
             // IMPORTANT: FIND A WAY HERE TO READ THE RESPONSE
-            Thread.sleep(5000);
-            RequestToJoinAccept accept = RequestToJoinAccept.parseFrom(s.getInputStream());
-            System.out.println(accept);
+            // Thread.sleep(5000);
+            // RequestToJoinAccept accept = RequestToJoinAccept.parseFrom(s.getInputStream());
+            // System.out.println(accept);
             s.close();
         }catch(IOException e){
-            e.printStackTrace();
-        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

@@ -1,7 +1,20 @@
-SETA.java
- SETA
-AdminTaxiThread.java
- AdminTaxiThread
+AdministratorPackage/AdministratorServer.java
+ AdministratorPackage.AdministratorServer
+seta/smartcity/requestToJoinAccept/RequestToJoinAcceptOuterClass.java
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$1
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$1
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Builder
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Position
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Position$1
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Position$Builder
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$PositionOrBuilder
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Taxi
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Taxi$1
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Taxi$Builder
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$TaxiOrBuilder
+ seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAcceptOrBuilder
 Main.java
  Main
 seta/smartcity/requestToJoin/RequestToJoinOuterClass.java
@@ -22,27 +35,14 @@ seta/smartcity/rideRequest/RideRequestOuterClass.java
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$Position$Builder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$PositionOrBuilder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequestOrBuilder
-seta/smartcity/requestToJoinAccept/RequestToJoinAcceptOuterClass.java
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$1
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$1
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Builder
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Position
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Position$1
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Position$Builder
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$PositionOrBuilder
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Taxi
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Taxi$1
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Taxi$Builder
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$TaxiOrBuilder
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAcceptOrBuilder
-TaxiDriver.java
- TaxiDriver
- TaxiDriver$1
-AdministratorServer.java
- AdministratorServer
-TaxiComAdmin.java
- TaxiComAdmin
-Taxi.java
- Taxi
+AdministratorPackage/AdminTaxiThread.java
+ AdministratorPackage.AdminTaxiThread
+TaxiPackage/TaxiComAdmin.java
+ TaxiPackage.TaxiComAdmin
+TaxiPackage/TaxiDriver.java
+ TaxiPackage.TaxiDriver
+ TaxiPackage.TaxiDriver$1
+TaxiPackage/Taxi.java
+ TaxiPackage.Taxi
+SETA.java
+ SETA

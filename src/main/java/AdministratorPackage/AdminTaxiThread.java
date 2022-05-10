@@ -1,3 +1,5 @@
+package AdministratorPackage;
+
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -33,7 +35,6 @@ public class AdminTaxiThread extends Thread{
         try {
             RequestToJoin receivedJoinRequest = RequestToJoin.parseFrom(inFromClient);
             System.out.println("Join request received");
-            System.out.println(receivedJoinRequest.getId());
 
             boolean accepted = true;
 
@@ -64,7 +65,7 @@ public class AdminTaxiThread extends Thread{
                         .build();
 
                 admin.addTaxi(thisTaxi);
-                acceptJoinRequest.writeTo(outToClient);
+                // acceptJoinRequest.writeTo(outToClient);
             }else{
                 outToClient.write(-1); // should be a message
             }

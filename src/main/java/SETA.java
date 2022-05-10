@@ -26,17 +26,24 @@ public class SETA {
         int id = 0;
 
         while(true){ // busy waiting
-            Thread.sleep(5000); // publish 2 requests
-            RideRequest payload = generateRideRequest(rand, id++);
-            String destDist = getDistrict(payload.getStartingPosition());
-            MqttMessage message = new MqttMessage(payload.toByteArray());
-            message.setQos(2);
-            // should notify the SETA that request was handled
-            System.out.println(clientId + " Publishing message: " + payload + " ...");
-            client.publish(topic+destDist, message);
-            System.out.println(clientId + " Message published at " + topic+destDist);
+            Thread.sleep(5000); // publish 2 requests each 5 seconds
+            for(int i=0; i<2; i++){
+            publishRequest(rand, id, clientId, client, topic);
+            id++;
+            }
 
         }
+    }
+
+    private static void publishRequest(Random rand, int id, String clientId, MqttClient client, String topic) throws MqttException {
+        RideRequest payload = generateRideRequest(rand, id);
+        String destDist = getDistrict(payload.getStartingPosition());
+        MqttMessage message = new MqttMessage(payload.toByteArray());
+        message.setQos(2);
+        // should notify the SETA that request was handled
+        System.out.println(clientId + " Publishing message: " + payload + " ...");
+        client.publish(topic+destDist, message);
+        System.out.println(clientId + " Message published at " + topic+destDist);
     }
 
     private static RideRequest generateRideRequest(Random rand, int id){
