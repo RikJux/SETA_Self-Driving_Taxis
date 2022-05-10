@@ -46,14 +46,14 @@ Simulator/PM10Simulator.java
 TaxiPackage/TaxiDriver.java
  TaxiPackage.TaxiDriver
  TaxiPackage.TaxiDriver$1
-TaxiPackage/Taxi.java
- TaxiPackage.Taxi
+TaxiPackage/TaxiComAdmin.java
+ TaxiPackage.TaxiComAdmin
 Simulator/Measurement.java
  Simulator.Measurement
 Simulator/Simulator.java
  Simulator.Simulator
-TaxiPackage/TaxiComAdmin.java
- TaxiPackage.TaxiComAdmin
+TaxiPackage/Taxi.java
+ TaxiPackage.Taxi
 Simulator/SimulatorData.java
  Simulator.SimulatorData
 TaxiPackage/Sensor.java
