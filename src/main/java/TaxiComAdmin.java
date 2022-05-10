@@ -15,7 +15,6 @@ public class TaxiComAdmin extends Thread{
     @Override
     public void run() {
 
-
         try {
             Socket s = new Socket("localhost", 9999);
 
@@ -29,12 +28,17 @@ public class TaxiComAdmin extends Thread{
             System.out.println("Sending join request to Administrator Server at port " + s.getPort());
             r.writeTo(s.getOutputStream());
             System.out.println("Join request sent to Administrator Server at port " + s.getPort());
+            //RequestToJoinAccept.Taxi t = RequestToJoinAccept.Taxi.parseFrom(s.getInputStream());
+            //System.out.println(t);
             // can just wait
             // IMPORTANT: FIND A WAY HERE TO READ THE RESPONSE
-            //RequestToJoinAccept accept = RequestToJoinAccept.parseFrom(s.getInputStream());
-            //System.out.println(accept);
+            Thread.sleep(5000);
+            RequestToJoinAccept accept = RequestToJoinAccept.parseFrom(s.getInputStream());
+            System.out.println(accept);
             s.close();
         }catch(IOException e){
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

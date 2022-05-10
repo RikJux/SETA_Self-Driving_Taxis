@@ -1,8 +1,7 @@
 SETA.java
  SETA
-TaxiDriver.java
- TaxiDriver
- TaxiDriver$1
+AdminTaxiThread.java
+ AdminTaxiThread
 Main.java
  Main
 seta/smartcity/requestToJoin/RequestToJoinOuterClass.java
@@ -38,11 +37,12 @@ seta/smartcity/requestToJoinAccept/RequestToJoinAcceptOuterClass.java
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Taxi$Builder
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$TaxiOrBuilder
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAcceptOrBuilder
-Taxi.java
- Taxi
-TaxiComAdmin.java
- TaxiComAdmin
-AdminTaxiThread.java
- AdminTaxiThread
+TaxiDriver.java
+ TaxiDriver
+ TaxiDriver$1
 AdministratorServer.java
  AdministratorServer
+TaxiComAdmin.java
+ TaxiComAdmin
+Taxi.java
+ Taxi

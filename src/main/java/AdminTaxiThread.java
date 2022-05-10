@@ -1,5 +1,6 @@
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Random;
 import java.io.IOException;
 import java.net.Socket;
@@ -30,31 +31,46 @@ public class AdminTaxiThread extends Thread{
     public void run() {
         System.out.println("Thread started!");
         try {
-            // System.out.println(inFromClient.read());
             RequestToJoin receivedJoinRequest = RequestToJoin.parseFrom(inFromClient);
             System.out.println("Join request received");
-            System.out.println(receivedJoinRequest);
-            /*RequestToJoinAccept.Taxi thisTaxi = RequestToJoinAccept.Taxi.newBuilder()
-                    .setId(receivedJoinRequest.getId())
-                    .setIp(receivedJoinRequest.getIp())
-                    .setPort(receivedJoinRequest.getPort())
-                    .build();
+            System.out.println(receivedJoinRequest.getId());
 
-            admin.addTaxi(thisTaxi);
+            boolean accepted = true;
 
-            Random rand = new Random();
+            for(RequestToJoinAccept.Taxi t: admin.getTaxis()){
+                if(t.getId().equals(receivedJoinRequest.getId())){
+                    accepted = false;
+                    break;
+                }
+            }
 
-            RequestToJoinAccept.Position startingP = RequestToJoinAccept.Position.newBuilder()
-                    .setX(genCoord(rand))
-                    .setY(genCoord(rand))
-                    .build();
+            if(accepted){
+                RequestToJoinAccept.Taxi thisTaxi = RequestToJoinAccept.Taxi.newBuilder()
+                        .setId(receivedJoinRequest.getId())
+                        .setIp(receivedJoinRequest.getIp())
+                        .setPort(receivedJoinRequest.getPort())
+                        .build();
 
-            RequestToJoinAccept acceptJoinRequest = RequestToJoinAccept.newBuilder()
-                    .setStartingP(startingP)
-                    .addAllTaxi(admin.getTaxis())
-                    .build();
+                Random rand = new Random();
 
-            acceptJoinRequest.writeTo(s.getOutputStream());  */
+                RequestToJoinAccept.Position startingP = RequestToJoinAccept.Position.newBuilder()
+                        .setX(genCoord(rand))
+                        .setY(genCoord(rand))
+                        .build();
+
+                RequestToJoinAccept acceptJoinRequest = RequestToJoinAccept.newBuilder()
+                        .setStartingP(startingP)
+                        .addAllTaxi(admin.getTaxis())
+                        .build();
+
+                admin.addTaxi(thisTaxi);
+                acceptJoinRequest.writeTo(outToClient);
+            }else{
+                outToClient.write(-1); // should be a message
+            }
+
+            System.out.println(accepted);
+            System.out.println(admin.getTaxis());
 
             s.close();
             System.out.println("Thread closed");

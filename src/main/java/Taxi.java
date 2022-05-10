@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Taxi {
 
-    private final String id = "0"; // should be given by the admin
+    private final String id = "1"; // should be given by the admin
     private final String ip = "localhost";
     private final int port = 5678;
     private final String topicString = "seta/smartcity/rides/";

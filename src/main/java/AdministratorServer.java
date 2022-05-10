@@ -9,7 +9,7 @@ public class AdministratorServer {
 
     private ArrayList<Taxi> taxis = new ArrayList<Taxi>();
 
-    public ArrayList<Taxi> getTaxis() {
+    public synchronized ArrayList<Taxi> getTaxis() {
         return taxis;
     }
 
