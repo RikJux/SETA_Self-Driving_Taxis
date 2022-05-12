@@ -1,5 +1,24 @@
-Simulator/Measurement.java
- Simulator.Measurement
+SETA.java
+ SETA
+Simulator/Buffer.java
+ Simulator.Buffer
+seta/smartcity/requestToJoin/RequestToJoinOuterClass.java
+ seta.smartcity.requestToJoin.RequestToJoinOuterClass
+ seta.smartcity.requestToJoin.RequestToJoinOuterClass$1
+ seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoin
+ seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoin$1
+ seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoin$Builder
+ seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoinOrBuilder
+beans/Taxis.java
+ beans.Taxis
+services/TaxiManagement.java
+ services.TaxiManagement
+AdministratorPackage/AdministratorServer.java
+ AdministratorPackage.AdministratorServer
+TaxiPackage/Sensor.java
+ TaxiPackage.Sensor
+Simulator/Simulator.java
+ Simulator.Simulator
 seta/smartcity/requestToJoinAccept/RequestToJoinAcceptOuterClass.java
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$1
@@ -15,15 +34,6 @@ seta/smartcity/requestToJoinAccept/RequestToJoinAcceptOuterClass.java
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Taxi$Builder
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$TaxiOrBuilder
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAcceptOrBuilder
-Main.java
- Main
-seta/smartcity/requestToJoin/RequestToJoinOuterClass.java
- seta.smartcity.requestToJoin.RequestToJoinOuterClass
- seta.smartcity.requestToJoin.RequestToJoinOuterClass$1
- seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoin
- seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoin$1
- seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoin$Builder
- seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoinOrBuilder
 seta/smartcity/rideRequest/RideRequestOuterClass.java
  seta.smartcity.rideRequest.RideRequestOuterClass
  seta.smartcity.rideRequest.RideRequestOuterClass$1
@@ -35,34 +45,24 @@ seta/smartcity/rideRequest/RideRequestOuterClass.java
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$Position$Builder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$PositionOrBuilder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequestOrBuilder
-Simulator/Simulator.java
- Simulator.Simulator
-SETA.java
- SETA
-Simulator/Buffer.java
- Simulator.Buffer
-Simulator/PM10Simulator.java
- Simulator.PM10Simulator
 AdministratorPackage/AdminTaxiThread.java
  AdministratorPackage.AdminTaxiThread
+Simulator/PM10Simulator.java
+ Simulator.PM10Simulator
+beans/TaxiBean.java
+ beans.TaxiBean
 Simulator/SimulatorData.java
  Simulator.SimulatorData
+Simulator/Measurement.java
+ Simulator.Measurement
 TaxiPackage/TaxiComAdmin.java
  TaxiPackage.TaxiComAdmin
+TaxiPackage/TaxiRESTClient.java
+ TaxiPackage.TaxiRESTClient
 TaxiPackage/TaxiDriver.java
  TaxiPackage.TaxiDriver
  TaxiPackage.TaxiDriver$1
-TaxiPackage/Sensor.java
- TaxiPackage.Sensor
 TaxiPackage/Taxi.java
  TaxiPackage.Taxi
-AdministratorPackage/AdministratorServer.java
- AdministratorPackage.AdministratorServer
-beans/TaxiBean.java
- beans.TaxiBean
-services/TaxiManagement.java
- services.TaxiManagement
-beans/Taxis.java
- beans.Taxis
-TaxiPackage/TaxiRESTClient.java
- TaxiPackage.TaxiRESTClient
+Main.java
+ Main

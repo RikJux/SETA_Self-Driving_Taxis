@@ -86,6 +86,6 @@ public class SETA {
             }
         }
 
-        return "district" + distN;
+        return "district_" + distN;
     }
 }

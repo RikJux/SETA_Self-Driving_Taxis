@@ -22,7 +22,7 @@ public class TaxiManagement {
     public Response joinRequest(TaxiBean t){
         if(!Taxis.getInstance().isIdPresent(t.getId())){
             Taxis.getInstance().addTaxi(t);
-            return Response.ok().build();
+            return Response.ok().entity(Taxis.getInstance()).build();
         }else{
             return Response.status(Response.Status.NOT_ACCEPTABLE).build();
         }
@@ -32,8 +32,8 @@ public class TaxiManagement {
     @DELETE
     @Consumes({"application/json", "application/xml"})
     public Response leaveRequest(@PathParam("id") String id){
-        TaxiBean removed = Taxis.getInstance().removeTaxi(id);
-        if(removed != null){
+        boolean removed = Taxis.getInstance().removeTaxi(id);
+        if(removed){
             return Response.ok().build();
         }else{
             return Response.status(Response.Status.NOT_FOUND).build();

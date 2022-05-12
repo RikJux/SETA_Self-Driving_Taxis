@@ -114,7 +114,7 @@ public class TaxiDriver extends Thread{
             }
         }
 
-        return "district" + distN;
+        return "district_" + distN;
     }
 
 }

@@ -1,11 +1,14 @@
 package beans;
 
+import seta.smartcity.rideRequest.RideRequestOuterClass;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -45,18 +48,36 @@ public class Taxis {
 
     public synchronized void addTaxi(TaxiBean t){taxiList.add(t);}
 
-    public synchronized TaxiBean removeTaxi(String id){
+    public synchronized boolean removeTaxi(String id){
 
-        TaxiBean removed = null;
+        boolean removed = false;
 
         for(TaxiBean t: taxiList){
             if(id.equals(t.getId())){
                 taxiList.remove(t);
-                removed = t;
+                removed = true;
+                break;
             }
         }
 
         return removed;
+
+    }
+
+    public static int[] randomCoord() {
+        Random rand = new Random();
+
+        int coord[] = new int[2];
+
+        for(int i=0; i<2; i++){
+            if(rand.nextBoolean()){
+                coord[i] = 0;
+            }else{
+                coord[i] = 9;
+            }
+        }
+
+        return coord;
 
     }
 
