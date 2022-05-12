@@ -70,7 +70,7 @@ public class Taxi {
         TaxiComAdmin toAdmin = new TaxiComAdmin(taxi);
         TaxiDriver driver = new TaxiDriver(taxi);
         Sensor sens = new Sensor();
-        sens.start();
+        //sens.start();
         //toAdmin.start();
         //driver.start();
     }

@@ -4,6 +4,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import com.sun.jersey.api.container.httpserver.HttpServerFactory;
+import com.sun.net.httpserver.HttpServer;
 import seta.smartcity.requestToJoin.RequestToJoinOuterClass;
 import seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass.RequestToJoinAccept.Taxi;
 
@@ -19,20 +21,19 @@ public class AdministratorServer {
         taxis.add(t);
     }
 
+    private static final String HOST = "localhost";
+    private static final int PORT = 1337;
+
     // recieve requests (through socket?)
     // check identifier is no already in use
     // assign random district
     // maybe a dispatcher
     public static void main(String[] args) throws Exception{
-        AdministratorServer admin = new AdministratorServer();
-        ServerSocket adminAcceptTaxi = new ServerSocket(9999);
-        System.out.println("Administrator Server is now accepting join requests");
-        System.out.println("at port " + adminAcceptTaxi.getLocalPort());
 
-        while(true){ // change this!
-            Socket incomingRequest = adminAcceptTaxi.accept();
-            AdminTaxiThread t = new AdminTaxiThread(admin, incomingRequest);
-            t.start();
-        }
+        HttpServer server = HttpServerFactory.create("http://"+HOST+":"+PORT+"/");
+        server.start();
+
+        System.out.println("Server started on: http://"+HOST+":"+PORT);
+
     }
 }

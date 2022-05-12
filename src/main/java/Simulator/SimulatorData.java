@@ -19,7 +19,7 @@ public class SimulatorData implements Buffer{
         if(size % 4 == 0){
             oldAvg = newAvg; // shift
             newAvg = computeMean(measurements.subList(size-4, size)); // avg of last four
-            if(size % 8 == 0){
+            if(size != 4){ // don't do this the first time
                 averages.add(new Measurement("0", "avg", (oldAvg+newAvg)/2,
                         measurements.get(size-1).getTimestamp()));
                 // already weighted as the size of the sample is always the same
