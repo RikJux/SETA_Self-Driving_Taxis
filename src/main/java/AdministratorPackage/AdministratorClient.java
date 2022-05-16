@@ -1,6 +1,5 @@
 package AdministratorPackage;
 
-import beans.Hello;
 import beans.TaxiBean;
 import beans.TaxiStatistics;
 import beans.Taxis;
@@ -31,27 +30,33 @@ public class AdministratorClient {
         while(statsType == null){
             TaxiStatistics taxiStats = null;
             System.out.println("What type of statistics do you want? Type:");
-            System.out.println("[T] for taxi-specific statistics; [W] for overall statistics in a temporal window");
+            System.out.println("[T] for taxi-specific statistics; [W] for overall statistics in a temporal window;");
+            System.out.println("[L] for list of taxis; [Q] to quit.");
             statsType = in.nextLine();
-            switch(statsType){
-                case("T"):
+            switch(statsType) {
+                case ("T"):
                     String[] idN = getTaxiIdN(in);
                     System.out.println("Retrieving averages for " + idN[1] + " measurements for taxi " + idN[0]);
                     taxiStats = statsOfTaxi(idN[0], Integer.parseInt(idN[1]));
                     break;
-                case("W"):
+                case ("W"):
                     double[] window = getWindow(in);
-                    System.out.println("Retrieving averages for time window [" + window[0] + ", "+ window[1]+"]");
+                    System.out.println("Retrieving averages for time window [" + window[0] + ", " + window[1] + "]");
                     taxiStats = statsInTempWindow(window[0], window[1]);
                     break;
+                case ("L"):
+                    List<TaxiBean> taxiList = getTaxis(client);
+                    for (TaxiBean t : taxiList) {
+                        System.out.println(t.toString());
+                    }
+                    break;
+                case ("Q"):
+                    System.out.println("Farewell");
+                    return;
                 default:
                     System.out.println("Invalid statistics selection");
             }
-            if(taxiStats != null){
                 System.out.println(taxiStats.toString());
-            }else{
-                System.out.println("Null statistics");
-            }
             statsType = null;
         }
 

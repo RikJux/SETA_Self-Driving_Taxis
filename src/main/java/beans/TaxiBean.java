@@ -40,4 +40,13 @@ public class TaxiBean {
     public void setPort(int port) {
         this.port = port;
     }
+
+    @Override
+    public String toString() {
+        return "TaxiBean{" +
+                "id='" + id + '\'' +
+                ", ip='" + ip + '\'' +
+                ", port=" + port +
+                '}';
+    }
 }

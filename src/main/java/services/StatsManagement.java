@@ -1,6 +1,5 @@
 package services;
 
-import beans.Hello;
 import beans.Statistics;
 import beans.TaxiStatistics;
 import com.google.gson.Gson;

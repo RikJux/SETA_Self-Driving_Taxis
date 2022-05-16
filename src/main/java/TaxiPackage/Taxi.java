@@ -1,5 +1,8 @@
 package TaxiPackage;
 
+import Simulator.Measurement;
+import Simulator.PM10Simulator;
+import Simulator.SimulatorData;
 import beans.TaxiBean;
 import beans.TaxiStatistics;
 import beans.Taxis;
@@ -19,12 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import java.io.*;
+import java.util.Random;
 
 public class Taxi {
 
-    private static String id = "2"; // default values
+    private static String id; // default values
     private static String ip = "localhost";
-    private static int port = 9999;
+    private static int port;
     private List<TaxiBean> taxiList;
     private final String topicString = "seta/smartcity/rides/";
     private final double chargeThreshold = 30; // if battery is below this value, go recharge
@@ -83,13 +87,16 @@ public class Taxi {
 
     private static final String serverAddress = "http://localhost:1337";
     private static final String joinPath = serverAddress+"/taxi/join";
-    private static final String leavePath = serverAddress+"/taxi/leave/"+id;
+    private static final String leavePath = serverAddress+"/taxi/leave/"; //+id
 
     public static void main(String args[]) {
         // insert id manually ?
+        id = "0";
+        port = 9999;
         Client client = Client.create();
         Taxis taxis = joinRequest(client);
         if(taxis == null){
+            System.out.println("Cannot enter the system");
             return;
         }
         List<TaxiBean> taxiList= taxis.getTaxiList();
@@ -97,9 +104,23 @@ public class Taxi {
         district = computeDistrict(currentP);
         System.out.println("Taxi " + id + " joined in " + district);
         for(TaxiBean t: taxiList){
-            System.out.println(t.getId() + " " + t.getIp() + " " + t.getPort());
+            System.out.println(t.toString());
         }
-        sendStatistics(client);
+        PM10Simulator pm10 = new PM10Simulator(new SimulatorData());
+        pm10.start();
+        Random rand = new Random();
+        while(true) {
+            try {
+                Thread.sleep(5000); // should be 15 sec.
+                List<Measurement> pollution = pm10.getBuffer().readAllAndClean();
+                TaxiStatistics taxiStats = new TaxiStatistics(id, (double) System.currentTimeMillis(),
+                        rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
+                sendStatistics(client, taxiStats);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        //sendStatistics(client);
         /*
         BufferedReader obj = new BufferedReader(new InputStreamReader(System.in));
         String command = null;
@@ -112,13 +133,12 @@ public class Taxi {
         if(command.equals("quit")){leaveRequest(client);}*/
     }
 
-    private static void sendStatistics(Client client){
+    private static void sendStatistics(Client client, TaxiStatistics taxiStats){
         ClientResponse clientResponse = null;
-
-        TaxiStatistics taxiStats= new TaxiStatistics(id, 1.0, 0.0 , 0.0, 1);
 
         WebResource webResource = client.resource(serverAddress+"/statistics/post/"+id);
         String input = new Gson().toJson(taxiStats);
+        System.out.println(input);
 
         try {
             clientResponse = webResource.type("application/json").post(ClientResponse.class, input);

@@ -28,11 +28,9 @@ public class SimulatorData implements Buffer{
 
     @Override
     public List<Measurement> readAllAndClean() {
-
         List<Measurement> sendAverages = new ArrayList<Measurement>(averages);
         averages.clear();
         return sendAverages;
-
     }
 
     private double computeMean(List<Measurement> meas){
