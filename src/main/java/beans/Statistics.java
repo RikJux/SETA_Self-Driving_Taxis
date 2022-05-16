@@ -1,16 +1,11 @@
 package beans;
 
-import javafx.util.Pair;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -41,15 +36,20 @@ public class Statistics {
     public synchronized TaxiStatistics avgOfNStats(String id, int n){
         List<TaxiStatistics> listOfStats = statistics.get(id);
         int s = listOfStats.size();
-        //TODO error n > s
+        if(n > s){
+            n = s;
+        }
         return computeAverage(statistics.get(id).subList(s-n, s));
     }
 
     public synchronized TaxiStatistics avgTemporalWindow(double start, double end){
-        List<List<TaxiStatistics>> values = new ArrayList<>(statistics.values());
+
+        Enumeration<List<TaxiStatistics>> stats = statistics.elements();
+
         List<TaxiStatistics> listOfStats = new ArrayList<>();
-        for(List<TaxiStatistics> listT: values){
-            for(TaxiStatistics taxiS: listT){
+        while(stats.hasMoreElements()){
+            for(TaxiStatistics taxiS: stats.nextElement()){
+                System.out.println(taxiS.toString());
                 if(taxiS.getTimestamp() >= start && taxiS.getTimestamp() <= end){
                     listOfStats.add(taxiS);
                 }
@@ -76,7 +76,7 @@ public class Statistics {
 
         }
 
-        TaxiStatistics avgTaxiStats = new TaxiStatistics(listOfStats.get(0).getId(), listOfStats.get(0).getTimestamp(),
+        TaxiStatistics avgTaxiStats = new TaxiStatistics("overall", listOfStats.get(listOfStats.size()-1).getTimestamp(),
                 countKilometersTravelled/n, countBatteryLevel/n, countRidesAccomplished/n);
 
         return avgTaxiStats;

@@ -1,12 +1,6 @@
 package beans;
 
-import javafx.util.Pair;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
 
 @XmlRootElement
 public class TaxiStatistics {
@@ -15,9 +9,6 @@ public class TaxiStatistics {
     private double kilometersTravelled;
     private double batteryLevel;
     private double ridesAccomplished;
-
-    //@XmlElement(name="pollution")
-    //private List<Double> pollutionLevel;
 
     @Override
     public String toString() {

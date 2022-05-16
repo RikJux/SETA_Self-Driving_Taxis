@@ -19,7 +19,7 @@ public class AdministratorClient {
 
     private static String serverAddress = "http://localhost:1337";
     private static String statsNPath = "/statistics/get/%s/%d";
-    private static String statsWindowPath = "/statistics/window/%f/%f";
+    private static String statsWindowPath = "/statistics/get/window/%f/%f";
     private static String taxisPath = "/taxi/taxiList";
     private static Client client;
 
@@ -36,10 +36,12 @@ public class AdministratorClient {
             switch(statsType){
                 case("T"):
                     String[] idN = getTaxiIdN(in);
+                    System.out.println("Retrieving averages for " + idN[1] + " measurements for taxi " + idN[0]);
                     taxiStats = statsOfTaxi(idN[0], Integer.parseInt(idN[1]));
                     break;
                 case("W"):
                     double[] window = getWindow(in);
+                    System.out.println("Retrieving averages for time window [" + window[0] + ", "+ window[1]+"]");
                     taxiStats = statsInTempWindow(window[0], window[1]);
                     break;
                 default:
@@ -47,6 +49,8 @@ public class AdministratorClient {
             }
             if(taxiStats != null){
                 System.out.println(taxiStats.toString());
+            }else{
+                System.out.println("Null statistics");
             }
             statsType = null;
         }
@@ -59,7 +63,7 @@ public class AdministratorClient {
         double from = -1;
         double to = -1;
 
-        while(from < 0 && to < 0){
+        while(from < 0 || to < 0){
             System.out.println("Insert the beginning timestamp:");
             try{
                 from = Double.parseDouble(in.nextLine());
@@ -97,14 +101,14 @@ public class AdministratorClient {
 
     private static String[] getTaxiIdN(Scanner in){
         String[] idN = new String[2];
-        List<TaxiBean> taxiList = getTaxis(client);
         String id = null;
         int n = 0;
         while(id == null){
             System.out.println("Insert the taxi id:");
             id = in.nextLine();
-            for(TaxiBean t: taxiList){
+            for(TaxiBean t: getTaxis(client)){
                 if(t.getId().equals(id)){
+                    id = t.getId();
                     System.out.println("Insert how many measurements are to take into account:");
                     break; // id found
                 }
@@ -150,7 +154,11 @@ public class AdministratorClient {
 
     public static TaxiStatistics getTaxiStats(Client client, String url){
         ClientResponse clientResponse = getRequest(client, url, MediaType.TEXT_PLAIN);
-        return new Gson().fromJson(clientResponse.getEntity(String.class), TaxiStatistics.class);
+        TaxiStatistics taxiStats = new Gson().fromJson(clientResponse.getEntity(String.class), TaxiStatistics.class);
+        if(taxiStats == null){
+            System.out.println("Something wrong in getting statistics");
+        }
+        return taxiStats;
     }
 
     public static ClientResponse getRequest(Client client, String url, String mediaType){

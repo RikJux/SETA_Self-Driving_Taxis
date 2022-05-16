@@ -29,9 +29,13 @@ public class StatsManagement {
 
         TaxiStatistics taxiStats = Statistics.getInstance().avgOfNStats(id, n);
         String statString = new Gson().toJson(taxiStats);
-        return Response.status(Response.Status.OK)
-                .entity(statString)
-                .build();
+        if(statString != null) {
+            return Response.status(Response.Status.OK)
+                    .entity(statString)
+                    .build();
+        }else{
+            return Response.status(Response.Status.NO_CONTENT).build();
+        }
 
     }
 
@@ -42,9 +46,13 @@ public class StatsManagement {
 
         TaxiStatistics taxiStats = Statistics.getInstance().avgTemporalWindow(from, to);
         String statString = new Gson().toJson(taxiStats);
-        return Response.status(Response.Status.OK)
-                .entity(statString)
-                .build();
+        if(statString != null){
+            return Response.status(Response.Status.OK)
+                    .entity(statString)
+                    .build();
+        }else{
+            return Response.status(Response.Status.NO_CONTENT).build();
+        }
 
     }
 

@@ -22,7 +22,7 @@ import java.io.*;
 
 public class Taxi {
 
-    private static String id = "0"; // default values
+    private static String id = "2"; // default values
     private static String ip = "localhost";
     private static int port = 9999;
     private List<TaxiBean> taxiList;
@@ -115,7 +115,7 @@ public class Taxi {
     private static void sendStatistics(Client client){
         ClientResponse clientResponse = null;
 
-        TaxiStatistics taxiStats= new TaxiStatistics(id, 0.0, 100.0 , 100.0, 0);
+        TaxiStatistics taxiStats= new TaxiStatistics(id, 1.0, 0.0 , 0.0, 1);
 
         WebResource webResource = client.resource(serverAddress+"/statistics/post/"+id);
         String input = new Gson().toJson(taxiStats);
