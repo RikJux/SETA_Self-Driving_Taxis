@@ -1,5 +1,7 @@
 package Simulator;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,8 +9,6 @@ public class SimulatorData implements Buffer{
 
     private List<Measurement> measurements = new ArrayList<Measurement>();
     private List<Measurement> averages = new ArrayList<Measurement>();
-    private double oldAvg = 0;
-    private double newAvg = 0;
 
     @Override
     public void addMeasurement(Measurement m) {
@@ -16,14 +16,12 @@ public class SimulatorData implements Buffer{
         measurements.add(m);
         int size = measurements.size();
 
-        if(size % 4 == 0){
-            oldAvg = newAvg; // shift
-            newAvg = computeMean(measurements.subList(size-4, size)); // avg of last four
-            if(size != 4){ // don't do this the first time
-                averages.add(new Measurement("0", "avg", (oldAvg+newAvg)/2,
-                        measurements.get(size-1).getTimestamp()));
-                // already weighted as the size of the sample is always the same
-            }
+        if(measurements.size() == 8){
+
+            averages.add(new Measurement(measurements.get(0).getId(), measurements.get(0).getType(),
+                    computeMean(measurements), measurements.get(size-1).getTimestamp()));
+
+            measurements = measurements.subList(4, 8); // overlap factor: 50%
         }
 
     }
@@ -31,7 +29,9 @@ public class SimulatorData implements Buffer{
     @Override
     public List<Measurement> readAllAndClean() {
 
-        return averages;
+        List<Measurement> sendAverages = new ArrayList<Measurement>(averages);
+        averages.clear();
+        return sendAverages;
 
     }
 

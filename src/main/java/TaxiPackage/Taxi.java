@@ -1,32 +1,35 @@
 package TaxiPackage;
 
 import beans.TaxiBean;
+import beans.TaxiStatistics;
 import beans.Taxis;
 import com.google.gson.Gson;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import javafx.util.Pair;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
 import seta.smartcity.rideRequest.RideRequestOuterClass.RideRequest.Position;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 import java.io.*;
 
 public class Taxi {
 
-    private static String id = "4"; // default values
+    private static String id = "3"; // default values
     private static String ip = "localhost";
     private static int port = 9999;
     private List<TaxiBean> taxiList;
     private final String topicString = "seta/smartcity/rides/";
     private final double chargeThreshold = 30; // if battery is below this value, go recharge
     private double battery = 100;
-    private Position currentP; //= Position.newBuilder().setX(0).setY(0).build(); // these should be given by Admin
+    private static int[] currentP; //= Position.newBuilder().setX(0).setY(0).build(); // these should be given by Admin
 
     public String getId() {
         return id;
@@ -52,11 +55,11 @@ public class Taxi {
         this.battery = battery;
     }
 
-    public Position getCurrentP() {
+    public int[] getCurrentP() {
         return currentP;
     }
 
-    public void setCurrentP(Position currentP) {
+    public void setCurrentP(int[] currentP) {
         this.currentP = currentP;
     }
 
@@ -83,20 +86,21 @@ public class Taxi {
     private static final String leavePath = serverAddress+"/taxi/leave/"+id;
 
     public static void main(String args[]) {
-
+        // insert id manually ?
         Client client = Client.create();
         Taxis taxis = joinRequest(client);
         if(taxis == null){
             return;
         }
         List<TaxiBean> taxiList= taxis.getTaxiList();
-        int coord[] = taxis.randomCoord();
-        district = computeDistrict(coord);
+        currentP = taxis.randomCoord();
+        district = computeDistrict(currentP);
         System.out.println("Taxi " + id + " joined in " + district);
         for(TaxiBean t: taxiList){
             System.out.println(t.getId() + " " + t.getIp() + " " + t.getPort());
         }
-
+        sendStatistics(client);
+        /*
         BufferedReader obj = new BufferedReader(new InputStreamReader(System.in));
         String command = null;
         System.out.println("Type \'quit\' to quit: ");
@@ -105,15 +109,26 @@ public class Taxi {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if(command.equals("quit")){leaveRequest(client);}
+        if(command.equals("quit")){leaveRequest(client);}*/
+    }
 
-        // subscribe to the topic(s)
-        //TaxiComAdmin toAdmin = new TaxiComAdmin(taxi);
-        //TaxiDriver driver = new TaxiDriver(this);
-        //Sensor sens = new Sensor();
-        //sens.start();
-        //toAdmin.start();
-        //driver.start();
+    private static void sendStatistics(Client client){
+        ClientResponse clientResponse = null;
+
+        TaxiStatistics taxiStats= new TaxiStatistics(id, 0.0, 100.0 , 100.0, 0);
+
+        WebResource webResource = client.resource(serverAddress+"/statistics/post/"+id);
+        String input = new Gson().toJson(taxiStats);
+
+        try {
+            clientResponse = webResource.type("application/json").post(ClientResponse.class, input);
+        } catch (ClientHandlerException e) {
+            System.out.println("Error");
+            return;
+        }
+
+        System.out.println(clientResponse.toString());
+
     }
 
     private static Taxis joinRequest(Client client){

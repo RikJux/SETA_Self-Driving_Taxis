@@ -3,7 +3,7 @@ package TaxiPackage;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.eclipse.paho.client.mqttv3.*;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
-
+/*
 public class TaxiDriver extends Thread{
 
     private final Taxi taxi;
@@ -118,4 +118,5 @@ public class TaxiDriver extends Thread{
     }
 
 }
+ */
 

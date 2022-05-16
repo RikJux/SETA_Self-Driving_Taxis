@@ -11,14 +11,16 @@ seta/smartcity/requestToJoin/RequestToJoinOuterClass.java
  seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoinOrBuilder
 beans/Taxis.java
  beans.Taxis
-services/TaxiManagement.java
- services.TaxiManagement
+TaxiPackage/TaxiComAdmin.java
+ TaxiPackage.TaxiComAdmin
 AdministratorPackage/AdministratorServer.java
  AdministratorPackage.AdministratorServer
-TaxiPackage/Sensor.java
- TaxiPackage.Sensor
+beans/TaxiStatistics.java
+ beans.TaxiStatistics
 Simulator/Simulator.java
  Simulator.Simulator
+TaxiPackage/Sensor.java
+ TaxiPackage.Sensor
 seta/smartcity/requestToJoinAccept/RequestToJoinAcceptOuterClass.java
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$1
@@ -45,24 +47,25 @@ seta/smartcity/rideRequest/RideRequestOuterClass.java
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$Position$Builder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$PositionOrBuilder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequestOrBuilder
-AdministratorPackage/AdminTaxiThread.java
- AdministratorPackage.AdminTaxiThread
 Simulator/PM10Simulator.java
  Simulator.PM10Simulator
-beans/TaxiBean.java
- beans.TaxiBean
-Simulator/SimulatorData.java
- Simulator.SimulatorData
 Simulator/Measurement.java
  Simulator.Measurement
-TaxiPackage/TaxiComAdmin.java
- TaxiPackage.TaxiComAdmin
-TaxiPackage/TaxiRESTClient.java
- TaxiPackage.TaxiRESTClient
-TaxiPackage/TaxiDriver.java
- TaxiPackage.TaxiDriver
- TaxiPackage.TaxiDriver$1
-TaxiPackage/Taxi.java
- TaxiPackage.Taxi
 Main.java
  Main
+beans/TaxiBean.java
+ beans.TaxiBean
+services/TaxiManagement.java
+ services.TaxiManagement
+beans/Statistics.java
+ beans.Statistics
+beans/Hello.java
+ beans.Hello
+TaxiPackage/Taxi.java
+ TaxiPackage.Taxi
+Simulator/SimulatorData.java
+ Simulator.SimulatorData
+services/StatsManagement.java
+ services.StatsManagement
+AdministratorPackage/AdministratorClient.java
+ AdministratorPackage.AdministratorClient
