@@ -22,7 +22,7 @@ import java.io.*;
 
 public class Taxi {
 
-    private static String id = "3"; // default values
+    private static String id = "0"; // default values
     private static String ip = "localhost";
     private static int port = 9999;
     private List<TaxiBean> taxiList;

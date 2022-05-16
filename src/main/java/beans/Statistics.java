@@ -41,6 +41,7 @@ public class Statistics {
     public synchronized TaxiStatistics avgOfNStats(String id, int n){
         List<TaxiStatistics> listOfStats = statistics.get(id);
         int s = listOfStats.size();
+        //TODO error n > s
         return computeAverage(statistics.get(id).subList(s-n, s));
     }
 

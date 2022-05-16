@@ -11,12 +11,12 @@ seta/smartcity/requestToJoin/RequestToJoinOuterClass.java
  seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoinOrBuilder
 beans/Taxis.java
  beans.Taxis
-TaxiPackage/TaxiComAdmin.java
- TaxiPackage.TaxiComAdmin
+services/TaxiManagement.java
+ services.TaxiManagement
 AdministratorPackage/AdministratorServer.java
  AdministratorPackage.AdministratorServer
-beans/TaxiStatistics.java
- beans.TaxiStatistics
+TaxiPackage/TaxiComAdmin.java
+ TaxiPackage.TaxiComAdmin
 Simulator/Simulator.java
  Simulator.Simulator
 TaxiPackage/Sensor.java
@@ -55,17 +55,17 @@ Main.java
  Main
 beans/TaxiBean.java
  beans.TaxiBean
-services/TaxiManagement.java
- services.TaxiManagement
-beans/Statistics.java
- beans.Statistics
-beans/Hello.java
- beans.Hello
-TaxiPackage/Taxi.java
- TaxiPackage.Taxi
 Simulator/SimulatorData.java
  Simulator.SimulatorData
+beans/Hello.java
+ beans.Hello
 services/StatsManagement.java
  services.StatsManagement
 AdministratorPackage/AdministratorClient.java
  AdministratorPackage.AdministratorClient
+TaxiPackage/Taxi.java
+ TaxiPackage.Taxi
+beans/TaxiStatistics.java
+ beans.TaxiStatistics
+beans/Statistics.java
+ beans.Statistics

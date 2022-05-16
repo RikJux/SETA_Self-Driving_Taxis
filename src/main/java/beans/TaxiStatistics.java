@@ -19,6 +19,17 @@ public class TaxiStatistics {
     //@XmlElement(name="pollution")
     //private List<Double> pollutionLevel;
 
+    @Override
+    public String toString() {
+        return "TaxiStatistics{" +
+                "id='" + id + '\'' +
+                ", timestamp=" + timestamp +
+                ", kilometersTravelled=" + kilometersTravelled +
+                ", batteryLevel=" + batteryLevel +
+                ", ridesAccomplished=" + ridesAccomplished +
+                '}';
+    }
+
     public TaxiStatistics(){};
 
     public TaxiStatistics(String id, double timestamp, double kilometersTravelled, double batteryLevel, double ridesAccomplished) {
