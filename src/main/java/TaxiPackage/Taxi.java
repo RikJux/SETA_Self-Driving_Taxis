@@ -12,11 +12,13 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import org.eclipse.paho.client.mqttv3.MqttException;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
 
 import java.util.Random;
+import java.util.Scanner;
 
 public class Taxi {
 
@@ -30,6 +32,15 @@ public class Taxi {
     private static TaxiStatistics taxiStats;
     private static int[] currentP; //= Position.newBuilder().setX(0).setY(0).build(); // these should be given by Admin
     private static Taxi instance;
+    private boolean isIdle;
+
+    public boolean isIdle() {
+        return isIdle;
+    }
+
+    public void setIdle(boolean idle) {
+        isIdle = idle;
+    }
 
     public String getId() {
         return id;
@@ -77,7 +88,7 @@ public class Taxi {
 
     public synchronized TaxiStatistics getTaxiStats() {
         return taxiStats;
-    }
+    } // cannot be sync!
 
     public void setTaxiStats(TaxiStatistics taxiStats) {
         this.taxiStats = taxiStats;
@@ -87,9 +98,17 @@ public class Taxi {
 
     public void setBattery(double b){this.getTaxiStats().setBatteryLevel(b);}
 
+    public void lowerBattery(double b){this.getTaxiStats().setBatteryLevel(this.getTaxiStats().getBatteryLevel() - b);}
+
     public double getKilometers(){return this.getTaxiStats().getKilometersTravelled();}
 
     public void setKilometers(double b){this.getTaxiStats().setKilometersTravelled(b);}
+
+    public void addKilometers(double b){this.getTaxiStats().setKilometersTravelled(b + this.getTaxiStats().getKilometersTravelled());}
+
+    public double getRidesAccomplished(){return this.getTaxiStats().getRidesAccomplished();}
+
+    public void addRideAccomplished(){this.getTaxiStats().setRidesAccomplished(this.getTaxiStats().getRidesAccomplished() + 1);}
 
     public synchronized static Taxi getInstance(){
         if(instance==null)
@@ -111,54 +130,59 @@ public class Taxi {
 
     public static void main(String args[]) {
         // insert id manually ?
-        id = "0"; //args[0];
-        port = 9999; //Integer.parseInt(args[1]);
-        taxiStats = new TaxiStatistics(id);
+        Taxi thisTaxi = getInstance();
+        thisTaxi.setTaxiStats(new TaxiStatistics(id));
+        thisTaxi.setBattery(100.0);
         Client client = Client.create();
         Taxis taxis = joinRequest(client);
         if(taxis == null){
             System.out.println("Cannot enter the system");
             return;
         }
-        List<TaxiBean> taxiList= taxis.getTaxiList();
-        currentP = taxis.randomCoord();
-        district = computeDistrict(currentP);
+        thisTaxi.setTaxiList(taxis.getTaxiList());
+        thisTaxi.setCurrentP(taxis.randomCoord());
+        thisTaxi.setDistrict(computeDistrict(currentP));
         System.out.println("Taxi " + id + " joined in " + district);
-        for(TaxiBean t: taxiList){
+        for(TaxiBean t: thisTaxi.getTaxiList()){
             System.out.println(t.toString());
         }
+
+        thisTaxi.setIdle(true); // ready to accept requests
+
         PM10Simulator pm10 = new PM10Simulator(new SimulatorData());
         pm10.start();
 
-        TaxiDriver drive = new TaxiDriver(getInstance());
+        TaxiDriver drive = new TaxiDriver(thisTaxi);
         drive.start();
+
+        new Thread(() -> {
+            String quit = null;
+            Scanner in = new Scanner(System.in);
+            while(quit == null){
+                System.out.println("Type [quit] to exit the system");
+                quit = in.nextLine();
+                if(quit.equals("quit")){
+                    leaveRequest(client);
+                }
+                quit = null;
+            }
+        }).start();
 
         Random rand = new Random();
         while(true) {
             try {
-                taxiStats = new TaxiStatistics(id); // taxi driver holds this (not pollution)
                 Thread.sleep(15000); // should be 15 sec.
                 List<Measurement> pollution = pm10.getBuffer().readAllAndClean();
-                taxiStats.setKilometersTravelled(0);
-                taxiStats.setBatteryLevel(0);
-                taxiStats.setRidesAccomplished(0);
-                taxiStats.setPollution(avgPollution(pollution));
-                sendStatistics(client, taxiStats);
+                thisTaxi.getTaxiStats().setPollution(avgPollution(pollution));
+                thisTaxi.getTaxiStats().setTimestamp(System.currentTimeMillis());
+                sendStatistics(client, thisTaxi.getTaxiStats());
+                double battLeft = thisTaxi.getTaxiStats().getBatteryLevel();
+                thisTaxi.setTaxiStats(new TaxiStatistics(id));
+                thisTaxi.setBattery(battLeft);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        //sendStatistics(client);
-        /*
-        BufferedReader obj = new BufferedReader(new InputStreamReader(System.in));
-        String command = null;
-        System.out.println("Type \'quit\' to quit: ");
-        try {
-            command = obj.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if(command.equals("quit")){leaveRequest(client);}*/
     }
 
     private static double avgPollution(List<Measurement> pollution){

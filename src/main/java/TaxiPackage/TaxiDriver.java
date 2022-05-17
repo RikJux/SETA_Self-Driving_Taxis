@@ -19,6 +19,7 @@ public class TaxiDriver extends Thread{
         String broker = "tcp://localhost:1883";
         String clientId = MqttClient.generateClientId();
         int qos = 2; // why?
+        taxi.setBattery(100.0);
 
         try {
             client = new MqttClient(broker, clientId);
@@ -44,30 +45,30 @@ public class TaxiDriver extends Thread{
                     int[] destinationP = fromMsgToArray(destinationPMsg);
 
                     // coordinate
-                    double distance = computeDistance(taxi.getCurrentP(), startingP); // to be sent to admin
-                    // if won, handle request (sleep) and move
-                    Thread.sleep(5000);
-                    double totalDistance = distance;
                     System.out.println("Taxi " + taxi.getId() + " located at "+ taxi.getX() + ", " + taxi.getY() +
                             " accepted request " + requestId + " from " + startingP[0] + ", " + startingP[1]
                             + " to " + destinationP[0] + ", " + destinationP[1]);
+                    taxi.setIdle(false);
                     System.out.println(clientId + " Unsubscribing ... - Thread PID: " + Thread.currentThread().getId());
                     client.unsubscribe(taxi.getTopicString()+ taxi.getDistrict());
-                    taxi.setCurrentP(startingP); // remains in the same district
-                    taxi.setBattery(taxi.getBattery() - distance); // consume battery, based on distance
-                    distance = computeDistance(taxi.getCurrentP(), destinationP); // to be sent to admin
-                    totalDistance += distance;
-                    taxi.setCurrentP(destinationP);
-                    taxi.setBattery(taxi.getBattery() - distance);
-                    taxi.setKilometers(totalDistance);
-                    System.out.println("Request fulfilled. Total distance travelled: " + totalDistance);
-                    System.out.println("Battery left: " + taxi.getBattery());
-                    System.out.println("Current position: " + taxi.getX() + ", " + taxi.getY());
-                    taxi.setDistrict(computeDistrict(destinationP));
-                    System.out.println(clientId + " Subscribed ... - Thread PID: " + Thread.currentThread().getId());
-                    client.subscribe(taxi.getTopicString()+taxi.getDistrict());
-                    System.out.println(clientId + " Subscribed to topic : " + taxi.getTopicString()+taxi.getDistrict());
-                    System.out.println("=====================================");
+                    travel(taxi.getCurrentP(), startingP, requestId, taxi, false, 2500); // reach the user
+                    travel(startingP, destinationP, requestId, taxi, true, 2500); // reach the final destination
+                    if(taxi.getTaxiStats().getBatteryLevel() > 30.0) {
+                        System.out.println(clientId + " Subscribed ... - Thread PID: " + Thread.currentThread().getId());
+                        client.subscribe(taxi.getTopicString() + taxi.getDistrict());
+                        System.out.println(clientId + " Subscribed to topic : " + taxi.getTopicString() + taxi.getDistrict());
+                        System.out.println("=====================================");
+                        taxi.setIdle(true);
+                    } else {
+                        System.out.println("Taxi " + taxi.getId() + " needs recharge.");
+                        destinationP = computeRechargeStation(taxi.getDistrict());
+                        travel(taxi.getCurrentP(), destinationP, null, taxi, false, 5);
+                        // mutual exclusion over recharge station
+                        Thread.sleep(10000);
+                        taxi.setBattery(100.0);
+                        taxi.setIdle(true);
+                    }
+
                 }
 
                 public void connectionLost(Throwable cause) {
@@ -89,6 +90,35 @@ public class TaxiDriver extends Thread{
             e.printStackTrace();
         }
 
+    }
+
+    private static void travel(int[] startingP, int[] destinationP, String requestId, Taxi taxi, boolean accomplished, int time) throws InterruptedException {
+
+        Thread.sleep(time * 1000); // half because you need to reach the user
+        double distance = computeDistance(startingP, destinationP);
+        taxi.setCurrentP(destinationP);
+        taxi.lowerBattery(distance);
+        taxi.addKilometers(distance);
+        taxi.setDistrict(computeDistrict(destinationP));
+        if(accomplished){
+            taxi.addRideAccomplished();
+            System.out.println("Taxi " + taxi.getId() + " fulfilled request " + requestId);
+        }
+        System.out.println(taxi.getTaxiStats().toString());
+
+    }
+
+    private static int[] computeRechargeStation(String district){
+        switch(district){
+            case("district_1"):
+                return new int[]{0, 0};
+            case("district_2"):
+                return new int[]{9, 0};
+            case("district_3"):
+                return new int[]{9, 9};
+            default:
+                return new int[]{0, 9};
+        }
     }
 
     private static double computeDistance(int[] p1, int[] p2){

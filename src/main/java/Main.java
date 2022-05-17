@@ -2,17 +2,14 @@ import AdministratorPackage.AdministratorServer;
 import TaxiPackage.Taxi;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Main {
     public static void main(String args[]) {
         int id = 0;
-        int port = 9900;
+        final int port = 1884;
 
         SETA s = new SETA();
         AdministratorServer adminServer = new AdministratorServer();
-        Taxi t = new Taxi(String.valueOf(id), "localhost", port);
+        Taxi t = new Taxi(String.valueOf(id++), "localhost", port+id);
 
         new Thread(() -> {
             try {

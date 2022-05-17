@@ -1,6 +1,5 @@
-TaxiPackage/TaxiDriver.java
- TaxiPackage.TaxiDriver
- TaxiPackage.TaxiDriver$1
+beans/TaxiStatistics.java
+ beans.TaxiStatistics
 Simulator/Buffer.java
  Simulator.Buffer
 seta/smartcity/requestToJoin/RequestToJoinOuterClass.java
@@ -52,23 +51,22 @@ Simulator/PM10Simulator.java
  Simulator.PM10Simulator
 Simulator/Measurement.java
  Simulator.Measurement
-beans/Statistics.java
- beans.Statistics
+AdministratorPackage/AdministratorClient.java
+ AdministratorPackage.AdministratorClient
+SETA.java
+ SETA
 services/TaxiManagement.java
  services.TaxiManagement
 services/StatsManagement.java
  services.StatsManagement
-AdministratorPackage/AdministratorClient.java
- AdministratorPackage.AdministratorClient
-TaxiPackage/TaxiComAdmin.java
- TaxiPackage.TaxiComAdmin
-beans/TaxiStatistics.java
- beans.TaxiStatistics
+beans/Statistics.java
+ beans.Statistics
+Main.java
+ Main
+TaxiPackage/TaxiDriver.java
+ TaxiPackage.TaxiDriver
+ TaxiPackage.TaxiDriver$1
 TaxiPackage/Taxi.java
  TaxiPackage.Taxi
-Main/SETA.java
- Main.SETA
-Main/MainThread.java
- Main.MainThread
-Main/Main.java
- Main.Main
+TaxiPackage/TaxiComAdmin.java
+ TaxiPackage.TaxiComAdmin
