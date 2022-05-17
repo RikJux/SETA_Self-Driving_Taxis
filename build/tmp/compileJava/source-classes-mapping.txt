@@ -1,5 +1,6 @@
-SETA.java
- SETA
+TaxiPackage/TaxiDriver.java
+ TaxiPackage.TaxiDriver
+ TaxiPackage.TaxiDriver$1
 Simulator/Buffer.java
  Simulator.Buffer
 seta/smartcity/requestToJoin/RequestToJoinOuterClass.java
@@ -9,18 +10,18 @@ seta/smartcity/requestToJoin/RequestToJoinOuterClass.java
  seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoin$1
  seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoin$Builder
  seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoinOrBuilder
-services/StatsManagement.java
- services.StatsManagement
-beans/TaxiStatistics.java
- beans.TaxiStatistics
+TaxiPackage/Sensor.java
+ TaxiPackage.Sensor
+Simulator/SimulatorData.java
+ Simulator.SimulatorData
 AdministratorPackage/AdministratorServer.java
  AdministratorPackage.AdministratorServer
-services/TaxiManagement.java
- services.TaxiManagement
+beans/TaxiBean.java
+ beans.TaxiBean
 Simulator/Simulator.java
  Simulator.Simulator
-beans/Statistics.java
- beans.Statistics
+beans/Taxis.java
+ beans.Taxis
 seta/smartcity/requestToJoinAccept/RequestToJoinAcceptOuterClass.java
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass
  seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$1
@@ -51,19 +52,23 @@ Simulator/PM10Simulator.java
  Simulator.PM10Simulator
 Simulator/Measurement.java
  Simulator.Measurement
-Main.java
- Main
-beans/Taxis.java
- beans.Taxis
-beans/TaxiBean.java
- beans.TaxiBean
-TaxiPackage/TaxiComAdmin.java
- TaxiPackage.TaxiComAdmin
-Simulator/SimulatorData.java
- Simulator.SimulatorData
-TaxiPackage/Sensor.java
- TaxiPackage.Sensor
-TaxiPackage/Taxi.java
- TaxiPackage.Taxi
+beans/Statistics.java
+ beans.Statistics
+services/TaxiManagement.java
+ services.TaxiManagement
+services/StatsManagement.java
+ services.StatsManagement
 AdministratorPackage/AdministratorClient.java
  AdministratorPackage.AdministratorClient
+TaxiPackage/TaxiComAdmin.java
+ TaxiPackage.TaxiComAdmin
+beans/TaxiStatistics.java
+ beans.TaxiStatistics
+TaxiPackage/Taxi.java
+ TaxiPackage.Taxi
+Main/SETA.java
+ Main.SETA
+Main/MainThread.java
+ Main.MainThread
+Main/Main.java
+ Main.Main

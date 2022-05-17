@@ -39,7 +39,7 @@ public class SETA {
         String destDist = getDistrict(payload.getStartingPosition());
         MqttMessage message = new MqttMessage(payload.toByteArray());
         message.setQos(2);
-        // should notify the SETA that request was handled
+        // should notify the Main.SETA that request was handled
         System.out.println(clientId + " Publishing message: " + payload + " ...");
         client.publish(topic+destDist, message);
         System.out.println(clientId + " Message published at " + topic+destDist);

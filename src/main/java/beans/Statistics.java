@@ -66,18 +66,20 @@ public class Statistics {
         double countKilometersTravelled = 0.0;
         double countBatteryLevel = 0.0;
         double countRidesAccomplished = 0.0;
-        // remember pollution
+        double pollutionMeasured = 0.0;
 
         for(TaxiStatistics t: listOfStats){
 
             countKilometersTravelled += t.getKilometersTravelled();
             countBatteryLevel += t.getBatteryLevel();
             countRidesAccomplished += t.getRidesAccomplished();
+            pollutionMeasured += t.getPollution();
 
         }
 
         TaxiStatistics avgTaxiStats = new TaxiStatistics("overall", listOfStats.get(listOfStats.size()-1).getTimestamp(),
-                countKilometersTravelled/n, countBatteryLevel/n, countRidesAccomplished/n);
+                countKilometersTravelled/n, countBatteryLevel/n, countRidesAccomplished/n,
+                pollutionMeasured/n);
 
         return avgTaxiStats;
 

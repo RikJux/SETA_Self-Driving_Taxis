@@ -9,6 +9,18 @@ public class TaxiStatistics {
     private double kilometersTravelled;
     private double batteryLevel;
     private double ridesAccomplished;
+    private double pollution;
+
+    public TaxiStatistics(){};
+
+    public TaxiStatistics(String id) {
+        this.id = id;
+        this.timestamp = 0;
+        this.kilometersTravelled = 0;
+        this.batteryLevel = 0;
+        this.ridesAccomplished = 0;
+        this.pollution = 0;
+    }
 
     @Override
     public String toString() {
@@ -18,17 +30,17 @@ public class TaxiStatistics {
                 ", kilometersTravelled=" + kilometersTravelled +
                 ", batteryLevel=" + batteryLevel +
                 ", ridesAccomplished=" + ridesAccomplished +
+                ", pollution=" + pollution +
                 '}';
     }
 
-    public TaxiStatistics(){};
-
-    public TaxiStatistics(String id, double timestamp, double kilometersTravelled, double batteryLevel, double ridesAccomplished) {
+    public TaxiStatistics(String id, double timestamp, double kilometersTravelled, double batteryLevel, double ridesAccomplished, double pollution) {
         this.id = id;
         this.timestamp = timestamp;
         this.kilometersTravelled = kilometersTravelled;
         this.batteryLevel = batteryLevel;
         this.ridesAccomplished = ridesAccomplished;
+        this.pollution = pollution;
     }
 
     public String getId() {
@@ -69,5 +81,13 @@ public class TaxiStatistics {
 
     public void setRidesAccomplished(double ridesAccomplished) {
         this.ridesAccomplished = ridesAccomplished;
+    }
+
+    public double getPollution() {
+        return pollution;
+    }
+
+    public void setPollution(double pollution) {
+        this.pollution = pollution;
     }
 }

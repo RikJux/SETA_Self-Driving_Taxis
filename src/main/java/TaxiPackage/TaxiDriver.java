@@ -1,9 +1,10 @@
 package TaxiPackage;
 
+import beans.TaxiStatistics;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.eclipse.paho.client.mqttv3.*;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
-/*
+
 public class TaxiDriver extends Thread{
 
     private final Taxi taxi;
@@ -13,6 +14,7 @@ public class TaxiDriver extends Thread{
     }
 
     public void run(){
+        System.out.println("Ciao sono il driver");
         MqttClient client;
         String broker = "tcp://localhost:1883";
         String clientId = MqttClient.generateClientId();
@@ -35,31 +37,32 @@ public class TaxiDriver extends Thread{
                     // receive request
                     RideRequestOuterClass.RideRequest receivedMessage = RideRequestOuterClass.RideRequest.parseFrom(message.getPayload());
                     String requestId = receivedMessage.getId();
-                    RideRequestOuterClass.RideRequest.Position startingP = receivedMessage.getStartingPosition();
-                    RideRequestOuterClass.RideRequest.Position destinationP = receivedMessage.getDestinationPosition();
+                    RideRequestOuterClass.RideRequest.Position startingPMsg = receivedMessage.getStartingPosition();
+                    RideRequestOuterClass.RideRequest.Position destinationPMsg = receivedMessage.getDestinationPosition();
+
+                    int[] startingP = fromMsgToArray(startingPMsg);
+                    int[] destinationP = fromMsgToArray(destinationPMsg);
+
                     // coordinate
                     double distance = computeDistance(taxi.getCurrentP(), startingP); // to be sent to admin
                     // if won, handle request (sleep) and move
+                    Thread.sleep(5000);
                     double totalDistance = distance;
-                    System.out.println("Taxi " + taxi.getId() + " located at "+ taxi.getCurrentP().getX() + ", " + taxi.getCurrentP().getY() +
-                            " accepted request " + requestId + " from " + startingP.getX() + ", " + startingP.getY()
-                            + " to " + destinationP.getX() + ", " + destinationP.getY());
+                    System.out.println("Taxi " + taxi.getId() + " located at "+ taxi.getX() + ", " + taxi.getY() +
+                            " accepted request " + requestId + " from " + startingP[0] + ", " + startingP[1]
+                            + " to " + destinationP[0] + ", " + destinationP[1]);
                     System.out.println(clientId + " Unsubscribing ... - Thread PID: " + Thread.currentThread().getId());
                     client.unsubscribe(taxi.getTopicString()+ taxi.getDistrict());
-                    Thread.sleep(5000);
                     taxi.setCurrentP(startingP); // remains in the same district
                     taxi.setBattery(taxi.getBattery() - distance); // consume battery, based on distance
-                    System.out.println("Customer reached. Distance travelled so far: " + totalDistance);
-                    System.out.println("Battery left: " + taxi.getBattery());
-                    System.out.println("Current position: " + taxi.getCurrentP().getX() + ", " + taxi.getCurrentP().getY());
-                    Thread.sleep(5000);
                     distance = computeDistance(taxi.getCurrentP(), destinationP); // to be sent to admin
                     totalDistance += distance;
                     taxi.setCurrentP(destinationP);
                     taxi.setBattery(taxi.getBattery() - distance);
+                    taxi.setKilometers(totalDistance);
                     System.out.println("Request fulfilled. Total distance travelled: " + totalDistance);
                     System.out.println("Battery left: " + taxi.getBattery());
-                    System.out.println("Current position: " + taxi.getCurrentP().getX() + ", " + taxi.getCurrentP().getY());
+                    System.out.println("Current position: " + taxi.getX() + ", " + taxi.getY());
                     taxi.setDistrict(computeDistrict(destinationP));
                     System.out.println(clientId + " Subscribed ... - Thread PID: " + Thread.currentThread().getId());
                     client.subscribe(taxi.getTopicString()+taxi.getDistrict());
@@ -88,14 +91,14 @@ public class TaxiDriver extends Thread{
 
     }
 
-    private static double computeDistance(RideRequestOuterClass.RideRequest.Position p1, RideRequestOuterClass.RideRequest.Position p2){
-        return Math.sqrt(Math.pow(p1.getX()-p2.getX(),2) +
-                Math.pow(p1.getY()-p2.getY(),2));
+    private static double computeDistance(int[] p1, int[] p2){
+        return Math.sqrt(Math.pow(getCoordX(p1)-getCoordX(p2),2) +
+                Math.pow(getCoordY(p1)-getCoordY(p2),2));
     }
 
-    private static String computeDistrict(RideRequestOuterClass.RideRequest.Position p){
-        int x = p.getX();
-        int y = p.getY();
+    private static String computeDistrict(int[] p){
+        int x = getCoordX(p);
+        int y = getCoordY(p);
         String distN;
 
         if(y < 5){
@@ -117,6 +120,19 @@ public class TaxiDriver extends Thread{
         return "district_" + distN;
     }
 
+    private static int getCoordX(int[] p){ return p[0];}
+
+    private static int getCoordY(int[] p){ return p[1];}
+
+    private static int[] fromMsgToArray(RideRequestOuterClass.RideRequest.Position pMsg){
+
+        int[] p = new int[2];
+
+        p[0] = pMsg.getX();
+        p[1] = pMsg.getY();
+        return p;
+
+    }
+
 }
- */
 

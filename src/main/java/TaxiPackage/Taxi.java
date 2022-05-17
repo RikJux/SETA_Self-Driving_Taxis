@@ -3,6 +3,7 @@ package TaxiPackage;
 import Simulator.Measurement;
 import Simulator.PM10Simulator;
 import Simulator.SimulatorData;
+import beans.Statistics;
 import beans.TaxiBean;
 import beans.TaxiStatistics;
 import beans.Taxis;
@@ -11,17 +12,10 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import javafx.util.Pair;
-import seta.smartcity.rideRequest.RideRequestOuterClass;
-import seta.smartcity.rideRequest.RideRequestOuterClass.RideRequest.Position;
 
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 
-import java.io.*;
 import java.util.Random;
 
 public class Taxi {
@@ -32,8 +26,10 @@ public class Taxi {
     private List<TaxiBean> taxiList;
     private final String topicString = "seta/smartcity/rides/";
     private final double chargeThreshold = 30; // if battery is below this value, go recharge
-    private double battery = 100;
+    private static String district;
+    private static TaxiStatistics taxiStats;
     private static int[] currentP; //= Position.newBuilder().setX(0).setY(0).build(); // these should be given by Admin
+    private static Taxi instance;
 
     public String getId() {
         return id;
@@ -51,14 +47,6 @@ public class Taxi {
         return chargeThreshold;
     }
 
-    public double getBattery() {
-        return battery;
-    }
-
-    public void setBattery(double battery) {
-        this.battery = battery;
-    }
-
     public int[] getCurrentP() {
         return currentP;
     }
@@ -66,6 +54,10 @@ public class Taxi {
     public void setCurrentP(int[] currentP) {
         this.currentP = currentP;
     }
+
+    public int getX() {return getCurrentP()[0];}
+
+    public int getY() {return getCurrentP()[1];}
 
     public String getDistrict() {
         return district;
@@ -75,7 +67,35 @@ public class Taxi {
         this.district = district;
     }
 
-    private static String district;
+    public List<TaxiBean> getTaxiList() {
+        return taxiList;
+    }
+
+    public void setTaxiList(List<TaxiBean> taxiList) {
+        this.taxiList = taxiList;
+    }
+
+    public synchronized TaxiStatistics getTaxiStats() {
+        return taxiStats;
+    }
+
+    public void setTaxiStats(TaxiStatistics taxiStats) {
+        this.taxiStats = taxiStats;
+    }
+
+    public double getBattery(){return this.getTaxiStats().getBatteryLevel();}
+
+    public void setBattery(double b){this.getTaxiStats().setBatteryLevel(b);}
+
+    public double getKilometers(){return this.getTaxiStats().getKilometersTravelled();}
+
+    public void setKilometers(double b){this.getTaxiStats().setKilometersTravelled(b);}
+
+    public synchronized static Taxi getInstance(){
+        if(instance==null)
+            instance = new Taxi(id, ip, port);
+        return instance;
+    }
 
     public Taxi(String id, String ip, int port){
 
@@ -87,12 +107,13 @@ public class Taxi {
 
     private static final String serverAddress = "http://localhost:1337";
     private static final String joinPath = serverAddress+"/taxi/join";
-    private static final String leavePath = serverAddress+"/taxi/leave/"; //+id
+    private static final String leavePath = serverAddress+"/taxi/leave/";
 
     public static void main(String args[]) {
         // insert id manually ?
-        id = "0";
-        port = 9999;
+        id = "0"; //args[0];
+        port = 9999; //Integer.parseInt(args[1]);
+        taxiStats = new TaxiStatistics(id);
         Client client = Client.create();
         Taxis taxis = joinRequest(client);
         if(taxis == null){
@@ -108,13 +129,20 @@ public class Taxi {
         }
         PM10Simulator pm10 = new PM10Simulator(new SimulatorData());
         pm10.start();
+
+        TaxiDriver drive = new TaxiDriver(getInstance());
+        drive.start();
+
         Random rand = new Random();
         while(true) {
             try {
-                Thread.sleep(5000); // should be 15 sec.
+                taxiStats = new TaxiStatistics(id); // taxi driver holds this (not pollution)
+                Thread.sleep(15000); // should be 15 sec.
                 List<Measurement> pollution = pm10.getBuffer().readAllAndClean();
-                TaxiStatistics taxiStats = new TaxiStatistics(id, (double) System.currentTimeMillis(),
-                        rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
+                taxiStats.setKilometersTravelled(0);
+                taxiStats.setBatteryLevel(0);
+                taxiStats.setRidesAccomplished(0);
+                taxiStats.setPollution(avgPollution(pollution));
                 sendStatistics(client, taxiStats);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -131,6 +159,16 @@ public class Taxi {
             e.printStackTrace();
         }
         if(command.equals("quit")){leaveRequest(client);}*/
+    }
+
+    private static double avgPollution(List<Measurement> pollution){
+
+        double sum = 0;
+        for(Measurement m: pollution){
+            sum += m.getValue();
+        }
+
+        return sum/pollution.size();
     }
 
     private static void sendStatistics(Client client, TaxiStatistics taxiStats){
@@ -176,7 +214,7 @@ public class Taxi {
     private static void leaveRequest(Client client){
         ClientResponse clientResponse = null;
 
-        WebResource webResource = client.resource(leavePath);
+        WebResource webResource = client.resource(leavePath+id);
 
         try {
             clientResponse = webResource.type("application/json").delete(ClientResponse.class);
