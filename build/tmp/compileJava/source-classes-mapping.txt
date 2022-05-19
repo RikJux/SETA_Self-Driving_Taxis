@@ -17,6 +17,8 @@ AdministratorPackage/AdministratorServer.java
  AdministratorPackage.AdministratorServer
 beans/Statistics.java
  beans.Statistics
+TaxiPackage/Impl/HandleRideServiceImpl.java
+ TaxiPackage.Impl.HandleRideServiceImpl
 taxi/communication/leaveService/LeaveServiceOuterClass.java
  taxi.communication.leaveService.LeaveServiceOuterClass
  taxi.communication.leaveService.LeaveServiceOuterClass$1
@@ -30,13 +32,16 @@ taxi/communication/leaveService/LeaveServiceOuterClass.java
  taxi.communication.leaveService.LeaveServiceOuterClass$LeaveOkOrBuilder
 services/StatsManagement.java
  services.StatsManagement
-Main.java
- Main
+Simulator/PM10Simulator.java
+ Simulator.PM10Simulator
 beans/TaxiBean.java
  beans.TaxiBean
-TaxiPackage/TaxiDriver.java
- TaxiPackage.TaxiDriver
- TaxiPackage.TaxiDriver$1
+TaxiPackage/Impl/RechargeServiceImpl.java
+ TaxiPackage.Impl.RechargeServiceImpl
+SETA.java
+ SETA
+TaxiPackage/Impl/LeaveServiceImpl.java
+ TaxiPackage.Impl.LeaveServiceImpl
 services/TaxiManagement.java
  services.TaxiManagement
 taxi/communication/handleRideService/HandleRideServiceOuterClass.java
@@ -58,6 +63,17 @@ taxi/communication/handleRideService/HandleRideServiceOuterClass.java
  taxi.communication.handleRideService.HandleRideServiceOuterClass$TakeChargeRide$1
  taxi.communication.handleRideService.HandleRideServiceOuterClass$TakeChargeRide$Builder
  taxi.communication.handleRideService.HandleRideServiceOuterClass$TakeChargeRideOrBuilder
+taxi/communication/joinService/JoinServiceGrpc.java
+ taxi.communication.joinService.JoinServiceGrpc
+ taxi.communication.joinService.JoinServiceGrpc$1
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceBaseDescriptorSupplier
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceBlockingStub
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceFileDescriptorSupplier
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceFutureStub
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceImplBase
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceMethodDescriptorSupplier
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceStub
+ taxi.communication.joinService.JoinServiceGrpc$MethodHandlers
 taxi/communication/rechargeService/RechargeServiceOuterClass.java
  taxi.communication.rechargeService.RechargeServiceOuterClass
  taxi.communication.rechargeService.RechargeServiceOuterClass$1
@@ -84,8 +100,8 @@ taxi/communication/leaveService/LeaveServiceGrpc.java
  taxi.communication.leaveService.LeaveServiceGrpc$LeaveServiceMethodDescriptorSupplier
  taxi.communication.leaveService.LeaveServiceGrpc$LeaveServiceStub
  taxi.communication.leaveService.LeaveServiceGrpc$MethodHandlers
-SETA.java
- SETA
+Simulator/Measurement.java
+ Simulator.Measurement
 taxi/communication/handleRideService/HandleRideServiceGrpc.java
  taxi.communication.handleRideService.HandleRideServiceGrpc
  taxi.communication.handleRideService.HandleRideServiceGrpc$1
@@ -97,8 +113,8 @@ taxi/communication/handleRideService/HandleRideServiceGrpc.java
  taxi.communication.handleRideService.HandleRideServiceGrpc$HandleRideServiceMethodDescriptorSupplier
  taxi.communication.handleRideService.HandleRideServiceGrpc$HandleRideServiceStub
  taxi.communication.handleRideService.HandleRideServiceGrpc$MethodHandlers
-TaxiPackage/Taxi.java
- TaxiPackage.Taxi
+beans/TaxiStatistics.java
+ beans.TaxiStatistics
 TaxiPackage/Sensor.java
  TaxiPackage.Sensor
 Simulator/Simulator.java
@@ -116,6 +132,8 @@ seta/smartcity/rideRequest/RideRequestOuterClass.java
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequestOrBuilder
 Simulator/SimulatorData.java
  Simulator.SimulatorData
+TaxiPackage/Impl/JoinServiceImpl.java
+ TaxiPackage.Impl.JoinServiceImpl
 taxi/communication/joinService/JoinServiceOuterClass.java
  taxi.communication.joinService.JoinServiceOuterClass
  taxi.communication.joinService.JoinServiceOuterClass$1
@@ -129,20 +147,12 @@ taxi/communication/joinService/JoinServiceOuterClass.java
  taxi.communication.joinService.JoinServiceOuterClass$JoinOkOrBuilder
 AdministratorPackage/AdministratorClient.java
  AdministratorPackage.AdministratorClient
-taxi/communication/joinService/JoinServiceGrpc.java
- taxi.communication.joinService.JoinServiceGrpc
- taxi.communication.joinService.JoinServiceGrpc$1
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceBaseDescriptorSupplier
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceBlockingStub
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceFileDescriptorSupplier
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceFutureStub
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceImplBase
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceMethodDescriptorSupplier
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceStub
- taxi.communication.joinService.JoinServiceGrpc$MethodHandlers
-beans/TaxiStatistics.java
- beans.TaxiStatistics
-Simulator/Measurement.java
- Simulator.Measurement
-Simulator/PM10Simulator.java
- Simulator.PM10Simulator
+TaxiPackage/TaxiDriver.java
+ TaxiPackage.TaxiDriver
+ TaxiPackage.TaxiDriver$1
+TaxiPackage/TaxiCommunicationClient.java
+ TaxiPackage.TaxiCommunicationClient
+TaxiPackage/Taxi.java
+ TaxiPackage.Taxi
+TaxiPackage/TaxiCommunicationServer.java
+ TaxiPackage.TaxiCommunicationServer

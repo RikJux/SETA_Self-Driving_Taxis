@@ -8,6 +8,9 @@ public class JoinServiceImpl extends JoinServiceGrpc.JoinServiceImplBase {
 
     @Override
     public void join(JoinServiceOuterClass.JoinMsg request, StreamObserver<JoinServiceOuterClass.JoinOk> responseObserver) {
-        super.join(request, responseObserver);
+        System.out.println(request);
+        // qui la logica su request
+        responseObserver.onNext(JoinServiceOuterClass.JoinOk.newBuilder().build());
+        responseObserver.onCompleted();
     }
 }

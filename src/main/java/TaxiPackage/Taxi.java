@@ -130,9 +130,9 @@ public class Taxi {
 
     public static void main(String args[]) {
         // insert id manually ?
-        id = "0";
+        id = "3";
         ip = "localhost";
-        port = 9999;
+        port = 9998;
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
@@ -146,9 +146,15 @@ public class Taxi {
         thisTaxi.setCurrentP(taxis.randomCoord());
         thisTaxi.setDistrict(computeDistrict(currentP));
         System.out.println("Taxi " + id + " joined in " + district);
-        for(TaxiBean t: thisTaxi.getTaxiList()){
+        for(TaxiBean t: thisTaxi.getTaxiList()){ // announce joining
             System.out.println(t.toString());
         }
+
+        TaxiCommunicationServer communicationServer = new TaxiCommunicationServer(thisTaxi);
+        communicationServer.start();
+
+        TaxiCommunicationClient communicationClient = new TaxiCommunicationClient(thisTaxi);
+        communicationClient.start();
 
         thisTaxi.setIdle(true); // ready to accept requests
 
@@ -212,8 +218,6 @@ public class Taxi {
             System.out.println("Error");
             return;
         }
-
-        System.out.println(clientResponse.toString());
 
     }
 

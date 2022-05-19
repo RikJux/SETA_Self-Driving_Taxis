@@ -14,7 +14,6 @@ public class TaxiDriver extends Thread{
     }
 
     public void run(){
-        System.out.println("Ciao sono il driver");
         MqttClient client;
         String broker = "tcp://localhost:1883";
         String clientId = MqttClient.generateClientId();
