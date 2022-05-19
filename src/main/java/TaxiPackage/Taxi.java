@@ -130,6 +130,9 @@ public class Taxi {
 
     public static void main(String args[]) {
         // insert id manually ?
+        id = "0";
+        ip = "localhost";
+        port = 9999;
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
@@ -159,10 +162,11 @@ public class Taxi {
             String quit = null;
             Scanner in = new Scanner(System.in);
             while(quit == null){
-                System.out.println("Type [quit] to exit the system");
+                System.out.println("Type [quit] to exit the system or [recharge] to go to recharge");
                 quit = in.nextLine();
                 if(quit.equals("quit")){
                     leaveRequest(client);
+                    return;
                 }
                 quit = null;
             }
@@ -171,7 +175,7 @@ public class Taxi {
         Random rand = new Random();
         while(true) {
             try {
-                Thread.sleep(15000); // should be 15 sec.
+                Thread.sleep(15000);
                 List<Measurement> pollution = pm10.getBuffer().readAllAndClean();
                 thisTaxi.getTaxiStats().setPollution(avgPollution(pollution));
                 thisTaxi.getTaxiStats().setTimestamp(System.currentTimeMillis());
@@ -231,8 +235,7 @@ public class Taxi {
             System.out.println("Join impossible: duplicated id " + id);
             return null; // duplicated id
         }
-
-        return clientResponse.getEntity(Taxis.class); // taxi successfully joined
+        return new Gson().fromJson(clientResponse.getEntity(String.class), Taxis.class);
     }
 
     private static void leaveRequest(Client client){

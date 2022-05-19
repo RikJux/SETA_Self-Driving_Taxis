@@ -1,0 +1,20 @@
+syntax = "proto3";
+package taxi.communication.rechargeService;
+
+message RechargeRequest{
+  message RechargePosition {
+    int32 x = 1;
+    int32 y = 2;
+  }
+  RechargePosition rechargePosition = 1;
+  string id = 2;
+  double timestamp = 3;
+}
+
+message RechargeOk{}
+
+service RechargeService{
+
+  rpc recharge (RechargeRequest) returns (RechargeOk);
+
+}

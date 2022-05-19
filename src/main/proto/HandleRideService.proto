@@ -1,0 +1,27 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+package taxi.communication.handleRideService;
+
+message ElectionMsg{
+
+  message CandidateMsg{
+    bool idle = 1;
+    double distance = 2;
+    double batteryLevel = 3;
+    string id = 4;
+  }
+
+  string RideRequest = 1;
+  CandidateMsg candidateMsg = 2;
+
+}
+
+message HandleRideOk{ string id = 1;} // send to the taxi that is a worse candidate
+
+message TakeChargeRide{ string id = 1;} // notify all taxis if win election. Is this really required?
+
+service HandleRideService{
+  rpc election (ElectionMsg) returns (HandleRideOk);
+
+  rpc takeCharge (TakeChargeRide) returns (google.protobuf.Empty);
+}

@@ -66,10 +66,6 @@ public final class RideRequestOuterClass {
     seta.smartcity.rideRequest.RideRequestOuterClass.RideRequest.PositionOrBuilder getDestinationPositionOrBuilder();
   }
   /**
-   * <pre>
-   * import Position from another proto file
-   * </pre>
-   *
    * Protobuf type {@code seta.smartcity.rideRequest.RideRequest}
    */
   public  static final class RideRequest extends
@@ -1112,10 +1108,6 @@ public final class RideRequestOuterClass {
       return builder;
     }
     /**
-     * <pre>
-     * import Position from another proto file
-     * </pre>
-     *
      * Protobuf type {@code seta.smartcity.rideRequest.RideRequest}
      */
     public static final class Builder extends

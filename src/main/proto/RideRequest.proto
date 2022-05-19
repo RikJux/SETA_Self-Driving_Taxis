@@ -1,5 +1,5 @@
 package seta.smartcity.rideRequest;
-// import Position from another proto file
+
 message RideRequest {
 
   required string id = 1;

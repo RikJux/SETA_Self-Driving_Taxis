@@ -67,6 +67,7 @@ public class TaxiDriver extends Thread{
                         Thread.sleep(10000);
                         taxi.setBattery(100.0);
                         taxi.setIdle(true);
+                        System.out.println("Taxi " + taxi.getId() + " is now fully recharged.");
                     }
 
                 }

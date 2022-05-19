@@ -1,0 +1,12 @@
+syntax = "proto3";
+package taxi.communication.leaveService;
+
+message LeaveMsg{
+  string id = 1;
+}
+
+message LeaveOk{}
+
+service LeaveService{
+  rpc leave (LeaveMsg) returns (LeaveOk);
+}

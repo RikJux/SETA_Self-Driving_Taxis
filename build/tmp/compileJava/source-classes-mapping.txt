@@ -1,41 +1,108 @@
-beans/TaxiStatistics.java
- beans.TaxiStatistics
 Simulator/Buffer.java
  Simulator.Buffer
-seta/smartcity/requestToJoin/RequestToJoinOuterClass.java
- seta.smartcity.requestToJoin.RequestToJoinOuterClass
- seta.smartcity.requestToJoin.RequestToJoinOuterClass$1
- seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoin
- seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoin$1
- seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoin$Builder
- seta.smartcity.requestToJoin.RequestToJoinOuterClass$RequestToJoinOrBuilder
-TaxiPackage/Sensor.java
- TaxiPackage.Sensor
-Simulator/SimulatorData.java
- Simulator.SimulatorData
-AdministratorPackage/AdministratorServer.java
- AdministratorPackage.AdministratorServer
-beans/TaxiBean.java
- beans.TaxiBean
-Simulator/Simulator.java
- Simulator.Simulator
+taxi/communication/rechargeService/RechargeServiceGrpc.java
+ taxi.communication.rechargeService.RechargeServiceGrpc
+ taxi.communication.rechargeService.RechargeServiceGrpc$1
+ taxi.communication.rechargeService.RechargeServiceGrpc$MethodHandlers
+ taxi.communication.rechargeService.RechargeServiceGrpc$RechargeServiceBaseDescriptorSupplier
+ taxi.communication.rechargeService.RechargeServiceGrpc$RechargeServiceBlockingStub
+ taxi.communication.rechargeService.RechargeServiceGrpc$RechargeServiceFileDescriptorSupplier
+ taxi.communication.rechargeService.RechargeServiceGrpc$RechargeServiceFutureStub
+ taxi.communication.rechargeService.RechargeServiceGrpc$RechargeServiceImplBase
+ taxi.communication.rechargeService.RechargeServiceGrpc$RechargeServiceMethodDescriptorSupplier
+ taxi.communication.rechargeService.RechargeServiceGrpc$RechargeServiceStub
 beans/Taxis.java
  beans.Taxis
-seta/smartcity/requestToJoinAccept/RequestToJoinAcceptOuterClass.java
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$1
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$1
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Builder
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Position
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Position$1
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Position$Builder
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$PositionOrBuilder
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Taxi
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Taxi$1
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$Taxi$Builder
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAccept$TaxiOrBuilder
- seta.smartcity.requestToJoinAccept.RequestToJoinAcceptOuterClass$RequestToJoinAcceptOrBuilder
+AdministratorPackage/AdministratorServer.java
+ AdministratorPackage.AdministratorServer
+beans/Statistics.java
+ beans.Statistics
+taxi/communication/leaveService/LeaveServiceOuterClass.java
+ taxi.communication.leaveService.LeaveServiceOuterClass
+ taxi.communication.leaveService.LeaveServiceOuterClass$1
+ taxi.communication.leaveService.LeaveServiceOuterClass$LeaveMsg
+ taxi.communication.leaveService.LeaveServiceOuterClass$LeaveMsg$1
+ taxi.communication.leaveService.LeaveServiceOuterClass$LeaveMsg$Builder
+ taxi.communication.leaveService.LeaveServiceOuterClass$LeaveMsgOrBuilder
+ taxi.communication.leaveService.LeaveServiceOuterClass$LeaveOk
+ taxi.communication.leaveService.LeaveServiceOuterClass$LeaveOk$1
+ taxi.communication.leaveService.LeaveServiceOuterClass$LeaveOk$Builder
+ taxi.communication.leaveService.LeaveServiceOuterClass$LeaveOkOrBuilder
+services/StatsManagement.java
+ services.StatsManagement
+Main.java
+ Main
+beans/TaxiBean.java
+ beans.TaxiBean
+TaxiPackage/TaxiDriver.java
+ TaxiPackage.TaxiDriver
+ TaxiPackage.TaxiDriver$1
+services/TaxiManagement.java
+ services.TaxiManagement
+taxi/communication/handleRideService/HandleRideServiceOuterClass.java
+ taxi.communication.handleRideService.HandleRideServiceOuterClass
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$1
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg$1
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg$Builder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg$CandidateMsg
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg$CandidateMsg$1
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg$CandidateMsg$Builder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg$CandidateMsgOrBuilder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsgOrBuilder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$HandleRideOk
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$HandleRideOk$1
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$HandleRideOk$Builder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$HandleRideOkOrBuilder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$TakeChargeRide
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$TakeChargeRide$1
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$TakeChargeRide$Builder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$TakeChargeRideOrBuilder
+taxi/communication/rechargeService/RechargeServiceOuterClass.java
+ taxi.communication.rechargeService.RechargeServiceOuterClass
+ taxi.communication.rechargeService.RechargeServiceOuterClass$1
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeOk
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeOk$1
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeOk$Builder
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeOkOrBuilder
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeRequest
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeRequest$1
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeRequest$Builder
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeRequest$RechargePosition
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeRequest$RechargePosition$1
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeRequest$RechargePosition$Builder
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeRequest$RechargePositionOrBuilder
+ taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeRequestOrBuilder
+taxi/communication/leaveService/LeaveServiceGrpc.java
+ taxi.communication.leaveService.LeaveServiceGrpc
+ taxi.communication.leaveService.LeaveServiceGrpc$1
+ taxi.communication.leaveService.LeaveServiceGrpc$LeaveServiceBaseDescriptorSupplier
+ taxi.communication.leaveService.LeaveServiceGrpc$LeaveServiceBlockingStub
+ taxi.communication.leaveService.LeaveServiceGrpc$LeaveServiceFileDescriptorSupplier
+ taxi.communication.leaveService.LeaveServiceGrpc$LeaveServiceFutureStub
+ taxi.communication.leaveService.LeaveServiceGrpc$LeaveServiceImplBase
+ taxi.communication.leaveService.LeaveServiceGrpc$LeaveServiceMethodDescriptorSupplier
+ taxi.communication.leaveService.LeaveServiceGrpc$LeaveServiceStub
+ taxi.communication.leaveService.LeaveServiceGrpc$MethodHandlers
+SETA.java
+ SETA
+taxi/communication/handleRideService/HandleRideServiceGrpc.java
+ taxi.communication.handleRideService.HandleRideServiceGrpc
+ taxi.communication.handleRideService.HandleRideServiceGrpc$1
+ taxi.communication.handleRideService.HandleRideServiceGrpc$HandleRideServiceBaseDescriptorSupplier
+ taxi.communication.handleRideService.HandleRideServiceGrpc$HandleRideServiceBlockingStub
+ taxi.communication.handleRideService.HandleRideServiceGrpc$HandleRideServiceFileDescriptorSupplier
+ taxi.communication.handleRideService.HandleRideServiceGrpc$HandleRideServiceFutureStub
+ taxi.communication.handleRideService.HandleRideServiceGrpc$HandleRideServiceImplBase
+ taxi.communication.handleRideService.HandleRideServiceGrpc$HandleRideServiceMethodDescriptorSupplier
+ taxi.communication.handleRideService.HandleRideServiceGrpc$HandleRideServiceStub
+ taxi.communication.handleRideService.HandleRideServiceGrpc$MethodHandlers
+TaxiPackage/Taxi.java
+ TaxiPackage.Taxi
+TaxiPackage/Sensor.java
+ TaxiPackage.Sensor
+Simulator/Simulator.java
+ Simulator.Simulator
 seta/smartcity/rideRequest/RideRequestOuterClass.java
  seta.smartcity.rideRequest.RideRequestOuterClass
  seta.smartcity.rideRequest.RideRequestOuterClass$1
@@ -47,26 +114,35 @@ seta/smartcity/rideRequest/RideRequestOuterClass.java
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$Position$Builder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$PositionOrBuilder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequestOrBuilder
-Simulator/PM10Simulator.java
- Simulator.PM10Simulator
-Simulator/Measurement.java
- Simulator.Measurement
+Simulator/SimulatorData.java
+ Simulator.SimulatorData
+taxi/communication/joinService/JoinServiceOuterClass.java
+ taxi.communication.joinService.JoinServiceOuterClass
+ taxi.communication.joinService.JoinServiceOuterClass$1
+ taxi.communication.joinService.JoinServiceOuterClass$JoinMsg
+ taxi.communication.joinService.JoinServiceOuterClass$JoinMsg$1
+ taxi.communication.joinService.JoinServiceOuterClass$JoinMsg$Builder
+ taxi.communication.joinService.JoinServiceOuterClass$JoinMsgOrBuilder
+ taxi.communication.joinService.JoinServiceOuterClass$JoinOk
+ taxi.communication.joinService.JoinServiceOuterClass$JoinOk$1
+ taxi.communication.joinService.JoinServiceOuterClass$JoinOk$Builder
+ taxi.communication.joinService.JoinServiceOuterClass$JoinOkOrBuilder
 AdministratorPackage/AdministratorClient.java
  AdministratorPackage.AdministratorClient
-SETA.java
- SETA
-services/TaxiManagement.java
- services.TaxiManagement
-services/StatsManagement.java
- services.StatsManagement
-beans/Statistics.java
- beans.Statistics
-Main.java
- Main
-TaxiPackage/TaxiDriver.java
- TaxiPackage.TaxiDriver
- TaxiPackage.TaxiDriver$1
-TaxiPackage/Taxi.java
- TaxiPackage.Taxi
-TaxiPackage/TaxiComAdmin.java
- TaxiPackage.TaxiComAdmin
+taxi/communication/joinService/JoinServiceGrpc.java
+ taxi.communication.joinService.JoinServiceGrpc
+ taxi.communication.joinService.JoinServiceGrpc$1
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceBaseDescriptorSupplier
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceBlockingStub
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceFileDescriptorSupplier
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceFutureStub
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceImplBase
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceMethodDescriptorSupplier
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceStub
+ taxi.communication.joinService.JoinServiceGrpc$MethodHandlers
+beans/TaxiStatistics.java
+ beans.TaxiStatistics
+Simulator/Measurement.java
+ Simulator.Measurement
+Simulator/PM10Simulator.java
+ Simulator.PM10Simulator
