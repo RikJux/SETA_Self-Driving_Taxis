@@ -11,10 +11,10 @@ import java.io.IOException;
 
 public class TaxiCommunicationServer extends Thread{
 
-    private final Taxi taxi;
+    private final Taxi thisTaxi;
 
-    public TaxiCommunicationServer(Taxi taxi){
-        this.taxi = taxi;
+    public TaxiCommunicationServer(Taxi thisTaxi){
+        this.thisTaxi = thisTaxi;
     }
 
     public void run()
@@ -22,16 +22,16 @@ public class TaxiCommunicationServer extends Thread{
 
         try {
 
-            Server server = ServerBuilder.forPort(taxi.getPort())
-                    .addService(new JoinServiceImpl())
-                    .addService(new LeaveServiceImpl())
+            Server server = ServerBuilder.forPort(thisTaxi.getPort())
+                    .addService(new JoinServiceImpl(thisTaxi))
+                    .addService(new LeaveServiceImpl(thisTaxi))
                     .addService(new HandleRideServiceImpl())
                     .addService(new RechargeServiceImpl())
                     .build();
 
             server.start();
 
-            System.out.println("Communication thread for taxi " + taxi.getId() + " started");
+            System.out.println("Communication thread for taxi " + thisTaxi.getId() + " started");
 
             server.awaitTermination();
 

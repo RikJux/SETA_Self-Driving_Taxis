@@ -12,16 +12,21 @@ import taxi.communication.leaveService.LeaveServiceOuterClass;
 public class TaxiCommunicationClient extends Thread{
 
     private final Taxi taxi;
+    private final boolean join;
+    private final TaxiBean otherTaxiBean;
 
-    public TaxiCommunicationClient(Taxi taxi){
+    public TaxiCommunicationClient(Taxi taxi, boolean join, TaxiBean otherTaxiBean){
         this.taxi = taxi;
+        this.join = join;
+        this.otherTaxiBean = otherTaxiBean;
     }
 
     public void run(){
 
-        for(TaxiBean t: taxi.getTaxiList()){ // announce joining
-            System.out.println(t.toString());
-            announceJoin(taxi.getId(), taxi.getIp(), taxi.getPort(), t);
+        if(join){
+            announceJoin(taxi.getId(), taxi.getIp(), taxi.getPort(), otherTaxiBean);
+        }else{
+            announceLeave(taxi.getId(), taxi.getIp(), taxi.getPort(), otherTaxiBean);
         }
 
     }
@@ -42,7 +47,7 @@ public class TaxiCommunicationClient extends Thread{
         System.out.println("Taxi " + t.getId() + " is now aware of my presence.");
     }
 
-    public static void announceLeaving(String myId, String myIp, int myPort, TaxiBean t){
+    public static void announceLeave(String myId, String myIp, int myPort, TaxiBean t){
         // synchronously contact all the other taxis
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(t.getIp()+":"+t.getPort()).usePlaintext().build();
 

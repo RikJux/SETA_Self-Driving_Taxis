@@ -1,5 +1,6 @@
 package TaxiPackage;
 
+import Simulator.Buffer;
 import Simulator.Measurement;
 import Simulator.PM10Simulator;
 import Simulator.SimulatorData;
@@ -124,15 +125,14 @@ public class Taxi {
 
     }
 
-    private static final String serverAddress = "http://localhost:1337";
+    static final String serverAddress = "http://localhost:1337";
     private static final String joinPath = serverAddress+"/taxi/join";
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
     public static void main(String args[]) {
         // insert id manually ?
-        id = "3";
-        ip = "localhost";
-        port = 9998;
+        id = "2";
+        port = 1338 + Integer.parseInt(id);
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
@@ -146,17 +146,17 @@ public class Taxi {
         thisTaxi.setCurrentP(taxis.randomCoord());
         thisTaxi.setDistrict(computeDistrict(currentP));
         System.out.println("Taxi " + id + " joined in " + district);
-        for(TaxiBean t: thisTaxi.getTaxiList()){ // announce joining
-            System.out.println(t.toString());
-        }
-
-        TaxiCommunicationServer communicationServer = new TaxiCommunicationServer(thisTaxi);
-        communicationServer.start();
-
-        TaxiCommunicationClient communicationClient = new TaxiCommunicationClient(thisTaxi);
-        communicationClient.start();
-
         thisTaxi.setIdle(true); // ready to accept requests
+
+        // initialize all threads
+        TaxiCommunicationServer communicationServer = new TaxiCommunicationServer(thisTaxi);
+
+        communicationServer.start();
+        // announce everyone in parallel
+        for(TaxiBean t: thisTaxi.getTaxiList()){
+            new TaxiCommunicationClient(thisTaxi, true, t).start();
+        }
+        System.out.println(thisTaxi.getTaxiList());
 
         PM10Simulator pm10 = new PM10Simulator(new SimulatorData());
         pm10.start();
@@ -164,35 +164,41 @@ public class Taxi {
         TaxiDriver drive = new TaxiDriver(thisTaxi);
         drive.start();
 
-        new Thread(() -> {
-            String quit = null;
-            Scanner in = new Scanner(System.in);
-            while(quit == null){
-                System.out.println("Type [quit] to exit the system or [recharge] to go to recharge");
-                quit = in.nextLine();
-                if(quit.equals("quit")){
-                    leaveRequest(client);
-                    return;
-                }
-                quit = null;
-            }
-        }).start();
+        Sensor sensor = new Sensor(thisTaxi, pm10, client);
+        sensor.start();
 
-        Random rand = new Random();
-        while(true) {
+        String quit = null;
+        Scanner in = new Scanner(System.in);
+
+
+        while(quit == null){
+            System.out.println("Type [quit] to exit the system or [recharge] to go to recharge");
+            quit = in.nextLine();
+            if(quit.equals("quit")){
+                System.out.println(thisTaxi.getTaxiList());
+                leaveRequest(client);
+                for(TaxiBean t: thisTaxi.getTaxiList()){
+                    new TaxiCommunicationClient(thisTaxi, false, t).start();
+                    System.out.println(thisTaxi.getTaxiList());
+                }
+                communicationServer.interrupt();
+                pm10.interrupt();
+                drive.interrupt();
+                sensor.interrupt();
+                return;
+            }
+            quit = null;
+        }
+
+        new Thread(() -> {
             try {
                 Thread.sleep(15000);
-                List<Measurement> pollution = pm10.getBuffer().readAllAndClean();
-                thisTaxi.getTaxiStats().setPollution(avgPollution(pollution));
-                thisTaxi.getTaxiStats().setTimestamp(System.currentTimeMillis());
-                sendStatistics(client, thisTaxi.getTaxiStats());
-                double battLeft = thisTaxi.getTaxiStats().getBatteryLevel();
-                thisTaxi.setTaxiStats(new TaxiStatistics(id));
-                thisTaxi.setBattery(battLeft);
+                System.out.println(thisTaxi.getTaxiList());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
+        }).start();
+
     }
 
     private static double avgPollution(List<Measurement> pollution){
@@ -203,6 +209,18 @@ public class Taxi {
         }
 
         return sum/pollution.size();
+    }
+
+    private static Taxi handleStatistics2(Client client, Taxi thisTaxi, Buffer pm10Buffer){
+        List<Measurement> pollution = pm10Buffer.readAllAndClean();
+        thisTaxi.getTaxiStats().setPollution(avgPollution(pollution));
+        thisTaxi.getTaxiStats().setTimestamp(System.currentTimeMillis());
+        sendStatistics(client, thisTaxi.getTaxiStats());
+        double battLeft = thisTaxi.getTaxiStats().getBatteryLevel();
+        thisTaxi.setTaxiStats(new TaxiStatistics(id));
+        thisTaxi.setBattery(battLeft);
+
+        return thisTaxi;
     }
 
     private static void sendStatistics(Client client, TaxiStatistics taxiStats){
