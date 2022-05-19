@@ -131,7 +131,7 @@ public class Taxi {
 
     public static void main(String args[]) {
         // insert id manually ?
-        id = "2";
+        id = "10";
         port = 1338 + Integer.parseInt(id);
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
@@ -150,37 +150,27 @@ public class Taxi {
 
         // initialize all threads
         TaxiCommunicationServer communicationServer = new TaxiCommunicationServer(thisTaxi);
-
-        communicationServer.start();
-        // announce everyone in parallel
-        for(TaxiBean t: thisTaxi.getTaxiList()){
-            new TaxiCommunicationClient(thisTaxi, true, t).start();
-        }
-        System.out.println(thisTaxi.getTaxiList());
-
         PM10Simulator pm10 = new PM10Simulator(new SimulatorData());
-        pm10.start();
-
         TaxiDriver drive = new TaxiDriver(thisTaxi);
-        drive.start();
-
         Sensor sensor = new Sensor(thisTaxi, pm10, client);
+
+        // start all threads
+        communicationServer.start();
+        new TaxiCommunicationClient(thisTaxi, true).start();
+        pm10.start();
+        drive.start();
         sensor.start();
 
         String quit = null;
         Scanner in = new Scanner(System.in);
 
-
         while(quit == null){
             System.out.println("Type [quit] to exit the system or [recharge] to go to recharge");
             quit = in.nextLine();
-            if(quit.equals("quit")){
+            if(quit.equals("quit")){ // leaving procedure
                 System.out.println(thisTaxi.getTaxiList());
                 leaveRequest(client);
-                for(TaxiBean t: thisTaxi.getTaxiList()){
-                    new TaxiCommunicationClient(thisTaxi, false, t).start();
-                    System.out.println(thisTaxi.getTaxiList());
-                }
+                new TaxiCommunicationClient(thisTaxi, false).start();
                 communicationServer.interrupt();
                 pm10.interrupt();
                 drive.interrupt();
@@ -189,15 +179,6 @@ public class Taxi {
             }
             quit = null;
         }
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(15000);
-                System.out.println(thisTaxi.getTaxiList());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
 
     }
 
