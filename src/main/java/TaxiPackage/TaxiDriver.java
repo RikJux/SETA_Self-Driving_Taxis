@@ -47,26 +47,27 @@ public class TaxiDriver extends Thread{
                     System.out.println("Taxi " + taxi.getId() + " located at "+ taxi.getX() + ", " + taxi.getY() +
                             " accepted request " + requestId + " from " + startingP[0] + ", " + startingP[1]
                             + " to " + destinationP[0] + ", " + destinationP[1]);
-                    taxi.setIdle(false);
+                    taxi.setCurrentStatus(Taxi.Status.WORKING);
                     System.out.println(clientId + " Unsubscribing ... - Thread PID: " + Thread.currentThread().getId());
                     client.unsubscribe(taxi.getTopicString()+ taxi.getDistrict());
-                    travel(taxi.getCurrentP(), startingP, requestId, taxi, false, 2500); // reach the user
-                    travel(startingP, destinationP, requestId, taxi, true, 2500); // reach the final destination
+                    travel(taxi.getCurrentP(), startingP, requestId, taxi, false, 2.5f); // reach the user
+                    travel(startingP, destinationP, requestId, taxi, true, 2.5f); // reach the final destination
                     if(taxi.getTaxiStats().getBatteryLevel() > 30.0) {
                         System.out.println(clientId + " Subscribed ... - Thread PID: " + Thread.currentThread().getId());
                         client.subscribe(taxi.getTopicString() + taxi.getDistrict());
                         System.out.println(clientId + " Subscribed to topic : " + taxi.getTopicString() + taxi.getDistrict());
                         System.out.println("=====================================");
-                        taxi.setIdle(true);
+                        taxi.setCurrentStatus(Taxi.Status.IDLE);
                     } else {
+                        // automatic recharge
                         System.out.println("Taxi " + taxi.getId() + " needs recharge.");
-                        destinationP = computeRechargeStation(taxi.getDistrict());
-                        travel(taxi.getCurrentP(), destinationP, null, taxi, false, 5);
-                        // mutual exclusion over recharge station
-                        Thread.sleep(10000);
-                        taxi.setBattery(100.0);
-                        taxi.setIdle(true);
-                        System.out.println("Taxi " + taxi.getId() + " is now fully recharged.");
+                        taxi.setCurrentStatus(Taxi.Status.REQUEST_RECHARGE);
+                        taxi.setRechargeRequestTimestamp(System.currentTimeMillis());
+                        // mutual exclusion
+                        taxi.setCurrentStatus(Taxi.Status.GO_RECHARGE);
+                        recharge(taxi);
+                        taxi.setRechargeRequestTimestamp(Double.MAX_VALUE);
+                        taxi.setCurrentStatus(Taxi.Status.IDLE);
                     }
 
                 }
@@ -92,9 +93,19 @@ public class TaxiDriver extends Thread{
 
     }
 
-    private static void travel(int[] startingP, int[] destinationP, String requestId, Taxi taxi, boolean accomplished, int time) throws InterruptedException {
+    public static void recharge(Taxi taxi) throws InterruptedException {
+        int[] destinationP = computeRechargeStation(taxi.getDistrict());
+        travel(taxi.getCurrentP(), destinationP, null, taxi, false, 5);
+        // mutual exclusion over recharge station
+        Thread.sleep(10000);
+        taxi.setBattery(100.0);
+        taxi.setCurrentStatus(Taxi.Status.IDLE);
+        System.out.println("Taxi " + taxi.getId() + " is now fully recharged.");
+    }
 
-        Thread.sleep(time * 1000); // half because you need to reach the user
+    private static void travel(int[] startingP, int[] destinationP, String requestId, Taxi taxi, boolean accomplished, float time) throws InterruptedException {
+
+        Thread.sleep((int) time * 1000); // half because you need to reach the user
         double distance = computeDistance(startingP, destinationP);
         taxi.setCurrentP(destinationP);
         taxi.lowerBattery(distance);

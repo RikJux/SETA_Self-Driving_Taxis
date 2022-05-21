@@ -14,14 +14,21 @@ import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import taxi.communication.rechargeService.RechargeServiceOuterClass.*;
 
 import javax.ws.rs.core.Response;
-import java.util.List;
-
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class Taxi {
+
+    public enum Status{
+        JOINING,
+        IDLE,
+        REQUEST_RECHARGE,
+        GO_RECHARGE,
+        WORKING,
+        LEAVING
+    }
 
     private static String id; // default values
     private static String ip = "localhost";
@@ -33,95 +40,17 @@ public class Taxi {
     private static TaxiStatistics taxiStats;
     private static int[] currentP; //= Position.newBuilder().setX(0).setY(0).build(); // these should be given by Admin
     private static Taxi instance;
-    private boolean isIdle;
-
-    public boolean isIdle() {
-        return isIdle;
-    }
-
-    public void setIdle(boolean idle) {
-        isIdle = idle;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getIp() { return ip; }
-
-    public int getPort() { return port; }
-
-    public String getTopicString() {
-        return topicString;
-    }
-
-    public double getChargeThreshold() {
-        return chargeThreshold;
-    }
-
-    public int[] getCurrentP() {
-        return currentP;
-    }
-
-    public void setCurrentP(int[] currentP) {
-        this.currentP = currentP;
-    }
-
-    public int getX() {return getCurrentP()[0];}
-
-    public int getY() {return getCurrentP()[1];}
-
-    public String getDistrict() {
-        return district;
-    }
-
-    public void setDistrict(String district) {
-        this.district = district;
-    }
-
-    public List<TaxiBean> getTaxiList() {
-        return taxiList;
-    }
-
-    public void setTaxiList(List<TaxiBean> taxiList) {
-        this.taxiList = taxiList;
-    }
-
-    public synchronized TaxiStatistics getTaxiStats() {
-        return taxiStats;
-    } // cannot be sync!
-
-    public void setTaxiStats(TaxiStatistics taxiStats) {
-        this.taxiStats = taxiStats;
-    }
-
-    public double getBattery(){return this.getTaxiStats().getBatteryLevel();}
-
-    public void setBattery(double b){this.getTaxiStats().setBatteryLevel(b);}
-
-    public void lowerBattery(double b){this.getTaxiStats().setBatteryLevel(this.getTaxiStats().getBatteryLevel() - b);}
-
-    public double getKilometers(){return this.getTaxiStats().getKilometersTravelled();}
-
-    public void setKilometers(double b){this.getTaxiStats().setKilometersTravelled(b);}
-
-    public void addKilometers(double b){this.getTaxiStats().setKilometersTravelled(b + this.getTaxiStats().getKilometersTravelled());}
-
-    public double getRidesAccomplished(){return this.getTaxiStats().getRidesAccomplished();}
-
-    public void addRideAccomplished(){this.getTaxiStats().setRidesAccomplished(this.getTaxiStats().getRidesAccomplished() + 1);}
-
-    public synchronized static Taxi getInstance(){
-        if(instance==null)
-            instance = new Taxi(id, ip, port);
-        return instance;
-    }
+    private Status currentStatus = Status.JOINING;
+    private Queue<RechargeRequest> rechageWaiting;
+    private int rechargeReqCounter = 0;
+    private double rechargeRequestTimestamp = Double.MAX_VALUE;
 
     public Taxi(String id, String ip, int port){
 
         this.id = id;
         this.ip = ip;
         this.port = port;
+        this.rechageWaiting = new PriorityQueue<RechargeRequest>();
 
     }
 
@@ -129,10 +58,11 @@ public class Taxi {
     private static final String joinPath = serverAddress+"/taxi/join";
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws InterruptedException {
         // insert id manually ?
-        id = "10";
-        port = 1338 + Integer.parseInt(id);
+        int idOffset = 2;
+        port = 1338 + idOffset;
+        id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
@@ -146,7 +76,6 @@ public class Taxi {
         thisTaxi.setCurrentP(taxis.randomCoord());
         thisTaxi.setDistrict(computeDistrict(currentP));
         System.out.println("Taxi " + id + " joined in " + district);
-        thisTaxi.setIdle(true); // ready to accept requests
 
         // initialize all threads
         TaxiCommunicationServer communicationServer = new TaxiCommunicationServer(thisTaxi);
@@ -157,18 +86,22 @@ public class Taxi {
         // start all threads
         communicationServer.start();
         new TaxiCommunicationClient(thisTaxi, true).start();
+        // wait until all ack are received?
         pm10.start();
         drive.start();
         sensor.start();
 
-        String quit = null;
+        thisTaxi.setCurrentStatus(Status.IDLE);
+
+        String userInput = null;
         Scanner in = new Scanner(System.in);
 
-        while(quit == null){
+        while(userInput == null){
             System.out.println("Type [quit] to exit the system or [recharge] to go to recharge");
-            quit = in.nextLine();
-            if(quit.equals("quit")){ // leaving procedure
+            userInput = in.nextLine();
+            if(userInput.equals("quit")){ // leaving procedure
                 System.out.println(thisTaxi.getTaxiList());
+                thisTaxi.setCurrentStatus(Status.LEAVING);
                 leaveRequest(client);
                 new TaxiCommunicationClient(thisTaxi, false).start();
                 communicationServer.interrupt();
@@ -177,7 +110,20 @@ public class Taxi {
                 sensor.interrupt();
                 return;
             }
-            quit = null;
+
+            if(userInput.equals("recharge")){
+                // tell the driver to go recharge
+                thisTaxi.setCurrentStatus(Status.REQUEST_RECHARGE);
+                thisTaxi.setRechargeRequestTimestamp(System.currentTimeMillis());
+                // mutual exclusion
+                new TaxiRechargeComm(thisTaxi).start();
+                thisTaxi.setCurrentStatus(Status.GO_RECHARGE);
+                TaxiDriver.recharge(thisTaxi); // probably not like this
+                thisTaxi.setRechargeRequestTimestamp(Double.MAX_VALUE);
+                thisTaxi.setCurrentStatus(Status.IDLE);
+            }
+
+            userInput = null;
         }
 
     }
@@ -285,4 +231,109 @@ public class Taxi {
         return "district_" + distN;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getIp() { return ip; }
+
+    public int getPort() { return port; }
+
+    public String getTopicString() {
+        return topicString;
+    }
+
+    public double getChargeThreshold() {
+        return chargeThreshold;
+    }
+
+    public int[] getCurrentP() {
+        return currentP;
+    }
+
+    public void setCurrentP(int[] currentP) {
+        this.currentP = currentP;
+    }
+
+    public int getX() {return getCurrentP()[0];}
+
+    public int getY() {return getCurrentP()[1];}
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public List<TaxiBean> getTaxiList() {
+        return taxiList;
+    }
+
+    public void setTaxiList(List<TaxiBean> taxiList) {
+        this.taxiList = taxiList;
+    }
+
+    public synchronized TaxiStatistics getTaxiStats() {
+        return taxiStats;
+    } // cannot be sync!
+
+    public void setTaxiStats(TaxiStatistics taxiStats) {
+        this.taxiStats = taxiStats;
+    }
+
+    public double getBattery(){return this.getTaxiStats().getBatteryLevel();}
+
+    public void setBattery(double b){this.getTaxiStats().setBatteryLevel(b);}
+
+    public void lowerBattery(double b){this.getTaxiStats().setBatteryLevel(this.getTaxiStats().getBatteryLevel() - b);}
+
+    public double getKilometers(){return this.getTaxiStats().getKilometersTravelled();}
+
+    public void setKilometers(double b){this.getTaxiStats().setKilometersTravelled(b);}
+
+    public void addKilometers(double b){this.getTaxiStats().setKilometersTravelled(b + this.getTaxiStats().getKilometersTravelled());}
+
+    public double getRidesAccomplished(){return this.getTaxiStats().getRidesAccomplished();}
+
+    public void addRideAccomplished(){this.getTaxiStats().setRidesAccomplished(this.getTaxiStats().getRidesAccomplished() + 1);}
+
+    public synchronized static Taxi getInstance(){
+        if(instance==null)
+            instance = new Taxi(id, ip, port);
+        return instance;
+    }
+
+    public Status getCurrentStatus() {
+        return currentStatus;
+    }
+
+    public void setCurrentStatus(Status currentStatus) {
+        this.currentStatus = currentStatus;
+    }
+
+    public Queue<RechargeRequest> getRechageWaiting() {
+        return rechageWaiting;
+    }
+
+    public void setRechageWaiting(Queue<RechargeRequest> rechageWaiting) {
+        this.rechageWaiting = rechageWaiting;
+    }
+
+    public double getRechargeRequestTimestamp() {
+        return rechargeRequestTimestamp;
+    }
+
+    public void setRechargeRequestTimestamp(double rechargeRequestTimestamp) {
+        this.rechargeRequestTimestamp = rechargeRequestTimestamp;
+    }
+
+    public int getRechargeReqCounter() {
+        return rechargeReqCounter;
+    }
+
+    public void setRechargeReqCounter(int rechargeReqCounter) {
+        this.rechargeReqCounter = rechargeReqCounter;
+    }
 }

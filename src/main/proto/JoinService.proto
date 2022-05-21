@@ -2,9 +2,17 @@ syntax = "proto3";
 package taxi.communication.joinService;
 
 message JoinMsg{
+
+  message Position {
+    int32 x = 1;
+    int32 y = 2;
+  }
+
   string id = 1;
   string ip = 2;
   int32 port = 3;
+  Position position = 4;
+
 }
 
 message JoinOk{}

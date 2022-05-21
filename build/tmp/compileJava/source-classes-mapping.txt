@@ -15,6 +15,9 @@ beans/Taxis.java
  beans.Taxis
 AdministratorPackage/AdministratorServer.java
  AdministratorPackage.AdministratorServer
+TaxiPackage/TaxiRechargeComm.java
+ TaxiPackage.TaxiRechargeComm
+ TaxiPackage.TaxiRechargeComm$1
 beans/Statistics.java
  beans.Statistics
 TaxiPackage/Impl/HandleRideServiceImpl.java
@@ -105,6 +108,7 @@ taxi/communication/handleRideService/HandleRideServiceGrpc.java
  taxi.communication.handleRideService.HandleRideServiceGrpc$MethodHandlers
 TaxiPackage/Taxi.java
  TaxiPackage.Taxi
+ TaxiPackage.Taxi$Status
 TaxiPackage/Sensor.java
  TaxiPackage.Sensor
 Simulator/Simulator.java
@@ -130,6 +134,10 @@ taxi/communication/joinService/JoinServiceOuterClass.java
  taxi.communication.joinService.JoinServiceOuterClass$JoinMsg
  taxi.communication.joinService.JoinServiceOuterClass$JoinMsg$1
  taxi.communication.joinService.JoinServiceOuterClass$JoinMsg$Builder
+ taxi.communication.joinService.JoinServiceOuterClass$JoinMsg$Position
+ taxi.communication.joinService.JoinServiceOuterClass$JoinMsg$Position$1
+ taxi.communication.joinService.JoinServiceOuterClass$JoinMsg$Position$Builder
+ taxi.communication.joinService.JoinServiceOuterClass$JoinMsg$PositionOrBuilder
  taxi.communication.joinService.JoinServiceOuterClass$JoinMsgOrBuilder
  taxi.communication.joinService.JoinServiceOuterClass$JoinOk
  taxi.communication.joinService.JoinServiceOuterClass$JoinOk$1

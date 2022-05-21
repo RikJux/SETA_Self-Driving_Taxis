@@ -16,7 +16,8 @@ public class JoinServiceImpl extends JoinServiceGrpc.JoinServiceImplBase {
 
     @Override
     public void join(JoinServiceOuterClass.JoinMsg request, StreamObserver<JoinServiceOuterClass.JoinOk> responseObserver) {
-        System.out.println("Taxi " + request.getId() + " is joining.");
+        System.out.println("Taxi " + request.getId() + " is joining at "
+                + request.getPosition().getX() + ", " + request.getPosition().getY());
         responseObserver.onNext(JoinServiceOuterClass.JoinOk.newBuilder().build());
 
         if(!thisTaxi.getId().equals(request.getId())){

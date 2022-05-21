@@ -22,39 +22,33 @@ public class TaxiCommunicationClient extends Thread{
     }
 
     public void run(){
-        /*
-        if(join){
-            announceJoinSync(taxi.getId(), taxi.getIp(), taxi.getPort(), otherTaxiBean);
-        }else{
-            announceLeaveSync(taxi.getId(), taxi.getIp(), taxi.getPort(), otherTaxiBean);
-        }
 
-         */
         if(join){
             for(TaxiBean t: taxi.getTaxiList()){
                 if(!taxi.getId().equals(t.getId())){
-                    announceJoinAsync(taxi.getId(), taxi.getIp(), taxi.getPort(), t);
+                    announceJoinAsync(taxi, t);
                 }
             }
         }else{
             for(TaxiBean t: taxi.getTaxiList()){
                 if(!taxi.getId().equals(t.getId())){
-                    announceLeaveAsync(taxi.getId(), taxi.getIp(), taxi.getPort(), t);
+                    announceLeaveAsync(taxi, t);
                 }
             }
         }
 
     }
 
-    public static void announceJoinAsync(String myId, String myIp, int myPort, TaxiBean t){
+    public static void announceJoinAsync(Taxi taxi, TaxiBean t){
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(t.getIp()+":"+t.getPort()).usePlaintext().build();
 
         JoinServiceStub stub = JoinServiceGrpc.newStub(channel);
 
         JoinServiceOuterClass.JoinMsg joinMsg = JoinServiceOuterClass.JoinMsg.newBuilder()
-                .setId(myId)
-                .setIp(myIp)
-                .setPort(myPort) // my port
+                .setId(taxi.getId())
+                .setIp(taxi.getIp())
+                .setPort(taxi.getPort())
+                .setPosition(JoinServiceOuterClass.JoinMsg.Position.newBuilder().setX(taxi.getX()).setY(taxi.getY()).build())
                 .build();
 
         stub.join(joinMsg, new StreamObserver<JoinServiceOuterClass.JoinOk>() {
@@ -76,13 +70,13 @@ public class TaxiCommunicationClient extends Thread{
 
     }
 
-    public static void announceLeaveAsync(String myId, String myIp, int myPort, TaxiBean t){
+    public static void announceLeaveAsync(Taxi taxi, TaxiBean t){
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(t.getIp()+":"+t.getPort()).usePlaintext().build();
 
         LeaveServiceGrpc.LeaveServiceStub stub = LeaveServiceGrpc.newStub(channel);
 
         LeaveServiceOuterClass.LeaveMsg leaveMsg = LeaveServiceOuterClass.LeaveMsg.newBuilder()
-                .setId(myId)
+                .setId(taxi.getId())
                 .build();
 
         stub.leave(leaveMsg, new StreamObserver<LeaveServiceOuterClass.LeaveOk>() {
