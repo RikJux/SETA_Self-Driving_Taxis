@@ -85,7 +85,9 @@ public class Taxi {
 
         // start all threads
         communicationServer.start();
-        new TaxiCommunicationClient(thisTaxi, true).start();
+        TaxiCommunicationClient announceJoinThread = new TaxiCommunicationClient(thisTaxi, true);
+        announceJoinThread.start();
+        announceJoinThread.join();
         // wait until all ack are received?
         pm10.start();
         drive.start();
@@ -103,7 +105,9 @@ public class Taxi {
                 System.out.println(thisTaxi.getTaxiList());
                 thisTaxi.setCurrentStatus(Status.LEAVING);
                 leaveRequest(client);
-                new TaxiCommunicationClient(thisTaxi, false).start();
+                TaxiCommunicationClient announceLeaveThread = new TaxiCommunicationClient(thisTaxi, false);
+                announceLeaveThread.start();
+                announceLeaveThread.join();
                 communicationServer.interrupt();
                 pm10.interrupt();
                 drive.interrupt();
@@ -116,11 +120,25 @@ public class Taxi {
                 thisTaxi.setCurrentStatus(Status.REQUEST_RECHARGE);
                 thisTaxi.setRechargeRequestTimestamp(System.currentTimeMillis());
                 // mutual exclusion
-                new TaxiRechargeComm(thisTaxi).start();
-                thisTaxi.setCurrentStatus(Status.GO_RECHARGE);
-                TaxiDriver.recharge(thisTaxi); // probably not like this
-                thisTaxi.setRechargeRequestTimestamp(Double.MAX_VALUE);
-                thisTaxi.setCurrentStatus(Status.IDLE);
+                //OPTION 1
+                TaxiRechargeComm r = new TaxiRechargeComm(thisTaxi);
+                r.start();
+                r.join();
+                System.out.println("Mutual exclusion ended");
+                System.out.println(thisTaxi.getCurrentStatus());
+                //thisTaxi.setCurrentStatus(Status.GO_RECHARGE);
+                synchronized (thisTaxi){
+                    while(thisTaxi.getCurrentStatus() == Status.GO_RECHARGE){
+                        thisTaxi.wait();
+                        if(thisTaxi.getCurrentStatus() == Status.IDLE){
+                            System.out.println("Recharge done.");
+                            break;
+                        }
+                    }
+                }
+                //TaxiDriver.recharge(thisTaxi); // probably not like this
+                //thisTaxi.setRechargeRequestTimestamp(Double.MAX_VALUE);
+                //thisTaxi.setCurrentStatus(Status.IDLE);
             }
 
             userInput = null;

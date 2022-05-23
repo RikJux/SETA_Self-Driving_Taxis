@@ -53,7 +53,7 @@ public class Sensor extends Thread{
 
         WebResource webResource = client.resource(Taxi.serverAddress+"/statistics/post/"+taxiStats.getId());
         String input = new Gson().toJson(taxiStats);
-        System.out.println(input);
+        //System.out.println(input);
 
         try {
             clientResponse = webResource.type("application/json").post(ClientResponse.class, input);

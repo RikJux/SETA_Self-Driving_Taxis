@@ -91,16 +91,39 @@ public class TaxiDriver extends Thread{
             e.printStackTrace();
         }
 
+
+        System.out.println("Ciao sono il taxi driver");
+
+        synchronized (taxi){
+            while(taxi.getCurrentStatus() != Taxi.Status.GO_RECHARGE){
+                try {
+                    System.out.println("Driver waiting for GO_RECHARGE");
+                    System.out.println(taxi.getCurrentStatus());
+                    taxi.wait();
+                    if(taxi.getCurrentStatus() == Taxi.Status.GO_RECHARGE){
+                        System.out.println("Driver going to recharge");
+                        recharge(taxi);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public static void recharge(Taxi taxi) throws InterruptedException {
-        int[] destinationP = computeRechargeStation(taxi.getDistrict());
-        travel(taxi.getCurrentP(), destinationP, null, taxi, false, 5);
-        // mutual exclusion over recharge station
-        Thread.sleep(10000);
-        taxi.setBattery(100.0);
-        taxi.setCurrentStatus(Taxi.Status.IDLE);
-        System.out.println("Taxi " + taxi.getId() + " is now fully recharged.");
+        synchronized (taxi){
+            int[] destinationP = computeRechargeStation(taxi.getDistrict());
+            travel(taxi.getCurrentP(), destinationP, null, taxi, false, 5);
+            System.out.println("travelled to recharge station");
+            // mutual exclusion over recharge station
+            Thread.sleep(10000);
+            taxi.setBattery(100.0);
+            taxi.setRechargeReqCounter(0);
+            taxi.setCurrentStatus(Taxi.Status.IDLE);
+            System.out.println("Taxi " + taxi.getId() + " is now fully recharged.");
+            taxi.notifyAll();
+        }
     }
 
     private static void travel(int[] startingP, int[] destinationP, String requestId, Taxi taxi, boolean accomplished, float time) throws InterruptedException {

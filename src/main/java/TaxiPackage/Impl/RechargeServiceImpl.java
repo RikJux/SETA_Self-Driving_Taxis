@@ -26,13 +26,21 @@ public class RechargeServiceImpl extends RechargeServiceGrpc.RechargeServiceImpl
 
         System.out.println("Taxi " + request.getId() + " is waiting for recharge in district " + district);
 
-        while(notOkCondition(thisTaxi, district, request.getTimestamp())){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        if(!thisTaxi.getId().equals(request.getId())){
+            synchronized (thisTaxi){
+                while(notOkCondition(thisTaxi, district, request.getTimestamp())){
+                    try {
+                        thisTaxi.wait();
+                        if(!notOkCondition(thisTaxi, district, request.getTimestamp())){
+                            notifyAll(); // now can acknowledge the request
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
+
 
         responseObserver.onNext(RechargeServiceOuterClass.RechargeOk.newBuilder().build());
         System.out.println("Acknowledged recharge request of taxi " + request.getId() + " in district " + district);

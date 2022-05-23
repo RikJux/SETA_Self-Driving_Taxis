@@ -21,16 +21,22 @@ public class TaxiRechargeComm extends Thread{
         for(TaxiBean t: taxi.getTaxiList()){
             requireRecharge(taxi, t);
         }
-
-        while(taxi.getRechargeReqCounter() < taxi.getTaxiList().size()){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        //TODO
+        synchronized (taxi){
+            while(taxi.getRechargeReqCounter() < taxi.getTaxiList().size()){
+                try {
+                    taxi.wait();
+                    if(taxi.getRechargeReqCounter() == taxi.getTaxiList().size()) {
+                        System.out.println("All other taxis tell you can go recharge!");
+                        taxi.setCurrentStatus(Taxi.Status.GO_RECHARGE);
+                        taxi.notifyAll();
+                        return;
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
-
-        System.out.println("All other taxis tell you can go recharge!");
 
     }
 
@@ -53,6 +59,11 @@ public class TaxiRechargeComm extends Thread{
             public void onNext(RechargeServiceOuterClass.RechargeOk value) {
                 System.out.println("Taxi " + t.getId() + " gave permission to recharge.");
                 taxi.setRechargeReqCounter(taxi.getRechargeReqCounter() + 1);
+                System.out.println("Counter: " + taxi.getRechargeReqCounter());
+                //TODO
+                synchronized (taxi){
+                    taxi.notifyAll();
+                }
             }
 
             @Override
