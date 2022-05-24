@@ -16,13 +16,13 @@ public class JoinServiceImpl extends JoinServiceGrpc.JoinServiceImplBase {
 
     @Override
     public void join(JoinServiceOuterClass.JoinMsg request, StreamObserver<JoinServiceOuterClass.JoinOk> responseObserver) {
-        System.out.println("Taxi " + request.getId() + " is joining at "
+        System.out.println("[JOIN SRV] Taxi " + request.getId() + " is joining at "
                 + request.getPosition().getX() + ", " + request.getPosition().getY());
         responseObserver.onNext(JoinServiceOuterClass.JoinOk.newBuilder().build());
 
         if(!thisTaxi.getId().equals(request.getId())){
             thisTaxi.getTaxiList().add(new TaxiBean(request.getId(), request.getIp(), request.getPort()));
-            System.out.println("Taxi "+ request.getId() + " was added to taxi list.");
+            System.out.println("[JOIN SRV] Taxi "+ request.getId() + " was added to taxi list.");
         }
 
         responseObserver.onCompleted();

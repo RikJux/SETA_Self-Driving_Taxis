@@ -41,7 +41,6 @@ public class Taxi {
     private static int[] currentP; //= Position.newBuilder().setX(0).setY(0).build(); // these should be given by Admin
     private static Taxi instance;
     private Status currentStatus = Status.JOINING;
-    private Queue<RechargeRequest> rechageWaiting;
     private int rechargeReqCounter = 0;
     private double rechargeRequestTimestamp = Double.MAX_VALUE;
 
@@ -50,7 +49,6 @@ public class Taxi {
         this.id = id;
         this.ip = ip;
         this.port = port;
-        this.rechageWaiting = new PriorityQueue<RechargeRequest>();
 
     }
 
@@ -69,13 +67,14 @@ public class Taxi {
         Client client = Client.create();
         Taxis taxis = joinRequest(client);
         if(taxis == null){
-            System.out.println("Cannot enter the system");
+            System.out.println("[TAXI MAIN] Cannot enter the system");
             return;
         }
+        // should not receive the whole taxis object, migrate to gson
         thisTaxi.setTaxiList(taxis.getTaxiList());
         thisTaxi.setCurrentP(taxis.randomCoord());
         thisTaxi.setDistrict(computeDistrict(currentP));
-        System.out.println("Taxi " + id + " joined in " + district);
+        System.out.println("[TAXI MAIN] Taxi " + id + " joined in " + district);
 
         // initialize all threads
         TaxiCommunicationServer communicationServer = new TaxiCommunicationServer(thisTaxi);
@@ -88,7 +87,6 @@ public class Taxi {
         TaxiCommunicationClient announceJoinThread = new TaxiCommunicationClient(thisTaxi, true);
         announceJoinThread.start();
         announceJoinThread.join();
-        // wait until all ack are received?
         pm10.start();
         drive.start();
         sensor.start();
@@ -99,11 +97,22 @@ public class Taxi {
         Scanner in = new Scanner(System.in);
 
         while(userInput == null){
-            System.out.println("Type [quit] to exit the system or [recharge] to go to recharge");
+            System.out.println("[TAXI MAIN] Type [quit] to exit the system or [recharge] to go to recharge");
             userInput = in.nextLine();
             if(userInput.equals("quit")){ // leaving procedure
-                System.out.println(thisTaxi.getTaxiList());
+                synchronized (thisTaxi){ // has to wait for full recharge, so never enters the while, for now
+                    System.out.println("[TAXI MAIN] Status after quit:" + thisTaxi.getCurrentStatus());
+                    while(thisTaxi.getCurrentStatus() != Status.IDLE){
+                        System.out.println("[TAXI MAIN] Waiting to get idle to quit");
+                        thisTaxi.wait();
+                        if(thisTaxi.getCurrentStatus() == Status.IDLE){
+                            System.out.println("[TAXI MAIN] Taxi ready to leave");
+                            thisTaxi.setCurrentStatus(Status.LEAVING);
+                        }
+                    }
+                }
                 thisTaxi.setCurrentStatus(Status.LEAVING);
+                System.out.println(thisTaxi.getCurrentStatus());
                 leaveRequest(client);
                 TaxiCommunicationClient announceLeaveThread = new TaxiCommunicationClient(thisTaxi, false);
                 announceLeaveThread.start();
@@ -119,67 +128,21 @@ public class Taxi {
                 // tell the driver to go recharge
                 thisTaxi.setCurrentStatus(Status.REQUEST_RECHARGE);
                 thisTaxi.setRechargeRequestTimestamp(System.currentTimeMillis());
-                // mutual exclusion
-                //OPTION 1
                 TaxiRechargeComm r = new TaxiRechargeComm(thisTaxi);
                 r.start();
-                r.join();
-                System.out.println("Mutual exclusion ended");
-                System.out.println(thisTaxi.getCurrentStatus());
-                //thisTaxi.setCurrentStatus(Status.GO_RECHARGE);
+                //r.join(); // wait for all responses
                 synchronized (thisTaxi){
                     while(thisTaxi.getCurrentStatus() == Status.GO_RECHARGE){
                         thisTaxi.wait();
                         if(thisTaxi.getCurrentStatus() == Status.IDLE){
-                            System.out.println("Recharge done.");
-                            break;
+                            System.out.println("[TAXI MAIN] Recharge done.");
+                            thisTaxi.notifyAll();
                         }
                     }
                 }
-                //TaxiDriver.recharge(thisTaxi); // probably not like this
-                //thisTaxi.setRechargeRequestTimestamp(Double.MAX_VALUE);
-                //thisTaxi.setCurrentStatus(Status.IDLE);
             }
 
             userInput = null;
-        }
-
-    }
-
-    private static double avgPollution(List<Measurement> pollution){
-
-        double sum = 0;
-        for(Measurement m: pollution){
-            sum += m.getValue();
-        }
-
-        return sum/pollution.size();
-    }
-
-    private static Taxi handleStatistics2(Client client, Taxi thisTaxi, Buffer pm10Buffer){
-        List<Measurement> pollution = pm10Buffer.readAllAndClean();
-        thisTaxi.getTaxiStats().setPollution(avgPollution(pollution));
-        thisTaxi.getTaxiStats().setTimestamp(System.currentTimeMillis());
-        sendStatistics(client, thisTaxi.getTaxiStats());
-        double battLeft = thisTaxi.getTaxiStats().getBatteryLevel();
-        thisTaxi.setTaxiStats(new TaxiStatistics(id));
-        thisTaxi.setBattery(battLeft);
-
-        return thisTaxi;
-    }
-
-    private static void sendStatistics(Client client, TaxiStatistics taxiStats){
-        ClientResponse clientResponse = null;
-
-        WebResource webResource = client.resource(serverAddress+"/statistics/post/"+id);
-        String input = new Gson().toJson(taxiStats);
-        System.out.println(input);
-
-        try {
-            clientResponse = webResource.type("application/json").post(ClientResponse.class, input);
-        } catch (ClientHandlerException e) {
-            System.out.println("Error");
-            return;
         }
 
     }
@@ -194,12 +157,12 @@ public class Taxi {
         try {
             clientResponse = webResource.type("application/json").post(ClientResponse.class, input);
         } catch (ClientHandlerException e) {
-            System.out.println("Join impossible: taxi" + id + "can't reach the server");
+            System.out.println("[TAXI MAIN] Join impossible: taxi" + id + "can't reach the server");
             return null;
         }
 
         if(clientResponse.getStatus() == Response.Status.NOT_ACCEPTABLE.getStatusCode()){
-            System.out.println("Join impossible: duplicated id " + id);
+            System.out.println("[TAXI MAIN] Join impossible: duplicated id " + id);
             return null; // duplicated id
         }
         return new Gson().fromJson(clientResponse.getEntity(String.class), Taxis.class);
@@ -213,15 +176,15 @@ public class Taxi {
         try {
             clientResponse = webResource.type("application/json").delete(ClientResponse.class);
         } catch (ClientHandlerException e) {
-            System.out.println("Impossible to leave: taxi " + id + " can't reach the server");
+            System.out.println("[TAXI MAIN] Impossible to leave: taxi " + id + " can't reach the server");
             return;
         }
 
         if(clientResponse.getStatus() == Response.Status.NOT_FOUND.getStatusCode()){
-            System.out.println("Impossible to leave: can't find id " + id);
+            System.out.println("[TAXI MAIN] Impossible to leave: can't find id " + id);
             return;
         }else{
-            System.out.println("Taxi " + id + " left the system");
+            System.out.println("[TAXI MAIN] Taxi " + id + " left the system");
         }
     }
 
@@ -246,7 +209,7 @@ public class Taxi {
             }
         }
 
-        return "district_" + distN;
+        return "district" + distN;
     }
 
     public String getId() {
@@ -331,20 +294,20 @@ public class Taxi {
         this.currentStatus = currentStatus;
     }
 
-    public Queue<RechargeRequest> getRechageWaiting() {
-        return rechageWaiting;
-    }
-
-    public void setRechageWaiting(Queue<RechargeRequest> rechageWaiting) {
-        this.rechageWaiting = rechageWaiting;
-    }
-
     public double getRechargeRequestTimestamp() {
         return rechargeRequestTimestamp;
     }
 
     public void setRechargeRequestTimestamp(double rechargeRequestTimestamp) {
         this.rechargeRequestTimestamp = rechargeRequestTimestamp;
+    }
+
+    public void incrementRechargeReqCounter(){
+        this.rechargeReqCounter = rechargeReqCounter + 1;
+    }
+
+    public void zeroRechargeReqCounter(){
+        this.rechargeReqCounter = 0;
     }
 
     public int getRechargeReqCounter() {

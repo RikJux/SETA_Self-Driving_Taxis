@@ -45,16 +45,24 @@ public class SETA {
         System.out.println(clientId + " Message published at " + topic+destDist);
     }
 
-    private static RideRequest generateRideRequest(Random rand, int id){
+    private static RideRequest generateRideRequest(Random rand, int id) {
 
         Position startingP = Position.newBuilder()
                 .setX(rand.nextInt(10))
                 .setY(rand.nextInt(10))
                 .build();
 
+
+        int destX;
+        int destY;
+        do {
+            destX = rand.nextInt(10);
+            destY = rand.nextInt(10);
+        } while (destX == startingP.getX() && destY == startingP.getY());
+
         Position destinationP = Position.newBuilder()
-                .setX(rand.nextInt(10))
-                .setY(rand.nextInt(10))
+                .setX(destX)
+                .setY(destY)
                 .build();
 
         return RideRequest.newBuilder()
@@ -86,6 +94,6 @@ public class SETA {
             }
         }
 
-        return "district_" + distN;
+        return "district" + distN;
     }
 }

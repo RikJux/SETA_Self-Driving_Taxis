@@ -21,10 +21,10 @@ public class RechargeServiceImpl extends RechargeServiceGrpc.RechargeServiceImpl
         int[] destinationRecharge = fromMsgToArray(request.getRechargePosition());
         String district = computeDistrict(destinationRecharge);
 
-        System.out.println("Taxi " + request.getId() + " requested recharge service at station " +
+        System.out.println("[RECHARGE SRV] Taxi " + request.getId() + " requested recharge service at station " +
                 getCoordX(destinationRecharge) + ", " + getCoordY(destinationRecharge));
 
-        System.out.println("Taxi " + request.getId() + " is waiting for recharge in district " + district);
+        System.out.println("[RECHARGE SRV] Taxi " + request.getId() + " is waiting for recharge in district " + district);
 
         if(!thisTaxi.getId().equals(request.getId())){
             synchronized (thisTaxi){
@@ -43,7 +43,7 @@ public class RechargeServiceImpl extends RechargeServiceGrpc.RechargeServiceImpl
 
 
         responseObserver.onNext(RechargeServiceOuterClass.RechargeOk.newBuilder().build());
-        System.out.println("Acknowledged recharge request of taxi " + request.getId() + " in district " + district);
+        System.out.println("[RECHARGE SRV] Acknowledged recharge request of taxi " + request.getId() + " in district " + district);
 
     }
 

@@ -17,13 +17,13 @@ public class LeaveServiceImpl extends LeaveServiceGrpc.LeaveServiceImplBase {
     }
     @Override
     public void leave(LeaveServiceOuterClass.LeaveMsg request, StreamObserver<LeaveServiceOuterClass.LeaveOk> responseObserver) {
-        System.out.println("Taxi " + request.getId() + " is leaving.");
+        System.out.println("[LEAVE SRV] Taxi " + request.getId() + " is leaving.");
 
         if(!thisTaxi.getId().equals(request.getId())){
             for(TaxiBean t: thisTaxi.getTaxiList()){
                 if(t.getId().equals(request.getId())){
                     thisTaxi.getTaxiList().remove(t);
-                    System.out.println("Taxi " + request.getId() + " was removed from taxi list.");
+                    System.out.println("[LEAVE SRV] Taxi " + request.getId() + " was removed from taxi list.");
                     break;
                 }
             }
