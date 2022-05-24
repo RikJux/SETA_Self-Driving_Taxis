@@ -18,7 +18,7 @@ message ElectionMsg{
 
 message HandleRideOk{ string id = 1;} // send to the taxi that is a worse candidate
 
-message TakeChargeRide{ string id = 1;} // notify all taxis if win election. Is this really required?
+message TakeChargeRide{ string id = 1;} // notify all taxis if win election.
 
 service HandleRideService{
   rpc election (ElectionMsg) returns (HandleRideOk);

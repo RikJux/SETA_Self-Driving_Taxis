@@ -4,6 +4,9 @@ import beans.TaxiStatistics;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.eclipse.paho.client.mqttv3.*;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
+import taxi.communication.handleRideService.HandleRideServiceOuterClass;
+
+import static Utils.Utils.*;
 
 public class TaxiDriver extends Thread {
 
@@ -40,16 +43,21 @@ public class TaxiDriver extends Thread {
                     RideRequestOuterClass.RideRequest.Position startingPMsg = receivedMessage.getStartingPosition();
                     RideRequestOuterClass.RideRequest.Position destinationPMsg = receivedMessage.getDestinationPosition();
 
-                    System.out.println("[TAXI DRIVER] A message arrived!");
+                    int[] startingP = fromMsgToArray(startingPMsg);
+                    int[] destinationP = fromMsgToArray(destinationPMsg);
 
-                    synchronized (thisTaxi) { // cannot get this lock
+                    System.out.println("[TAXI DRIVER] Request " + receivedMessage.getId() + " arrived.");
+
+                    synchronized (thisTaxi) { // still unsure about this
+                        ElectionIdentifier elId = new ElectionIdentifier(thisTaxi, computeDistance(thisTaxi.getCurrentP(), startingP));
+                        HandleRideServiceOuterClass.ElectionMsg.CandidateMsg c = elId.toMsg();
+                        System.out.println(c);
+                        System.out.println(new ElectionIdentifier(c).toString());
                         if(thisTaxi.getCurrentStatus() != Taxi.Status.IDLE){
                             System.out.println("[TAXI DRIVER] Taxi currently unavailable");
                             thisTaxi.wait();
                         }
                         if (thisTaxi.getCurrentStatus() == Taxi.Status.IDLE) {
-                            int[] startingP = fromMsgToArray(startingPMsg);
-                            int[] destinationP = fromMsgToArray(destinationPMsg);
 
                             // coordinate first!
                             System.out.println("[TAXI DRIVER] Taxi " + thisTaxi.getId() + " located at " + thisTaxi.getX() + ", " + thisTaxi.getY() +
@@ -158,66 +166,6 @@ public class TaxiDriver extends Thread {
             taxi.addRideAccomplished();
             System.out.println("[TAXI DRIVER] Taxi " + taxi.getId() + " fulfilled request " + requestId);
         }
-    }
-
-    private static int[] computeRechargeStation(String district) {
-        switch (district) {
-            case ("district_1"):
-                return new int[]{0, 0};
-            case ("district_2"):
-                return new int[]{9, 0};
-            case ("district_3"):
-                return new int[]{9, 9};
-            default:
-                return new int[]{0, 9};
-        }
-    }
-
-    private static double computeDistance(int[] p1, int[] p2) {
-        return Math.sqrt(Math.pow(getCoordX(p1) - getCoordX(p2), 2) +
-                Math.pow(getCoordY(p1) - getCoordY(p2), 2));
-    }
-
-    private static String computeDistrict(int[] p) {
-        int x = getCoordX(p);
-        int y = getCoordY(p);
-        String distN;
-
-        if (y < 5) {
-            // we are in the upper city
-            if (x < 5) {
-                distN = "1";
-            } else {
-                distN = "2";
-            }
-        } else {
-            // we are in the lower city
-            if (x < 5) {
-                distN = "4";
-            } else {
-                distN = "3";
-            }
-        }
-
-        return "district" + distN;
-    }
-
-    private static int getCoordX(int[] p) {
-        return p[0];
-    }
-
-    private static int getCoordY(int[] p) {
-        return p[1];
-    }
-
-    private static int[] fromMsgToArray(RideRequestOuterClass.RideRequest.Position pMsg) {
-
-        int[] p = new int[2];
-
-        p[0] = pMsg.getX();
-        p[1] = pMsg.getY();
-        return p;
-
     }
 
 }

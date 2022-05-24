@@ -39,9 +39,8 @@ beans/TaxiBean.java
  beans.TaxiBean
 TaxiPackage/Impl/RechargeServiceImpl.java
  TaxiPackage.Impl.RechargeServiceImpl
-TaxiPackage/TaxiDriver.java
- TaxiPackage.TaxiDriver
- TaxiPackage.TaxiDriver$1
+Simulator/PM10Simulator.java
+ Simulator.PM10Simulator
 TaxiPackage/Impl/LeaveServiceImpl.java
  TaxiPackage.Impl.LeaveServiceImpl
 services/TaxiManagement.java
@@ -106,9 +105,10 @@ taxi/communication/handleRideService/HandleRideServiceGrpc.java
  taxi.communication.handleRideService.HandleRideServiceGrpc$HandleRideServiceMethodDescriptorSupplier
  taxi.communication.handleRideService.HandleRideServiceGrpc$HandleRideServiceStub
  taxi.communication.handleRideService.HandleRideServiceGrpc$MethodHandlers
-TaxiPackage/Taxi.java
- TaxiPackage.Taxi
- TaxiPackage.Taxi$Status
+Utils/Utils.java
+ Utils.Utils
+Simulator/Measurement.java
+ Simulator.Measurement
 TaxiPackage/Sensor.java
  TaxiPackage.Sensor
 Simulator/Simulator.java
@@ -162,7 +162,11 @@ TaxiPackage/TaxiCommunicationClient.java
  TaxiPackage.TaxiCommunicationClient$2
 beans/TaxiStatistics.java
  beans.TaxiStatistics
-Simulator/Measurement.java
- Simulator.Measurement
-Simulator/PM10Simulator.java
- Simulator.PM10Simulator
+TaxiPackage/Taxi.java
+ TaxiPackage.Taxi
+ TaxiPackage.Taxi$Status
+TaxiPackage/TaxiDriver.java
+ TaxiPackage.TaxiDriver
+ TaxiPackage.TaxiDriver$1
+TaxiPackage/ElectionIdentifier.java
+ TaxiPackage.ElectionIdentifier

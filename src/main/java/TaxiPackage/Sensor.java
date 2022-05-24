@@ -12,6 +12,8 @@ import com.sun.jersey.api.client.WebResource;
 
 import java.util.List;
 
+import static Utils.Utils.avgPollution;
+
 public class Sensor extends Thread{
 
     private final Taxi thisTaxi;
@@ -62,15 +64,5 @@ public class Sensor extends Thread{
             return;
         }
 
-    }
-
-    private static double avgPollution(List<Measurement> pollution){
-
-        double sum = 0;
-        for(Measurement m: pollution){
-            sum += m.getValue();
-        }
-
-        return sum/pollution.size();
     }
 }

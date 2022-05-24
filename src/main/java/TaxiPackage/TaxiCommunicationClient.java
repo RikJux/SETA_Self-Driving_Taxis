@@ -96,36 +96,4 @@ public class TaxiCommunicationClient extends Thread{
         });
     }
 
-
-    public static void announceJoinSync(String myId, String myIp, int myPort, TaxiBean t){
-        // synchronously contact all the other taxis
-        final ManagedChannel channel = ManagedChannelBuilder.forTarget(t.getIp()+":"+t.getPort()).usePlaintext().build();
-
-        JoinServiceBlockingStub stub = JoinServiceGrpc.newBlockingStub(channel);
-
-        JoinServiceOuterClass.JoinMsg joinMsg = JoinServiceOuterClass.JoinMsg.newBuilder()
-                .setId(myId)
-                .setIp(myIp)
-                .setPort(myPort) // my port
-                .build();
-
-        JoinServiceOuterClass.JoinOk response = stub.join(joinMsg);
-        System.out.println("[TAXI COMM] Taxi " + t.getId() + " is now aware of my presence.");
-    }
-
-    public static void announceLeaveSync(String myId, String myIp, int myPort, TaxiBean t){
-        // synchronously contact all the other taxis
-        final ManagedChannel channel = ManagedChannelBuilder.forTarget(t.getIp()+":"+t.getPort()).usePlaintext().build();
-
-        LeaveServiceGrpc.LeaveServiceBlockingStub stub = LeaveServiceGrpc.newBlockingStub(channel);
-
-        LeaveServiceOuterClass.LeaveMsg leaveMsg = LeaveServiceOuterClass.LeaveMsg.newBuilder()
-                .setId(myId)
-                .build();
-
-        LeaveServiceOuterClass.LeaveOk response = stub.leave(leaveMsg);
-        System.out.println("[TAXI COMM] Taxi " + t.getId() + " is now aware of my departure.");
-    }
-
-
 }

@@ -1,10 +1,7 @@
 package TaxiPackage;
 
-import Simulator.Buffer;
-import Simulator.Measurement;
 import Simulator.PM10Simulator;
 import Simulator.SimulatorData;
-import beans.Statistics;
 import beans.TaxiBean;
 import beans.TaxiStatistics;
 import beans.Taxis;
@@ -13,11 +10,10 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import taxi.communication.rechargeService.RechargeServiceOuterClass.*;
-
 import javax.ws.rs.core.Response;
 import java.util.*;
+
+import static Utils.Utils.*;
 
 public class Taxi {
 
@@ -43,6 +39,7 @@ public class Taxi {
     private Status currentStatus = Status.JOINING;
     private int rechargeReqCounter = 0;
     private double rechargeRequestTimestamp = Double.MAX_VALUE;
+    private Stack<Object> electionId = new Stack<Object>();
 
     public Taxi(String id, String ip, int port){
 
@@ -58,7 +55,7 @@ public class Taxi {
 
     public static void main(String args[]) throws InterruptedException {
         // insert id manually ?
-        int idOffset = 2;
+        int idOffset = 0;
         port = 1338 + idOffset;
         id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
@@ -70,6 +67,7 @@ public class Taxi {
             System.out.println("[TAXI MAIN] Cannot enter the system");
             return;
         }
+        new Stack<Double>();
         // should not receive the whole taxis object, migrate to gson
         thisTaxi.setTaxiList(taxis.getTaxiList());
         thisTaxi.setCurrentP(taxis.randomCoord());
@@ -188,30 +186,6 @@ public class Taxi {
         }
     }
 
-    private static String computeDistrict(int[] coord){
-        int x = coord[0];
-        int y = coord[1];
-        String distN;
-
-        if(y < 5){
-            // we are in the upper city
-            if(x < 5){
-                distN = "1";
-            }else{
-                distN = "2";
-            }
-        }else{
-            // we are in the lower city
-            if(x < 5){
-                distN = "4";
-            }else{
-                distN = "3";
-            }
-        }
-
-        return "district" + distN;
-    }
-
     public String getId() {
         return id;
     }
@@ -316,5 +290,17 @@ public class Taxi {
 
     public void setRechargeReqCounter(int rechargeReqCounter) {
         this.rechargeReqCounter = rechargeReqCounter;
+    }
+
+    public Stack<Double> fillElectionId(double distance) {
+
+        Stack<Double> electionId = new Stack<Double>();
+
+        electionId.push(Double.parseDouble(this.getId()));
+        electionId.push(this.getBattery());
+        electionId.push(-1*distance);
+        electionId.push(this.getCurrentStatus()==Status.IDLE ? 1d : 0d);
+
+        return electionId;
     }
 }
