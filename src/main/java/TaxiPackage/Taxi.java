@@ -12,6 +12,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import javax.ws.rs.core.Response;
 import java.util.*;
+import TaxiPackage.Threads.*;
 
 import static Utils.Utils.*;
 
@@ -22,6 +23,7 @@ public class Taxi {
         IDLE,
         REQUEST_RECHARGE,
         GO_RECHARGE,
+        ELECTED,
         WORKING,
         LEAVING
     }
@@ -36,7 +38,7 @@ public class Taxi {
     private static TaxiStatistics taxiStats;
     private static int[] currentP; //= Position.newBuilder().setX(0).setY(0).build(); // these should be given by Admin
     private static Taxi instance;
-    private Status currentStatus = Status.JOINING;
+    private Status currentStatus;
     private int rechargeReqCounter = 0;
     private double rechargeRequestTimestamp = Double.MAX_VALUE;
     private Stack<Object> electionId = new Stack<Object>();
@@ -61,6 +63,7 @@ public class Taxi {
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
+        /*
         Client client = Client.create();
         Taxis taxis = joinRequest(client);
         if(taxis == null){
@@ -74,6 +77,13 @@ public class Taxi {
         thisTaxi.setDistrict(computeDistrict(currentP));
         System.out.println("[TAXI MAIN] Taxi " + id + " joined in " + district);
 
+         */
+        Joining j = new Joining(thisTaxi, Status.JOINING, new ArrayList<>(), thisTaxi);
+        j.start();
+        Leaving l = new Leaving(thisTaxi, Status.LEAVING, new ArrayList<>(), thisTaxi);
+        l.start();
+
+        Client client = Client.create();
         // initialize all threads
         TaxiCommunicationServer communicationServer = new TaxiCommunicationServer(thisTaxi);
         PM10Simulator pm10 = new PM10Simulator(new SimulatorData());
@@ -82,14 +92,13 @@ public class Taxi {
 
         // start all threads
         communicationServer.start();
-        TaxiCommunicationClient announceJoinThread = new TaxiCommunicationClient(thisTaxi, true);
-        announceJoinThread.start();
-        announceJoinThread.join();
+        synchronized (thisTaxi){
+            thisTaxi.setCurrentStatus(Status.JOINING);
+            thisTaxi.notifyAll();
+        }
         pm10.start();
         drive.start();
         sensor.start();
-
-        thisTaxi.setCurrentStatus(Status.IDLE);
 
         String userInput = null;
         Scanner in = new Scanner(System.in);
@@ -109,12 +118,18 @@ public class Taxi {
                         }
                     }
                 }
-                thisTaxi.setCurrentStatus(Status.LEAVING);
+                synchronized (thisTaxi){
+                    thisTaxi.setCurrentStatus(Status.LEAVING);
+                    thisTaxi.notifyAll();
+                }
                 System.out.println(thisTaxi.getCurrentStatus());
+                /*
                 leaveRequest(client);
                 TaxiCommunicationClient announceLeaveThread = new TaxiCommunicationClient(thisTaxi, false);
                 announceLeaveThread.start();
                 announceLeaveThread.join();
+
+                 */
                 communicationServer.interrupt();
                 pm10.interrupt();
                 drive.interrupt();
@@ -266,6 +281,7 @@ public class Taxi {
 
     public void setCurrentStatus(Status currentStatus) {
         this.currentStatus = currentStatus;
+        System.out.println("Taxi " + id + " is in status " + this.currentStatus);
     }
 
     public double getRechargeRequestTimestamp() {

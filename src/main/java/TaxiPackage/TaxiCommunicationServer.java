@@ -25,7 +25,7 @@ public class TaxiCommunicationServer extends Thread{
             Server server = ServerBuilder.forPort(thisTaxi.getPort())
                     .addService(new JoinServiceImpl(thisTaxi))
                     .addService(new LeaveServiceImpl(thisTaxi))
-                    .addService(new HandleRideServiceImpl())
+                    .addService(new HandleRideServiceImpl(thisTaxi))
                     .addService(new RechargeServiceImpl(thisTaxi))
                     .build();
 
