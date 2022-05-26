@@ -6,8 +6,9 @@ import TaxiPackage.TaxiRechargeComm;
 import java.util.List;
 
 public class RequestRecharge extends TaxiThread{
-    public RequestRecharge(Taxi thisTaxi, Taxi.Status thisStatus, List<Taxi.Status> nextStatus, Object syncObj) {
-        super(thisTaxi, thisStatus, nextStatus, syncObj);
+    public RequestRecharge(Taxi thisTaxi, Taxi.Status thisStatus, Object syncObj) {
+        super(thisTaxi, thisStatus, syncObj);
+        this.nextStatus.add(Taxi.Status.GO_RECHARGE);
     }
 
     @Override

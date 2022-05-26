@@ -7,8 +7,9 @@ import java.util.List;
 import static Utils.Utils.*;
 
 public class GoRecharge extends TaxiThread{
-    public GoRecharge(Taxi thisTaxi, Taxi.Status thisStatus, List<Taxi.Status> nextStatus, Object syncObj) {
-        super(thisTaxi, thisStatus, nextStatus, syncObj);
+    public GoRecharge(Taxi thisTaxi, Taxi.Status thisStatus, Object syncObj) {
+        super(thisTaxi, thisStatus, syncObj);
+        this.nextStatus.add(Taxi.Status.IDLE);
     }
 
     @Override

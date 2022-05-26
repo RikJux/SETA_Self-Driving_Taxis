@@ -7,8 +7,10 @@ import java.util.List;
 import static Utils.Utils.*;
 
 public class Working extends TaxiThread{
-    public Working(Taxi thisTaxi, Taxi.Status thisStatus, List<Taxi.Status> nextStatus, Object syncObj) {
-        super(thisTaxi, thisStatus, nextStatus, syncObj);
+    public Working(Taxi thisTaxi, Taxi.Status thisStatus, Object syncObj) {
+        super(thisTaxi, thisStatus, syncObj);
+        this.nextStatus.add(Taxi.Status.IDLE);
+        this.nextStatus.add(Taxi.Status.REQUEST_RECHARGE);
     }
 
     @Override

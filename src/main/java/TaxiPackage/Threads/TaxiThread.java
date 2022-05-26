@@ -2,6 +2,7 @@ package TaxiPackage.Threads;
 
 import TaxiPackage.Taxi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class TaxiThread extends Thread {
@@ -11,10 +12,10 @@ public abstract class TaxiThread extends Thread {
     public final List<Taxi.Status> nextStatus;
     public final Object syncObj;
 
-    public TaxiThread(Taxi thisTaxi, Taxi.Status thisStatus, List<Taxi.Status> nextStatus, Object syncObj) {
+    public TaxiThread(Taxi thisTaxi, Taxi.Status thisStatus, Object syncObj) {
         this.thisTaxi = thisTaxi;
         this.thisStatus = thisStatus;
-        this.nextStatus = nextStatus;
+        this.nextStatus = new ArrayList<Taxi.Status>();
         this.syncObj = syncObj;
     }
     @Override
@@ -42,6 +43,8 @@ public abstract class TaxiThread extends Thread {
     public void makeTransition(Taxi.Status s){
         if(nextStatus.contains(s)){ // check if transaction is correct
             thisTaxi.setCurrentStatus(s);
+        } else{
+            System.out.println("Error in defining transitions at " + thisStatus);
         }
     }
 

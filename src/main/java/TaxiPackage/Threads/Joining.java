@@ -22,8 +22,9 @@ public class Joining extends TaxiThread {
     static final String serverAddress = "http://localhost:1337";
     private static final String joinPath = serverAddress+"/taxi/join";
 
-    public Joining(Taxi thisTaxi, Taxi.Status thisStatus, List<Taxi.Status> nextStatus, Object syncObj) {
-        super(thisTaxi, thisStatus, nextStatus, syncObj);
+    public Joining(Taxi thisTaxi, Taxi.Status thisStatus, Object syncObj) {
+        super(thisTaxi, thisStatus, syncObj);
+        this.nextStatus.add(Taxi.Status.IDLE);
     }
 
     @Override

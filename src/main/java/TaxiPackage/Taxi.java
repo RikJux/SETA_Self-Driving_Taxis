@@ -30,8 +30,9 @@ public class Taxi {
         LEAVING
     }
 
-    public enum ManualInput{
+    public enum Input{
         RECHARGE,
+        WORK,
         QUIT
     }
 
@@ -46,19 +47,21 @@ public class Taxi {
     private static int[] currentP; //= Position.newBuilder().setX(0).setY(0).build(); // these should be given by Admin
     private static Taxi instance;
     private Status currentStatus;
-    private ManualInput manualInput;
+    private Input input;
     private int rechargeReqCounter = 0;
     private double rechargeRequestTimestamp = Double.MAX_VALUE;
-    private Stack<Object> electionId = new Stack<Object>();
     private RideRequestOuterClass.RideRequest reqToHandle = null;
     private static Object statusLock = new Object();
+    private static Object inputLock = new Object();
+    private static List<Thread> taxiThreads;
 
-    public ManualInput getManualInput() {
-        return manualInput;
+    public Input getInput() {
+        return input;
     }
 
-    public void setManualInput(ManualInput manualInput) {
-        this.manualInput = manualInput;
+    public void setInput(Input input) {
+        this.input = input;
+        System.out.println(this.input);
     }
 
     public Taxi(String id, String ip, int port){
@@ -75,116 +78,104 @@ public class Taxi {
 
     public static void main(String args[]) throws InterruptedException {
         // insert id manually ?
-        int idOffset = 0;
+        int idOffset = 1;
         port = 1338 + idOffset;
         id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
-        MqttClient mqttClient;
-        String broker = "tcp://localhost:1883";
-
-        ArrayList<Status> jS = new ArrayList<>();
-        jS.add(Status.IDLE);
-        Joining j = new Joining(thisTaxi, Status.JOINING, jS, statusLock);
-        j.start();
-        Leaving l = new Leaving(thisTaxi, Status.LEAVING, new ArrayList<>(), statusLock);
-        l.start();
-
-        ArrayList<Status> iS = new ArrayList<>();
-        iS.add(Status.REQUEST_RECHARGE);
-        iS.add(Status.WORKING);
-        Idle idle = new Idle(thisTaxi, Status.IDLE, iS, statusLock, null);
-        idle.start();
-
-        ArrayList<Status> rS = new ArrayList<>();
-        rS.add(Status.GO_RECHARGE);
-        RequestRecharge requestRecharge = new RequestRecharge(thisTaxi, Status.REQUEST_RECHARGE, rS, statusLock);
-        requestRecharge.start();
-
-        ArrayList<Status> gS = new ArrayList<>();
-        gS.add(Status.IDLE);
-        GoRecharge goRecharge = new GoRecharge(thisTaxi, Status.GO_RECHARGE, gS, statusLock);
-        goRecharge.start();
-
-        ArrayList<Status> wS = new ArrayList<>();
-        wS.add(Status.IDLE);
-        wS.add(Status.REQUEST_RECHARGE);
-        Working working = new Working(thisTaxi, Status.WORKING, wS, statusLock);
-        working.start();
-
-
-        synchronized (statusLock){
-            Thread.sleep(1000);
-            thisTaxi.setCurrentStatus(Status.JOINING);
-            statusLock.notifyAll();
-
-            }
 
         Client client = Client.create();
         // initialize all threads
+        /*
         TaxiCommunicationServer communicationServer = new TaxiCommunicationServer(thisTaxi);
         PM10Simulator pm10 = new PM10Simulator(new SimulatorData());
         TaxiDriver drive = new TaxiDriver(thisTaxi);
         Sensor sensor = new Sensor(thisTaxi, pm10, client);
 
-        // start all threads
-        communicationServer.start();
-        pm10.start();
-        sensor.start();
+         */
+        PM10Simulator pm10 = new PM10Simulator(new SimulatorData());
 
+        taxiThreads = new ArrayList<Thread>(){
+            {
+                add(new Joining(thisTaxi, Status.JOINING, statusLock));
+                add(new Leaving(thisTaxi, Status.LEAVING, statusLock));
+                add(new Idle(thisTaxi, Status.IDLE, statusLock));
+                add(new RequestRecharge(thisTaxi, Status.REQUEST_RECHARGE, statusLock));
+                add(new GoRecharge(thisTaxi, Status.GO_RECHARGE, statusLock));
+                add(new Working(thisTaxi, Status.WORKING, statusLock));
+                add(new TaxiCommunicationServer(thisTaxi));
+                add(pm10);
+                add(new Sensor(thisTaxi, pm10, client));
+            }
+        };
+
+        /*
+        Joining j = new Joining(thisTaxi, Status.JOINING, statusLock);
+        j.start();
+        Leaving l = new Leaving(thisTaxi, Status.LEAVING, statusLock);
+        l.start();
+
+        ArrayList<Status> iS = new ArrayList<>();
+        iS.add(Status.REQUEST_RECHARGE);
+        iS.add(Status.WORKING);
+        Idle idle = new Idle(thisTaxi, Status.IDLE, statusLock);
+        idle.start();
+
+        ArrayList<Status> rS = new ArrayList<>();
+        rS.add(Status.GO_RECHARGE);
+        RequestRecharge requestRecharge = new RequestRecharge(thisTaxi, Status.REQUEST_RECHARGE, statusLock);
+        requestRecharge.start();
+
+        ArrayList<Status> gS = new ArrayList<>();
+        gS.add(Status.IDLE);
+        GoRecharge goRecharge = new GoRecharge(thisTaxi, Status.GO_RECHARGE, statusLock);
+        goRecharge.start();
+
+        ArrayList<Status> wS = new ArrayList<>();
+        wS.add(Status.IDLE);
+        wS.add(Status.REQUEST_RECHARGE);
+        Working working = new Working(thisTaxi, Status.WORKING, statusLock);
+        working.start();
+
+         */
+
+        for(Thread t: taxiThreads){
+            t.start();
+        }
+
+        synchronized (statusLock) {
+            Thread.sleep(5000);
+            thisTaxi.setCurrentStatus(Status.JOINING);
+            statusLock.notifyAll();
+        }
 
         String userInput = null;
         Scanner in = new Scanner(System.in);
 
-        while(userInput == null){
+        while (userInput == null) {
             System.out.println("[TAXI MAIN] Type [quit] to exit the system or [recharge] to go to recharge");
             userInput = in.nextLine();
-            if(userInput.equals("quit")){ // leaving procedure
-                thisTaxi.setManualInput(ManualInput.QUIT);
-                synchronized (statusLock){ // has to wait for full recharge, so never enters the while, for now
-                    while(thisTaxi.getCurrentStatus() != Status.IDLE){
-                        System.out.println("[TAXI MAIN] Waiting to get idle to quit");
-                        statusLock.wait();
-                        if(thisTaxi.getCurrentStatus() == Status.IDLE){
-                            System.out.println("[TAXI MAIN] Taxi ready to leave");
-                            thisTaxi.setCurrentStatus(Status.LEAVING);
+            if (userInput.equals("quit")) { // leaving procedure
+                synchronized (inputLock){
+                    while(thisTaxi.getInput() != Input.QUIT){
+                        inputLock.wait();
+                        if(thisTaxi.getInput() == null){
+                            thisTaxi.setInput(Input.QUIT);
+                            inputLock.notifyAll();
                         }
                     }
                 }
-                synchronized (thisTaxi){
-                    thisTaxi.setCurrentStatus(Status.LEAVING);
-                    thisTaxi.notifyAll();
-                }
-                System.out.println(thisTaxi.getCurrentStatus());
-                /*
-                leaveRequest(client);
-                TaxiCommunicationClient announceLeaveThread = new TaxiCommunicationClient(thisTaxi, false);
-                announceLeaveThread.start();
-                announceLeaveThread.join();
-
-                 */
-                communicationServer.interrupt();
-                pm10.interrupt();
-                drive.interrupt();
-                sensor.interrupt();
                 return;
             }
 
             if(userInput.equals("recharge")){
-                thisTaxi.setManualInput(ManualInput.RECHARGE);
-                // tell the driver to go recharge
-                thisTaxi.setCurrentStatus(Status.REQUEST_RECHARGE);
-                thisTaxi.setRechargeRequestTimestamp(System.currentTimeMillis());
-                TaxiRechargeComm r = new TaxiRechargeComm(thisTaxi);
-                r.start();
-                //r.join(); // wait for all responses
-                synchronized (thisTaxi){
-                    while(thisTaxi.getCurrentStatus() == Status.GO_RECHARGE){
-                        thisTaxi.wait();
-                        if(thisTaxi.getCurrentStatus() == Status.IDLE){
-                            System.out.println("[TAXI MAIN] Recharge done.");
-                            thisTaxi.notifyAll();
+                synchronized (inputLock){
+                    while(thisTaxi.getInput() != Input.RECHARGE){
+                        inputLock.wait();
+                        if(thisTaxi.getInput() == null){
+                            thisTaxi.setInput(Input.RECHARGE);
+                            inputLock.notifyAll();
                         }
                     }
                 }
@@ -193,47 +184,6 @@ public class Taxi {
             userInput = null;
         }
 
-    }
-
-    private static Taxis joinRequest(Client client){
-        ClientResponse clientResponse = null;
-
-        TaxiBean t = new TaxiBean(id, ip, port);
-        WebResource webResource = client.resource(joinPath);
-        String input = new Gson().toJson(t);
-
-        try {
-            clientResponse = webResource.type("application/json").post(ClientResponse.class, input);
-        } catch (ClientHandlerException e) {
-            System.out.println("[TAXI MAIN] Join impossible: taxi" + id + "can't reach the server");
-            return null;
-        }
-
-        if(clientResponse.getStatus() == Response.Status.NOT_ACCEPTABLE.getStatusCode()){
-            System.out.println("[TAXI MAIN] Join impossible: duplicated id " + id);
-            return null; // duplicated id
-        }
-        return new Gson().fromJson(clientResponse.getEntity(String.class), Taxis.class);
-    }
-
-    private static void leaveRequest(Client client){
-        ClientResponse clientResponse = null;
-
-        WebResource webResource = client.resource(leavePath+id);
-
-        try {
-            clientResponse = webResource.type("application/json").delete(ClientResponse.class);
-        } catch (ClientHandlerException e) {
-            System.out.println("[TAXI MAIN] Impossible to leave: taxi " + id + " can't reach the server");
-            return;
-        }
-
-        if(clientResponse.getStatus() == Response.Status.NOT_FOUND.getStatusCode()){
-            System.out.println("[TAXI MAIN] Impossible to leave: can't find id " + id);
-            return;
-        }else{
-            System.out.println("[TAXI MAIN] Taxi " + id + " left the system");
-        }
     }
 
     public String getId() {
@@ -363,4 +313,19 @@ public class Taxi {
         this.reqToHandle = reqToHandle;
     }
 
+    public static Object getInputLock() {
+        return inputLock;
+    }
+
+    public static void setInputLock(Object inputLock) {
+        Taxi.inputLock = inputLock;
+    }
+
+    public static List<Thread> getTaxiThreads() {
+        return taxiThreads;
+    }
+
+    public static void setTaxiThreads(List<Thread> taxiThreads) {
+        Taxi.taxiThreads = taxiThreads;
+    }
 }

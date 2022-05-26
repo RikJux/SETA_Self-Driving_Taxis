@@ -11,12 +11,17 @@ public class Idle extends TaxiThread{
     private final int qos = 2; // check
     private boolean isConnected = false;
     private final String broker = "tcp://localhost:1883";
+    private Object inputLock;
     private MqttClient client;
     private static Object requestLock = new Object();
 
-    public Idle(Taxi thisTaxi, Taxi.Status thisStatus, List<Taxi.Status> nextStatus, Object syncObj, MqttClient client) {
-        super(thisTaxi, thisStatus, nextStatus, syncObj);
+    public Idle(Taxi thisTaxi, Taxi.Status thisStatus, Object syncObj) {
+        super(thisTaxi, thisStatus, syncObj);
         this.client = null;
+        this.inputLock = thisTaxi.getInputLock();
+        this.nextStatus.add(Taxi.Status.REQUEST_RECHARGE);
+        this.nextStatus.add(Taxi.Status.WORKING);
+        this.nextStatus.add(Taxi.Status.LEAVING);
     }
 
     @Override
@@ -28,37 +33,47 @@ public class Idle extends TaxiThread{
                 isConnected = true;
             }
             subscribe(client);
-            synchronized (requestLock){
-                while(thisTaxi.getReqToHandle() == null){
-                    requestLock.wait();
-                    if(thisTaxi.getReqToHandle() != null){
+            synchronized (inputLock){
+                while(thisTaxi.getCurrentStatus() == Taxi.Status.IDLE){
+                    if(thisTaxi.getInput() == null || thisTaxi.getInput() == Taxi.Input.WORK){
+                        System.out.println("Waiting for input.");
+                        inputLock.wait(); // TODO E SE GLI INPUT FOSSERO TRAMITE MQTT?
+                        // qui c'è wait "ingiustificata"
+                    }
+                    // waits even if the input is not null!
+                    if(thisTaxi.getInput() != null){
+                        System.out.println("Input arrived.");
                         unsubscribe(client);
-                        makeTransition(Taxi.Status.WORKING);
-                        requestLock.notify();
+                        switch (thisTaxi.getInput()){
+                            case QUIT:
+                                makeTransition(Taxi.Status.LEAVING);
+                                break;
+                            case WORK:
+                                makeTransition(Taxi.Status.WORKING);
+                                break;
+                            case RECHARGE:
+                                makeTransition(Taxi.Status.REQUEST_RECHARGE);
+                                break;
+                            default:
+                                System.out.println("Error in input at " + thisStatus + " : " + thisTaxi.getCurrentStatus());
+                                makeTransition(Taxi.Status.LEAVING);
+                                break;
+                        }
                     }
                 }
             }
-            /*
-            while(true){ // busy waiting!
-                if(thisTaxi.getReqToHandle() == null){
-                    Thread.sleep(1000);
-                }else{
-                    unsubscribe(client);
-                    makeTransition(Taxi.Status.WORKING);
-                    break;
-                }
-            }
 
-             */
-            // unsubscribe(client);
         } catch (Exception e) { // MqttException
             e.printStackTrace();
         }
-        // election
-        //thisTaxi.setReqToHandle(null);
-        //makeTransition(Taxi.Status.WORKING);
-        //makeTransition(Taxi.Status.REQUEST_RECHARGE);
 
+    }
+
+    @Override
+    public void makeTransition(Taxi.Status s) {
+        super.makeTransition(s);
+        thisTaxi.setInput(null);
+        inputLock.notifyAll();
     }
 
     private MqttClient initiateMqttClient() throws MqttException {
@@ -75,11 +90,15 @@ public class Idle extends TaxiThread{
             public void messageArrived(String topic, MqttMessage message) throws Exception {
 
                 RideRequestOuterClass.RideRequest receivedMessage = RideRequestOuterClass.RideRequest.parseFrom(message.getPayload());
-                synchronized (requestLock){ // will be changed after election algorithm
-                    thisTaxi.setReqToHandle(receivedMessage);
-                    requestLock.notify();
+                System.out.println("Request " + receivedMessage.getId() + " arrived.");
+                synchronized (inputLock){ // will be changed after election algorithm
+                    if(thisTaxi.getInput() == null){
+                        thisTaxi.setInput(Taxi.Input.WORK);
+                        thisTaxi.setReqToHandle(receivedMessage);
                         }
+                    inputLock.notifyAll();
                     }
+            }
 
             @Override
             public void deliveryComplete(IMqttDeliveryToken token) {

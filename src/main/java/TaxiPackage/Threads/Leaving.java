@@ -15,8 +15,8 @@ public class Leaving extends TaxiThread{
     static final String serverAddress = "http://localhost:1337";
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
-    public Leaving(Taxi thisTaxi, Taxi.Status thisStatus, List<Taxi.Status> nextStatus, Object syncObj) {
-        super(thisTaxi, thisStatus, nextStatus, syncObj);
+    public Leaving(Taxi thisTaxi, Taxi.Status thisStatus, Object syncObj) {
+        super(thisTaxi, thisStatus, syncObj);
     }
 
     @Override
@@ -26,6 +26,9 @@ public class Leaving extends TaxiThread{
         TaxiCommunicationClient announceJoinThread = new TaxiCommunicationClient(thisTaxi, false);
         announceJoinThread.start();
         announceJoinThread.join();
+        for(Thread t: thisTaxi.getTaxiThreads()){
+            t.interrupt();
+        }
 
     }
 
