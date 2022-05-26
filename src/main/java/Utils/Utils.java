@@ -1,6 +1,7 @@
 package Utils;
 
 import Simulator.Measurement;
+import TaxiPackage.Taxi;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
 
 import java.util.List;
@@ -79,6 +80,20 @@ public class Utils {
         }
 
         return sum/pollution.size();
+    }
+
+    public static void travel(int[] startingP, int[] destinationP, String requestId, Taxi taxi, boolean accomplished, float time) throws InterruptedException {
+
+        Thread.sleep((long) (time * 1000));
+        double distance = computeDistance(startingP, destinationP);
+        taxi.setCurrentP(destinationP);
+        taxi.lowerBattery(distance);
+        taxi.addKilometers(distance);
+        taxi.setDistrict(computeDistrict(destinationP));
+        if (accomplished) {
+            taxi.addRideAccomplished();
+            System.out.println("[TAXI DRIVER] Taxi " + taxi.getId() + " fulfilled request " + requestId);
+        }
     }
 
 }

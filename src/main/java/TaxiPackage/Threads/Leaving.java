@@ -26,12 +26,6 @@ public class Leaving extends TaxiThread{
         TaxiCommunicationClient announceJoinThread = new TaxiCommunicationClient(thisTaxi, false);
         announceJoinThread.start();
         announceJoinThread.join();
-    }
-
-    @Override
-    public void makeTransition() {
-
-        System.out.println("The Taxi left.");
 
     }
 

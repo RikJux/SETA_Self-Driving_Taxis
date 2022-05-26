@@ -25,6 +25,8 @@ public class Working extends TaxiThread{
         travel(thisTaxi.getCurrentP(), startingP, requestId, thisTaxi, false, 2.5f); // reach the user
         travel(startingP, destinationP, requestId, thisTaxi, true, 2.5f); // reach the final destination
 
+        thisTaxi.setReqToHandle(null);
+
         if(thisTaxi.getBattery() <= 30){ // after driving
             System.out.println("[TAXI DRIVER] Taxi " + thisTaxi.getId() + " needs recharge.");
             thisTaxi.setRechargeRequestTimestamp(System.currentTimeMillis());

@@ -13,6 +13,8 @@ import com.sun.jersey.api.client.WebResource;
 import javax.ws.rs.core.Response;
 import java.util.*;
 import TaxiPackage.Threads.*;
+import org.eclipse.paho.client.mqttv3.*;
+import seta.smartcity.rideRequest.RideRequestOuterClass;
 
 import static Utils.Utils.*;
 
@@ -28,6 +30,11 @@ public class Taxi {
         LEAVING
     }
 
+    public enum ManualInput{
+        RECHARGE,
+        QUIT
+    }
+
     private static String id; // default values
     private static String ip = "localhost";
     private static int port;
@@ -39,9 +46,20 @@ public class Taxi {
     private static int[] currentP; //= Position.newBuilder().setX(0).setY(0).build(); // these should be given by Admin
     private static Taxi instance;
     private Status currentStatus;
+    private ManualInput manualInput;
     private int rechargeReqCounter = 0;
     private double rechargeRequestTimestamp = Double.MAX_VALUE;
     private Stack<Object> electionId = new Stack<Object>();
+    private RideRequestOuterClass.RideRequest reqToHandle = null;
+    private static Object statusLock = new Object();
+
+    public ManualInput getManualInput() {
+        return manualInput;
+    }
+
+    public void setManualInput(ManualInput manualInput) {
+        this.manualInput = manualInput;
+    }
 
     public Taxi(String id, String ip, int port){
 
@@ -63,25 +81,45 @@ public class Taxi {
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
-        /*
-        Client client = Client.create();
-        Taxis taxis = joinRequest(client);
-        if(taxis == null){
-            System.out.println("[TAXI MAIN] Cannot enter the system");
-            return;
-        }
-        new Stack<Double>();
-        // should not receive the whole taxis object, migrate to gson
-        thisTaxi.setTaxiList(taxis.getTaxiList());
-        thisTaxi.setCurrentP(taxis.randomCoord());
-        thisTaxi.setDistrict(computeDistrict(currentP));
-        System.out.println("[TAXI MAIN] Taxi " + id + " joined in " + district);
+        MqttClient mqttClient;
+        String broker = "tcp://localhost:1883";
 
-         */
-        Joining j = new Joining(thisTaxi, Status.JOINING, new ArrayList<>(), thisTaxi);
+        ArrayList<Status> jS = new ArrayList<>();
+        jS.add(Status.IDLE);
+        Joining j = new Joining(thisTaxi, Status.JOINING, jS, statusLock);
         j.start();
-        Leaving l = new Leaving(thisTaxi, Status.LEAVING, new ArrayList<>(), thisTaxi);
+        Leaving l = new Leaving(thisTaxi, Status.LEAVING, new ArrayList<>(), statusLock);
         l.start();
+
+        ArrayList<Status> iS = new ArrayList<>();
+        iS.add(Status.REQUEST_RECHARGE);
+        iS.add(Status.WORKING);
+        Idle idle = new Idle(thisTaxi, Status.IDLE, iS, statusLock, null);
+        idle.start();
+
+        ArrayList<Status> rS = new ArrayList<>();
+        rS.add(Status.GO_RECHARGE);
+        RequestRecharge requestRecharge = new RequestRecharge(thisTaxi, Status.REQUEST_RECHARGE, rS, statusLock);
+        requestRecharge.start();
+
+        ArrayList<Status> gS = new ArrayList<>();
+        gS.add(Status.IDLE);
+        GoRecharge goRecharge = new GoRecharge(thisTaxi, Status.GO_RECHARGE, gS, statusLock);
+        goRecharge.start();
+
+        ArrayList<Status> wS = new ArrayList<>();
+        wS.add(Status.IDLE);
+        wS.add(Status.REQUEST_RECHARGE);
+        Working working = new Working(thisTaxi, Status.WORKING, wS, statusLock);
+        working.start();
+
+
+        synchronized (statusLock){
+            Thread.sleep(1000);
+            thisTaxi.setCurrentStatus(Status.JOINING);
+            statusLock.notifyAll();
+
+            }
 
         Client client = Client.create();
         // initialize all threads
@@ -92,13 +130,9 @@ public class Taxi {
 
         // start all threads
         communicationServer.start();
-        synchronized (thisTaxi){
-            thisTaxi.setCurrentStatus(Status.JOINING);
-            thisTaxi.notifyAll();
-        }
         pm10.start();
-        drive.start();
         sensor.start();
+
 
         String userInput = null;
         Scanner in = new Scanner(System.in);
@@ -107,11 +141,11 @@ public class Taxi {
             System.out.println("[TAXI MAIN] Type [quit] to exit the system or [recharge] to go to recharge");
             userInput = in.nextLine();
             if(userInput.equals("quit")){ // leaving procedure
-                synchronized (thisTaxi){ // has to wait for full recharge, so never enters the while, for now
-                    System.out.println("[TAXI MAIN] Status after quit:" + thisTaxi.getCurrentStatus());
+                thisTaxi.setManualInput(ManualInput.QUIT);
+                synchronized (statusLock){ // has to wait for full recharge, so never enters the while, for now
                     while(thisTaxi.getCurrentStatus() != Status.IDLE){
                         System.out.println("[TAXI MAIN] Waiting to get idle to quit");
-                        thisTaxi.wait();
+                        statusLock.wait();
                         if(thisTaxi.getCurrentStatus() == Status.IDLE){
                             System.out.println("[TAXI MAIN] Taxi ready to leave");
                             thisTaxi.setCurrentStatus(Status.LEAVING);
@@ -138,6 +172,7 @@ public class Taxi {
             }
 
             if(userInput.equals("recharge")){
+                thisTaxi.setManualInput(ManualInput.RECHARGE);
                 // tell the driver to go recharge
                 thisTaxi.setCurrentStatus(Status.REQUEST_RECHARGE);
                 thisTaxi.setRechargeRequestTimestamp(System.currentTimeMillis());
@@ -319,4 +354,13 @@ public class Taxi {
 
         return electionId;
     }
+
+    public RideRequestOuterClass.RideRequest getReqToHandle() {
+        return reqToHandle;
+    }
+
+    public void setReqToHandle(RideRequestOuterClass.RideRequest reqToHandle) {
+        this.reqToHandle = reqToHandle;
+    }
+
 }

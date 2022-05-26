@@ -27,7 +27,6 @@ public class TaxiDriver extends Thread {
             client = new MqttClient(broker, clientId);
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
-
             System.out.println("[TAXI DRIVER] Connecting to SETA");
             client.connect(connOpts);
             //System.out.println(clientId + "[TAXI DRIVER] Connected - Thread PID: " + Thread.currentThread().getId());

@@ -19,17 +19,15 @@ public abstract class TaxiThread extends Thread {
     }
     @Override
     public void run() {
-        synchronized (thisTaxi){
+        synchronized (syncObj){
             try {
                 while(thisTaxi.getCurrentStatus() != thisStatus){
-                    System.out.println(thisStatus + " waiting for the lock");
-                    thisTaxi.wait();
+                    syncObj.wait();
                     if (thisTaxi.getCurrentStatus() == thisStatus) {
+                        System.out.println(thisStatus + " acquired the lock.");
                         doStuff();
-                        makeTransition();
-                        System.out.println(thisStatus + " releasing the lock");
-                        thisTaxi.notifyAll();
-                        return;
+                        System.out.println(thisStatus + " released the lock.");
+                        syncObj.notifyAll();
                         }
                     }
                 } catch (InterruptedException e) {
@@ -40,7 +38,12 @@ public abstract class TaxiThread extends Thread {
         }
 
     public abstract void doStuff() throws InterruptedException;
-    public abstract void makeTransition();
+
+    public void makeTransition(Taxi.Status s){
+        if(nextStatus.contains(s)){ // check if transaction is correct
+            thisTaxi.setCurrentStatus(s);
+        }
+    }
 
 }
 

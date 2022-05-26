@@ -116,7 +116,11 @@ Utils/Utils.java
  Utils.Utils
 TaxiPackage/Taxi.java
  TaxiPackage.Taxi
+ TaxiPackage.Taxi$ManualInput
  TaxiPackage.Taxi$Status
+TaxiPackage/Threads/Idle.java
+ TaxiPackage.Threads.Idle
+ TaxiPackage.Threads.Idle$1
 TaxiPackage/Threads/Elected.java
  TaxiPackage.Threads.Elected
 TaxiPackage/Sensor.java

@@ -34,21 +34,17 @@ public class Joining extends TaxiThread {
             System.out.println("Cannot enter the system");
             return;
         }
-        new Stack<Double>();
         // should not receive the whole taxis object, migrate to gson
         thisTaxi.setTaxiList(taxis.getTaxiList());
         thisTaxi.setCurrentP(taxis.randomCoord());
         thisTaxi.setDistrict(computeDistrict(thisTaxi.getCurrentP()));
-        System.out.println("[TAXI MAIN] Taxi " + thisTaxi.getId() + " joined in " + thisTaxi.getDistrict());
+        System.out.println(thisStatus + " Taxi" + thisTaxi.getId() + " joined in " + thisTaxi.getDistrict());
 
         TaxiCommunicationClient announceJoinThread = new TaxiCommunicationClient(thisTaxi, true);
         announceJoinThread.start();
         announceJoinThread.join();
-    }
+        makeTransition(Taxi.Status.IDLE);
 
-    @Override
-    public void makeTransition() {
-        thisTaxi.setCurrentStatus(Taxi.Status.IDLE);
     }
 
     private static Taxis joinRequest(Client client){

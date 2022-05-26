@@ -29,7 +29,7 @@ public class TaxiRechargeComm extends Thread{
                     thisTaxi.wait();
                     if(thisTaxi.getRechargeReqCounter() == thisTaxi.getTaxiList().size()) {
                         System.out.println("[RECHARGE COMM] All other taxis tell you can go recharge!");
-                        thisTaxi.setCurrentStatus(Taxi.Status.GO_RECHARGE);
+                        // thisTaxi.setCurrentStatus(Taxi.Status.GO_RECHARGE);
                         thisTaxi.zeroRechargeReqCounter();
                         thisTaxi.notifyAll();
                         return;

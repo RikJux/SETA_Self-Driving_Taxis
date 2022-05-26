@@ -34,7 +34,7 @@ public class RechargeServiceImpl extends RechargeServiceGrpc.RechargeServiceImpl
                     try {
                         thisTaxi.wait();
                         if(!notOkCondition(thisTaxi, district, request.getTimestamp())){
-                            notifyAll(); // now can acknowledge the request
+                            thisTaxi.notifyAll(); // now can acknowledge the request
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
