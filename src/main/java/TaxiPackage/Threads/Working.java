@@ -1,6 +1,10 @@
 package TaxiPackage.Threads;
 
 import TaxiPackage.Taxi;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import seta.smartcity.rideRequest.RideRequestOuterClass;
 
 import java.util.List;
 
@@ -11,14 +15,32 @@ public class Working extends TaxiThread{
         super(thisTaxi, thisStatus, syncObj);
         this.nextStatus.add(Taxi.Status.IDLE);
         this.nextStatus.add(Taxi.Status.REQUEST_RECHARGE);
+        this.client = null;
     }
+
+    private boolean isConnected = false;
+    private MqttClient client;
+    private final String broker = "tcp://localhost:1883";
+    private final String handledTopic = "seta/smartcity/handled/";
+    private final String availableTaxiTopic = "seta/smartcity/available/";
 
     @Override
     public void doStuff() throws InterruptedException {
 
-        String requestId = thisTaxi.getReqToHandle().getId();
-        int[] startingP = fromMsgToArray(thisTaxi.getReqToHandle().getStartingPosition());
-        int[] destinationP = fromMsgToArray(thisTaxi.getReqToHandle().getDestinationPosition());
+        if(!isConnected){
+            try {
+                client = initiateMqttClient();
+                client.connect();
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+            isConnected = true;
+        }
+
+        RideRequestOuterClass.RideRequest requestToHandle = thisTaxi.getReqToHandle();
+        String requestId = requestToHandle.getId();
+        int[] startingP = fromMsgToArray(requestToHandle.getStartingPosition());
+        int[] destinationP = fromMsgToArray(requestToHandle.getDestinationPosition());
 
         System.out.println("[TAXI DRIVER] Taxi " + thisTaxi.getId() + " located at " + thisTaxi.getX() + ", " + thisTaxi.getY() +
                 " accepted request " + requestId + " from " + getCoordX(startingP) + ", " + getCoordY(startingP)
@@ -38,4 +60,17 @@ public class Working extends TaxiThread{
         }
 
     }
+
+    private void publishHandledRequest(){
+
+    }
+
+    private MqttClient initiateMqttClient() throws MqttException {
+        MqttClient mqttClient = new MqttClient(broker, MqttClient.generateClientId(), null);
+        MqttConnectOptions connOpts = new MqttConnectOptions();
+        connOpts.setCleanSession(true);
+
+        return mqttClient;
+    }
+
 }

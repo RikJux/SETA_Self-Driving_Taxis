@@ -23,15 +23,16 @@ public class TaxiRechargeComm extends Thread{
             requireRecharge(thisTaxi, t);
         }
         //TODO
-        synchronized (thisTaxi){
+        synchronized (thisTaxi.getRechargeLock()){
             while(thisTaxi.getRechargeReqCounter() < thisTaxi.getTaxiList().size()){
                 try {
-                    thisTaxi.wait();
+                    thisTaxi.getRechargeLock().wait();
                     if(thisTaxi.getRechargeReqCounter() == thisTaxi.getTaxiList().size()) {
                         System.out.println("[RECHARGE COMM] All other taxis tell you can go recharge!");
-                        // thisTaxi.setCurrentStatus(Taxi.Status.GO_RECHARGE);
-                        thisTaxi.zeroRechargeReqCounter();
-                        thisTaxi.notifyAll();
+                        synchronized (thisTaxi.getRechargeTimestampLock()){
+                            thisTaxi.zeroRechargeReqCounter();
+                        }
+                        thisTaxi.getRechargeLock().notifyAll();
                         return;
                     }
                 } catch (InterruptedException e) {
@@ -61,11 +62,11 @@ public class TaxiRechargeComm extends Thread{
         stub.recharge(rechargeReq, new StreamObserver<RechargeServiceOuterClass.RechargeOk>() {
             @Override
             public void onNext(RechargeServiceOuterClass.RechargeOk value) {
-                synchronized (thisTaxi){
+                synchronized (thisTaxi.getRechargeLock()){
                     System.out.println("[RECHARGE COMM] Taxi " + t.getId() + " gave permission to recharge.");
                     thisTaxi.incrementRechargeReqCounter();
                     System.out.println("[RECHARGE COMM] Counter: " + thisTaxi.getRechargeReqCounter());
-                    thisTaxi.notifyAll();
+                    thisTaxi.getRechargeLock().notifyAll();
                 }
             }
 

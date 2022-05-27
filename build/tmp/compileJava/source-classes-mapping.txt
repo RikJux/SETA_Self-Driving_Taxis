@@ -99,8 +99,9 @@ taxi/communication/leaveService/LeaveServiceGrpc.java
  taxi.communication.leaveService.LeaveServiceGrpc$LeaveServiceMethodDescriptorSupplier
  taxi.communication.leaveService.LeaveServiceGrpc$LeaveServiceStub
  taxi.communication.leaveService.LeaveServiceGrpc$MethodHandlers
-SETA.java
- SETA
+TaxiPackage/TaxiReqComm.java
+ TaxiPackage.TaxiReqComm
+ TaxiPackage.TaxiReqComm$1
 taxi/communication/handleRideService/HandleRideServiceGrpc.java
  taxi.communication.handleRideService.HandleRideServiceGrpc
  taxi.communication.handleRideService.HandleRideServiceGrpc$1
@@ -114,11 +115,10 @@ taxi/communication/handleRideService/HandleRideServiceGrpc.java
  taxi.communication.handleRideService.HandleRideServiceGrpc$MethodHandlers
 Utils/Utils.java
  Utils.Utils
-TaxiPackage/TaxiReqComm.java
- TaxiPackage.TaxiReqComm
- TaxiPackage.TaxiReqComm$1
 Simulator/PM10Simulator.java
  Simulator.PM10Simulator
+Simulator/Measurement.java
+ Simulator.Measurement
 TaxiPackage/Sensor.java
  TaxiPackage.Sensor
 Simulator/Simulator.java
@@ -182,8 +182,8 @@ TaxiPackage/TaxiCommunicationClient.java
  TaxiPackage.TaxiCommunicationClient$2
 beans/TaxiStatistics.java
  beans.TaxiStatistics
-Simulator/Measurement.java
- Simulator.Measurement
+SETA.java
+ SETA
 TaxiPackage/Taxi.java
  TaxiPackage.Taxi
  TaxiPackage.Taxi$1

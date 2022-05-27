@@ -53,6 +53,8 @@ public class Taxi {
     private RideRequestOuterClass.RideRequest reqToHandle = null;
     private static Object statusLock = new Object();
     private static Object inputLock = new Object();
+    private static Object rechargeLock = new Object();
+    private static Object rechargeTimestampLock = new Object();
     private static List<Thread> taxiThreads;
 
     public Input getInput() {
@@ -77,23 +79,15 @@ public class Taxi {
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
     public static void main(String args[]) throws InterruptedException {
-        // insert id manually ?
-        int idOffset = 1;
-        port = 1338 + idOffset;
+        int idOffset = 0;
+        port = 1884 + idOffset;
         id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
 
         Client client = Client.create();
-        // initialize all threads
-        /*
-        TaxiCommunicationServer communicationServer = new TaxiCommunicationServer(thisTaxi);
-        PM10Simulator pm10 = new PM10Simulator(new SimulatorData());
-        TaxiDriver drive = new TaxiDriver(thisTaxi);
-        Sensor sensor = new Sensor(thisTaxi, pm10, client);
 
-         */
         PM10Simulator pm10 = new PM10Simulator(new SimulatorData());
 
         taxiThreads = new ArrayList<Thread>(){
@@ -109,36 +103,6 @@ public class Taxi {
                 add(new Sensor(thisTaxi, pm10, client));
             }
         };
-
-        /*
-        Joining j = new Joining(thisTaxi, Status.JOINING, statusLock);
-        j.start();
-        Leaving l = new Leaving(thisTaxi, Status.LEAVING, statusLock);
-        l.start();
-
-        ArrayList<Status> iS = new ArrayList<>();
-        iS.add(Status.REQUEST_RECHARGE);
-        iS.add(Status.WORKING);
-        Idle idle = new Idle(thisTaxi, Status.IDLE, statusLock);
-        idle.start();
-
-        ArrayList<Status> rS = new ArrayList<>();
-        rS.add(Status.GO_RECHARGE);
-        RequestRecharge requestRecharge = new RequestRecharge(thisTaxi, Status.REQUEST_RECHARGE, statusLock);
-        requestRecharge.start();
-
-        ArrayList<Status> gS = new ArrayList<>();
-        gS.add(Status.IDLE);
-        GoRecharge goRecharge = new GoRecharge(thisTaxi, Status.GO_RECHARGE, statusLock);
-        goRecharge.start();
-
-        ArrayList<Status> wS = new ArrayList<>();
-        wS.add(Status.IDLE);
-        wS.add(Status.REQUEST_RECHARGE);
-        Working working = new Working(thisTaxi, Status.WORKING, statusLock);
-        working.start();
-
-         */
 
         for(Thread t: taxiThreads){
             t.start();
@@ -156,29 +120,13 @@ public class Taxi {
         while (userInput == null) {
             System.out.println("[TAXI MAIN] Type [quit] to exit the system or [recharge] to go to recharge");
             userInput = in.nextLine();
-            if (userInput.equals("quit")) { // leaving procedure
-                synchronized (inputLock){
-                    if(thisTaxi.getInput() != null){
-                        inputLock.wait();
-                    }
-                    if(thisTaxi.getInput() == null){
-                        thisTaxi.setInput(Input.QUIT);
-                        inputLock.notifyAll();
-                    }
-                }
+            if (userInput.equals("quit")) {
+                manualInput(thisTaxi, Input.QUIT);
                 return;
             }
 
             if(userInput.equals("recharge")){
-                synchronized (inputLock){
-                    if(thisTaxi.getInput() != null){
-                        inputLock.wait();
-                    }
-                    if(thisTaxi.getInput() == null){
-                        thisTaxi.setInput(Input.RECHARGE);
-                        inputLock.notifyAll();
-                    }
-                }
+                manualInput(thisTaxi, Input.RECHARGE);
             }
 
             userInput = null;
@@ -328,4 +276,33 @@ public class Taxi {
     public static void setTaxiThreads(List<Thread> taxiThreads) {
         Taxi.taxiThreads = taxiThreads;
     }
+
+    public static Object getRechargeLock() {
+        return rechargeLock;
+    }
+
+    public static void setRechargeLock(Object rechargeLock) {
+        Taxi.rechargeLock = rechargeLock;
+    }
+
+    public static Object getRechargeTimestampLock() {
+        return rechargeTimestampLock;
+    }
+
+    public static void setRechargeTimestampLock(Object rechargeTimestampLock) {
+        Taxi.rechargeTimestampLock = rechargeTimestampLock;
+    }
+
+    private static void manualInput(Taxi thisTaxi, Input input) throws InterruptedException {
+        synchronized (inputLock){
+            if(thisTaxi.getInput() != null){
+                inputLock.wait();
+            }
+            if(thisTaxi.getInput() == null){
+                thisTaxi.setInput(input);
+                inputLock.notifyAll();
+            }
+        }
+    }
+
 }

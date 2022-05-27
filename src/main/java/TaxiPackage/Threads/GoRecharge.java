@@ -23,7 +23,6 @@ public class GoRecharge extends TaxiThread{
         thisTaxi.setCurrentStatus(Taxi.Status.IDLE);
         System.out.println(thisStatus + " Taxi " + thisTaxi.getId() + " is now fully recharged.");
 
-        thisTaxi.setRechargeRequestTimestamp(Double.MAX_VALUE);
         makeTransition(Taxi.Status.IDLE);
 
     }

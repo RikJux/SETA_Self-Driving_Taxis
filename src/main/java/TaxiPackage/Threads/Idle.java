@@ -6,14 +6,19 @@ import seta.smartcity.rideRequest.RideRequestOuterClass;
 
 import java.util.List;
 
+import static Utils.Utils.computeDistrict;
+
 public class Idle extends TaxiThread{
     private final String topicString = "seta/smartcity/rides/";
-    private final int qos = 2; // check
+    private final int qos = 1;
     private boolean isConnected = false;
     private final String broker = "tcp://localhost:1883";
+    private final String handleTopic = "seta/smartcity/handled/";
+    private final String availableTaxiTopic = "seta/smartcity/available/";
     private Object inputLock;
     private MqttClient client;
     private static Object requestLock = new Object();
+
 
     public Idle(Taxi thisTaxi, Taxi.Status thisStatus, Object syncObj) {
         super(thisTaxi, thisStatus, syncObj);
@@ -33,14 +38,15 @@ public class Idle extends TaxiThread{
                 isConnected = true;
             }
             subscribe(client);
+            synchronized (thisTaxi.getRechargeTimestampLock()){
+                thisTaxi.setRechargeRequestTimestamp(Double.MAX_VALUE); // GO_RECHARGE
+            }
             synchronized (inputLock){
                 while(thisTaxi.getCurrentStatus() == Taxi.Status.IDLE){
                     if(thisTaxi.getInput() == null || thisTaxi.getInput() == Taxi.Input.WORK){
                         System.out.println("Waiting for input.");
-                        inputLock.wait(); // TODO E SE GLI INPUT FOSSERO TRAMITE MQTT?
-                        // qui c'è wait "ingiustificata"
+                        inputLock.wait();
                     }
-                    // waits even if the input is not null!
                     if(thisTaxi.getInput() != null){
                         System.out.println("Input arrived.");
                         unsubscribe(client);
@@ -50,6 +56,7 @@ public class Idle extends TaxiThread{
                                 break;
                             case WORK:
                                 makeTransition(Taxi.Status.WORKING);
+                                publishToHandleRequest();
                                 break;
                             case RECHARGE:
                                 makeTransition(Taxi.Status.REQUEST_RECHARGE);
@@ -76,8 +83,17 @@ public class Idle extends TaxiThread{
         inputLock.notifyAll();
     }
 
+    private void publishToHandleRequest() throws MqttException{
+        RideRequestOuterClass.RideRequest payload = thisTaxi.getReqToHandle();
+        String destDist = computeDistrict(new int[]{payload.getStartingPosition().getX(), payload.getStartingPosition().getX()});
+        MqttMessage message = new MqttMessage(payload.toByteArray());
+        message.setQos(1);
+        client.publish(handleTopic+destDist, message);
+        System.out.println("[REQUEST : " + payload.getId() + "] will handled at " + handleTopic+destDist);
+    }
+
     private MqttClient initiateMqttClient() throws MqttException {
-        MqttClient mqttClient = new MqttClient(broker, MqttClient.generateClientId());
+        MqttClient mqttClient = new MqttClient(broker, MqttClient.generateClientId(), null);
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
         mqttClient.setCallback(new MqttCallback() { // taxi is IDLE (or else it's unsubscribed)
