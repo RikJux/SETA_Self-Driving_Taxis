@@ -158,12 +158,12 @@ public class Taxi {
             userInput = in.nextLine();
             if (userInput.equals("quit")) { // leaving procedure
                 synchronized (inputLock){
-                    while(thisTaxi.getInput() != Input.QUIT){
+                    if(thisTaxi.getInput() != null){
                         inputLock.wait();
-                        if(thisTaxi.getInput() == null){
-                            thisTaxi.setInput(Input.QUIT);
-                            inputLock.notifyAll();
-                        }
+                    }
+                    if(thisTaxi.getInput() == null){
+                        thisTaxi.setInput(Input.QUIT);
+                        inputLock.notifyAll();
                     }
                 }
                 return;
@@ -171,12 +171,12 @@ public class Taxi {
 
             if(userInput.equals("recharge")){
                 synchronized (inputLock){
-                    while(thisTaxi.getInput() != Input.RECHARGE){
+                    if(thisTaxi.getInput() != null){
                         inputLock.wait();
-                        if(thisTaxi.getInput() == null){
-                            thisTaxi.setInput(Input.RECHARGE);
-                            inputLock.notifyAll();
-                        }
+                    }
+                    if(thisTaxi.getInput() == null){
+                        thisTaxi.setInput(Input.RECHARGE);
+                        inputLock.notifyAll();
                     }
                 }
             }
