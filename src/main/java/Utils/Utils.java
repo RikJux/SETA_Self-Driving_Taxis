@@ -13,6 +13,11 @@ public class Utils {
     public static final String DISTRICT_3 = "district3";
     public static final String DISTRICT_4 = "district4";
 
+    public static final String broker = "tcp://localhost:1883";
+    public static final String handledTopic = "seta/smartcity/handled/";
+    public static final String ridesTopic = "seta/smartcity/rides/"; // add the string related to the district
+    public static final String availableTopic = "seta/smartcity/available/";
+
     public static int[] computeRechargeStation(String district) {
         switch (district) {
             case (DISTRICT_1):
@@ -52,6 +57,10 @@ public class Utils {
                 return DISTRICT_3;
             }
         }
+    }
+
+    public static String computeDistrict(RideRequestOuterClass.RideRequest r){
+        return computeDistrict(new int[]{r.getStartingPosition().getX(), r.getStartingPosition().getY()});
     }
 
     public static int getCoordX(int[] p) {

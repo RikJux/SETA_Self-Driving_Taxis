@@ -3,6 +3,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
 import org.eclipse.paho.client.mqttv3.*;
+import seta.smartcity.rideRequest.RideRequestOuterClass;
 import seta.smartcity.rideRequest.RideRequestOuterClass.RideRequest;
 import seta.smartcity.rideRequest.RideRequestOuterClass.RideRequest.Position;
 
@@ -10,17 +11,15 @@ import static Utils.Utils.*;
 
 public class SETA {
 
+    private static Object unhandledLock = new Object();
+
     private static Hashtable<String, List<RideRequest>> unhandledRequests = new Hashtable<String, List<RideRequest>>();
 
     public static void main(String args[]) throws InterruptedException, MqttException {
 
         // create some RideRequest and publish them!
         MqttClient client;
-        String broker = "tcp://localhost:1883";
         String clientId = MqttClient.generateClientId();
-        String topic = "seta/smartcity/rides/"; // add the string related to the district
-        String handledTopic = "seta/smartcity/handled/";
-        String availableTaxiTopic = "seta/smartcity/available/";
 
         unhandledRequests.put(DISTRICT_1, new ArrayList<RideRequest>());
         unhandledRequests.put(DISTRICT_2, new ArrayList<RideRequest>());
@@ -40,17 +39,32 @@ public class SETA {
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
 
-                switch(topic){
-                    case "seta/smartcity/handled/"+DISTRICT_1:
-                        break;
-                    case "seta/smartcity/handled/"+DISTRICT_2:
-                        break;
-                    case "seta/smartcity/handled/"+DISTRICT_3:
-                        break;
-                    case "seta/smartcity/handled/"+DISTRICT_4:
-                        break;
-                    default:
-                        System.out.println("Received message from illegal topic");
+                System.out.println("Message from: " + topic);
+                if(topic.contains(handledTopic)){
+
+                    RideRequest handledMessage = RideRequestOuterClass.RideRequest.parseFrom(message.getPayload());
+                    System.out.println("[REQUEST : " + handledMessage.getId() + "] is being handled.");
+
+                    synchronized (unhandledLock){
+                        boolean ok = unhandledRequests.get(computeDistrict(handledMessage)).remove(handledMessage);
+                        if(ok){
+                            System.out.println("Correctly removed [REQUEST : " + handledMessage.getId() + "]");
+                        }else{
+                            System.out.println("Something wrong in removing [REQUEST : " + handledMessage.getId() + "]");
+                        }
+                    }
+
+                } else if (topic.contains(availableTopic)) {
+
+                    String dist = fetchDistrictFromTopic(topic, availableTopic);
+                    List<RideRequest> toSend = new ArrayList<RideRequest>();
+                    synchronized (unhandledLock){
+                        toSend = unhandledRequests.get(dist);
+                    }
+                    publishManyRequests(toSend, client);
+
+                }else{
+                    System.out.println("Received message from illegal topic");
                 }
 
             }
@@ -64,29 +78,51 @@ public class SETA {
         System.out.println(clientId + " Connecting Broker " + broker);
         client.connect(connOpts);
         System.out.println(clientId + " Connected");
+        client.subscribe(handledTopic+"+", 1);
+        client.subscribe(availableTopic+"+", 1);
 
         Random rand = new Random();
-        int id = 0;
 
-        while(true){
-            Thread.sleep(5000); // publish 2 requests each 5 seconds
-            for(int i=0; i<2; i++){
-            publishRequest(rand, id++, clientId, client, topic);
+        new Thread(() -> {
+            int id = 0;
+            while (id > -1) {
+                try {
+                    Thread.sleep(5000); // generate 2 requests each 5 seconds
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                for (int i = 0; i < 2; i++) {
+                    synchronized (unhandledLock){
+                        RideRequest r = generateRideRequest(rand, id++);
+                        unhandledRequests.get(computeDistrict(r)).add(r);
+                        System.out.println("[REQUEST : " + r.getId() + "] put in unhandled data structure.");
+                    }
+                }
             }
+        }).start();
 
-        }
     }
 
-    private static void publishRequest(Random rand, int id, String clientId, MqttClient client, String topic) throws MqttException {
-        RideRequest payload = generateRideRequest(rand, id);
-        String destDist = computeDistrict(new int[]{payload.getStartingPosition().getX(), payload.getStartingPosition().getY()});
+    private static void publishManyRequests(List<RideRequest> toSend, MqttClient client){
+
+        for(RideRequest r: toSend){
+            try {
+                publishRequest(r, client, ridesTopic);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private static void publishRequest(RideRequest payload, MqttClient client, String topic) throws MqttException {
+
+        String destDist = computeDistrict(payload);
         MqttMessage message = new MqttMessage(payload.toByteArray());
         message.setQos(1);
-        // should notify the SETA that request was handled
         client.publish(topic+destDist, message);
-        System.out.println(clientId + "[REQUEST : " + payload.getId() + "] published.");
-        unhandledRequests.get(destDist).add(payload);
-        System.out.println(clientId + "[REQUEST : " + payload.getId() + "] put in unhandled data structure.");
+        System.out.println("[REQUEST : " + payload.getId() + "] published.");
+
     }
 
     private static RideRequest generateRideRequest(Random rand, int id) {
@@ -116,4 +152,22 @@ public class SETA {
                 .build();
 
     }
+
+    private static String fetchDistrictFromTopic(String topic, String mainTopic){
+        switch(topic.substring(mainTopic.length())){
+            case DISTRICT_1:
+                return DISTRICT_1;
+            case DISTRICT_2:
+                return DISTRICT_2;
+            case DISTRICT_3:
+                return DISTRICT_3;
+            case DISTRICT_4:
+                return DISTRICT_4;
+            default:
+                System.out.println("Received message from illegal topic");
+                return null;
+        }
+
+    }
+
 }

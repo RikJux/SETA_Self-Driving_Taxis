@@ -4,17 +4,14 @@ import TaxiPackage.Taxi;
 import org.eclipse.paho.client.mqttv3.*;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static Utils.Utils.computeDistrict;
+import static Utils.Utils.*;
 
 public class Idle extends TaxiThread{
-    private final String topicString = "seta/smartcity/rides/";
     private final int qos = 1;
     private boolean isConnected = false;
-    private final String broker = "tcp://localhost:1883";
-    private final String handleTopic = "seta/smartcity/handled/";
-    private final String availableTaxiTopic = "seta/smartcity/available/";
     private Object inputLock;
     private MqttClient client;
     private static Object requestLock = new Object();
@@ -37,13 +34,21 @@ public class Idle extends TaxiThread{
                 client.connect();
                 isConnected = true;
             }
+            synchronized (inputLock){
+                thisTaxi.setInput(null);
+            }
             subscribe(client);
+            thisTaxi.setReqToHandle(null);
             synchronized (thisTaxi.getRechargeTimestampLock()){
                 thisTaxi.setRechargeRequestTimestamp(Double.MAX_VALUE); // GO_RECHARGE
             }
+
+            client.publish(availableTopic+thisTaxi.getDistrict(), new MqttMessage("".getBytes()));
+            System.out.println("Made taxi available at " + availableTopic+thisTaxi.getDistrict());
+
             synchronized (inputLock){
                 while(thisTaxi.getCurrentStatus() == Taxi.Status.IDLE){
-                    if(thisTaxi.getInput() == null || thisTaxi.getInput() == Taxi.Input.WORK){
+                    if(thisTaxi.getInput() == null){
                         System.out.println("Waiting for input.");
                         inputLock.wait();
                     }
@@ -56,7 +61,6 @@ public class Idle extends TaxiThread{
                                 break;
                             case WORK:
                                 makeTransition(Taxi.Status.WORKING);
-                                publishToHandleRequest();
                                 break;
                             case RECHARGE:
                                 makeTransition(Taxi.Status.REQUEST_RECHARGE);
@@ -68,6 +72,7 @@ public class Idle extends TaxiThread{
                         }
                     }
                 }
+                inputLock.notifyAll();
             }
 
         } catch (Exception e) { // MqttException
@@ -88,8 +93,8 @@ public class Idle extends TaxiThread{
         String destDist = computeDistrict(new int[]{payload.getStartingPosition().getX(), payload.getStartingPosition().getX()});
         MqttMessage message = new MqttMessage(payload.toByteArray());
         message.setQos(1);
-        client.publish(handleTopic+destDist, message);
-        System.out.println("[REQUEST : " + payload.getId() + "] will handled at " + handleTopic+destDist);
+        client.publish(handledTopic+destDist, message);
+        System.out.println("[REQUEST : " + payload.getId() + "] will handled at " + handledTopic+destDist);
     }
 
     private MqttClient initiateMqttClient() throws MqttException {
@@ -106,11 +111,12 @@ public class Idle extends TaxiThread{
             public void messageArrived(String topic, MqttMessage message) throws Exception {
 
                 RideRequestOuterClass.RideRequest receivedMessage = RideRequestOuterClass.RideRequest.parseFrom(message.getPayload());
-                System.out.println("Request " + receivedMessage.getId() + " arrived.");
+                System.out.println("[REQUEST : " + receivedMessage.getId() + "] arrived.");
                 synchronized (inputLock){ // will be changed after election algorithm
-                    if(thisTaxi.getInput() == null){
+                    if(thisTaxi.getInput() == null && thisTaxi.getReqToHandle() == null){
                         thisTaxi.setInput(Taxi.Input.WORK);
                         thisTaxi.setReqToHandle(receivedMessage);
+                        publishToHandleRequest();
                         }
                     inputLock.notifyAll();
                     }
@@ -127,11 +133,11 @@ public class Idle extends TaxiThread{
 
     private void subscribe(MqttClient client) throws MqttException {
         client.subscribe(thisTaxi.getTopicString() + thisTaxi.getDistrict(), qos);
-        System.out.println(thisStatus + " Subscribed to " + topicString + thisTaxi.getDistrict());
+        System.out.println(thisStatus + " Subscribed to " + ridesTopic + thisTaxi.getDistrict());
     }
 
     private void unsubscribe(MqttClient client) throws MqttException {
         client.unsubscribe(thisTaxi.getTopicString() + thisTaxi.getDistrict());
-        System.out.println(thisStatus + " Unsubscribed from " + topicString + thisTaxi.getDistrict());
+        System.out.println(thisStatus + " Unsubscribed from " + ridesTopic + thisTaxi.getDistrict());
     }
 }

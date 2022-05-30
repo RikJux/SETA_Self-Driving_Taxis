@@ -109,8 +109,18 @@ public class Taxi {
         }
 
         synchronized (statusLock) {
-            Thread.sleep(5000);
-            thisTaxi.setCurrentStatus(Status.JOINING);
+            String userInput = null;
+            Scanner in = new Scanner(System.in);
+            while(thisTaxi.getCurrentStatus() == null){
+                System.out.println("Type [join] to join the system");
+                userInput = in.nextLine();
+                if(userInput.equals("join")){
+                    thisTaxi.setCurrentStatus(Status.JOINING);
+                    break;
+                }else{
+                    userInput = null;
+                }
+            }
             statusLock.notifyAll();
         }
 
