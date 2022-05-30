@@ -1,5 +1,6 @@
 package TaxiPackage;
 
+import AdministratorPackage.AdministratorClient;
 import Simulator.PM10Simulator;
 import Simulator.SimulatorData;
 import beans.TaxiBean;
@@ -81,7 +82,7 @@ public class Taxi {
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
     public static void main(String args[]) throws InterruptedException {
-        int idOffset = 0;
+        int idOffset = 3;
         port = 1884 + idOffset;
         id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
@@ -188,6 +189,7 @@ public class Taxi {
 
     public void setTaxiList(List<TaxiBean> taxiList) {
         this.taxiList = taxiList;
+        System.out.println(this.taxiList);
     }
 
     public synchronized TaxiStatistics getTaxiStats() {
@@ -323,6 +325,7 @@ public class Taxi {
 
     public void setNextTaxi(TaxiBean nextTaxi) {
         this.nextTaxi = nextTaxi;
+        System.out.println("[NEXT : " + this.nextTaxi + " ]");
     }
 
     public static Object getNextLock() {
@@ -332,4 +335,26 @@ public class Taxi {
     public static void setNextLock(Object nextLock) {
         Taxi.nextLock = nextLock;
     }
+
+    private static Taxis joinRequest(Client client){
+        ClientResponse clientResponse = null;
+
+        TaxiBean t = new TaxiBean(id, ip, port);
+        WebResource webResource = client.resource(joinPath);
+        String input = new Gson().toJson(t);
+
+        try {
+            clientResponse = webResource.type("application/json").post(ClientResponse.class, input);
+        } catch (ClientHandlerException e) {
+            System.out.println("[TAXI MAIN] Join impossible: taxi" + id + "can't reach the server");
+            return null;
+        }
+
+        if(clientResponse.getStatus() == Response.Status.NOT_ACCEPTABLE.getStatusCode()){
+            System.out.println("[TAXI MAIN] Join impossible: duplicated id " + id);
+            return null; // duplicated id
+        }
+        return new Gson().fromJson(clientResponse.getEntity(String.class), Taxis.class);
+    }
+
 }

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Stack;
 
 import static Utils.Utils.computeDistrict;
+import static Utils.Utils.extractNextTaxi;
 
 
 public class Joining extends TaxiThread {
@@ -40,6 +41,9 @@ public class Joining extends TaxiThread {
         thisTaxi.setCurrentP(taxis.randomCoord());
         thisTaxi.setDistrict(computeDistrict(thisTaxi.getCurrentP()));
         System.out.println(thisStatus + " Taxi" + thisTaxi.getId() + " joined in " + thisTaxi.getDistrict());
+        synchronized (thisTaxi.getNextLock()){
+            thisTaxi.setNextTaxi(extractNextTaxi(thisTaxi));
+        }
 
         TaxiCommunicationClient announceJoinThread = new TaxiCommunicationClient(thisTaxi, true);
         announceJoinThread.start();

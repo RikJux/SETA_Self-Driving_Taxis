@@ -115,11 +115,15 @@ taxi/communication/handleRideService/HandleRideServiceGrpc.java
  taxi.communication.handleRideService.HandleRideServiceGrpc$MethodHandlers
 Utils/Utils.java
  Utils.Utils
-TaxiPackage/TaxiReqComm.java
- TaxiPackage.TaxiReqComm
- TaxiPackage.TaxiReqComm$1
-Simulator/PM10Simulator.java
- Simulator.PM10Simulator
+TaxiPackage/Taxi.java
+ TaxiPackage.Taxi
+ TaxiPackage.Taxi$1
+ TaxiPackage.Taxi$Input
+ TaxiPackage.Taxi$Status
+TaxiPackage/Threads/Idle.java
+ TaxiPackage.Threads.Idle
+ TaxiPackage.Threads.Idle$1
+ TaxiPackage.Threads.Idle$2
 TaxiPackage/Sensor.java
  TaxiPackage.Sensor
 Simulator/Simulator.java
@@ -185,12 +189,8 @@ beans/TaxiStatistics.java
  beans.TaxiStatistics
 Simulator/Measurement.java
  Simulator.Measurement
-TaxiPackage/Taxi.java
- TaxiPackage.Taxi
- TaxiPackage.Taxi$1
- TaxiPackage.Taxi$Input
- TaxiPackage.Taxi$Status
-TaxiPackage/Threads/Idle.java
- TaxiPackage.Threads.Idle
- TaxiPackage.Threads.Idle$1
- TaxiPackage.Threads.Idle$2
+Simulator/PM10Simulator.java
+ Simulator.PM10Simulator
+TaxiPackage/TaxiReqComm.java
+ TaxiPackage.TaxiReqComm
+ TaxiPackage.TaxiReqComm$1
