@@ -40,6 +40,7 @@ public class Taxi {
     private static String ip = "localhost";
     private static int port;
     private List<TaxiBean> taxiList;
+    private TaxiBean nextTaxi;
     private final String topicString = "seta/smartcity/rides/";
     private final double chargeThreshold = 30; // if battery is below this value, go recharge
     private static String district;
@@ -55,6 +56,7 @@ public class Taxi {
     private static Object inputLock = new Object();
     private static Object rechargeLock = new Object();
     private static Object rechargeTimestampLock = new Object();
+    private static Object nextLock = new Object();
     private static List<Thread> taxiThreads;
 
     public Input getInput() {
@@ -315,4 +317,19 @@ public class Taxi {
         }
     }
 
+    public TaxiBean getNextTaxi() {
+        return nextTaxi;
+    }
+
+    public void setNextTaxi(TaxiBean nextTaxi) {
+        this.nextTaxi = nextTaxi;
+    }
+
+    public static Object getNextLock() {
+        return nextLock;
+    }
+
+    public static void setNextLock(Object nextLock) {
+        Taxi.nextLock = nextLock;
+    }
 }

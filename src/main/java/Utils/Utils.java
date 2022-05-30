@@ -2,6 +2,7 @@ package Utils;
 
 import Simulator.Measurement;
 import TaxiPackage.Taxi;
+import beans.TaxiBean;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
 
 import java.util.List;
@@ -103,6 +104,37 @@ public class Utils {
             taxi.addRideAccomplished();
             System.out.println("[TAXI DRIVER] Taxi " + taxi.getId() + " fulfilled request " + requestId);
         }
+    }
+
+    public static TaxiBean extractNextTaxi(Taxi taxi) {
+
+        TaxiBean resultingNext = new TaxiBean(taxi.getId(), taxi.getIp(), taxi.getPort());
+
+        int id = Integer.parseInt(taxi.getId());
+        int nextId = Integer.parseInt(taxi.getNextTaxi().getId());
+
+        for (TaxiBean t : taxi.getTaxiList().subList(1, taxi.getTaxiList().size())) {
+            int thisId = Integer.parseInt(t.getId());
+            if(thisId > id){
+                if(nextId <= id){
+                    // taxi t is the next because it has greater id than this taxi and current next is lower
+                    resultingNext = t;
+                }else{ // both the two candidates (this and next) have greater id than taxi
+                    if(thisId < nextId){
+                        // among two taxis with greater id, pick the one with minimum id
+                        resultingNext = t;
+                    }
+                }
+            }else{
+                if(nextId <= id && thisId < nextId){
+                    // condition needed in case that the taxi has maximum id, so the next will be the taxi with minimum id
+                    resultingNext = t;
+                }
+            }
+        }
+
+        return resultingNext;
+
     }
 
 }
