@@ -4,6 +4,7 @@ import Simulator.Measurement;
 import TaxiPackage.Taxi;
 import beans.TaxiBean;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
+import taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass;
 
 import java.util.List;
 
@@ -175,6 +176,10 @@ public class Utils {
 
         return resultingNext;
 
+    }
+
+    public static RechargeTokenServiceOuterClass.RechargeToken createRechargeToken(String district){
+        return RechargeTokenServiceOuterClass.RechargeToken.newBuilder().setDistrict(district).build();
     }
 
 }

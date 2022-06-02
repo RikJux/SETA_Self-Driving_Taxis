@@ -6,6 +6,8 @@ import taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass;
 
 import java.util.List;
 
+import static Utils.Utils.*;
+
 public class RequestRecharge extends TaxiThread{
     public RequestRecharge(Taxi thisTaxi, Taxi.Status thisStatus, Object syncObj) {
         super(thisTaxi, thisStatus, syncObj);
@@ -15,11 +17,10 @@ public class RequestRecharge extends TaxiThread{
     @Override
     public void doStuff() throws InterruptedException {
 
-        RechargeTokenServiceOuterClass.RechargeToken rechargeToken = thisTaxi.getTokens().remove();
-        if(rechargeToken.getDistrict() == thisTaxi.getDistrict()){
-            makeTransition(Taxi.Status.GO_RECHARGE);
-        }
-        thisTaxi.getTokens().add(rechargeToken);
+        System.out.println("Waiting for [RECHARGE TOKEN " + thisTaxi.getDistrict() + "]");
+        thisTaxi.getTokens().setInUse(createRechargeToken(thisTaxi.getDistrict()));
+        makeTransition(Taxi.Status.GO_RECHARGE);
+
     }
 
 }
