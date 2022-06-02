@@ -21,8 +21,9 @@ public class GoRecharge extends TaxiThread{
         Thread.sleep(10000);
         thisTaxi.setBattery(100.0);
         thisTaxi.setCurrentStatus(Taxi.Status.IDLE);
-        System.out.println(thisStatus + " Taxi " + thisTaxi.getId() + " is now fully recharged.");
+        System.out.println(thisStatus + printInformation("TAXI", thisTaxi.getId()) + "is now fully recharged.");
 
+        thisTaxi.getTokens().setUnused();
         makeTransition(Taxi.Status.IDLE);
 
     }

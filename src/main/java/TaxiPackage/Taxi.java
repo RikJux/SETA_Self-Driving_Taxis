@@ -43,6 +43,7 @@ public class Taxi {
     private static int port;
     private TokenQueue tokens;
     private List<TaxiBean> taxiList;
+    private ElectionData electionData;
     private TaxiBean nextTaxi;
     private final String topicString = "seta/smartcity/rides/";
     private final double chargeThreshold = 30; // if battery is below this value, go recharge
@@ -84,13 +85,14 @@ public class Taxi {
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
     public static void main(String args[]) throws InterruptedException {
-        int idOffset = 0;
+        int idOffset = 1;
         port = 1884 + idOffset;
         id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
         thisTaxi.setTokens(new TokenQueue(new ArrayList<RechargeTokenServiceOuterClass.RechargeToken>()));
+        thisTaxi.setElectionData(new ElectionData(thisTaxi));
 
         Client client = Client.create();
 
@@ -135,7 +137,7 @@ public class Taxi {
         Scanner in = new Scanner(System.in);
 
         while (userInput == null) {
-            System.out.println("[TAXI MAIN] Type [quit] to exit the system or [recharge] to go to recharge");
+            System.out.println("Type [quit] to exit the system or [recharge] to go to recharge");
             userInput = in.nextLine();
             if (userInput.equals("quit")) {
                 manualInput(thisTaxi, Input.QUIT);
@@ -329,7 +331,7 @@ public class Taxi {
 
     public void setNextTaxi(TaxiBean nextTaxi) {
         this.nextTaxi = nextTaxi;
-        System.out.println("[NEXT : " + this.nextTaxi + " ]");
+        System.out.println(printInformation("NEXT", this.nextTaxi.getId()));
     }
 
     public static Object getNextLock() {
@@ -347,4 +349,14 @@ public class Taxi {
     public void setTokens(TokenQueue tokens) {
         this.tokens = tokens;
     }
+
+    public ElectionData getElectionData() {
+        return electionData;
+    }
+
+    public void setElectionData(ElectionData electionData) {
+        this.electionData = electionData;
+    }
 }
+
+

@@ -1,8 +1,14 @@
 package TaxiPackage.Threads;
 
 import TaxiPackage.Taxi;
+import beans.TaxiBean;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 import org.eclipse.paho.client.mqttv3.*;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
+import taxi.communication.handleRideService.HandleRideServiceGrpc;
+import taxi.communication.handleRideService.HandleRideServiceOuterClass;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -53,7 +59,7 @@ public class Idle extends TaxiThread{
                         inputLock.wait();
                     }
                     if(thisTaxi.getInput() != null){
-                        System.out.println("Input arrived.");
+                        System.out.println("Arrived [INPUT " + thisTaxi.getInput() + "]");
                         unsubscribe(client);
                         switch (thisTaxi.getInput()){
                             case QUIT:
@@ -94,7 +100,7 @@ public class Idle extends TaxiThread{
         MqttMessage message = new MqttMessage(payload.toByteArray());
         message.setQos(1);
         client.publish(handledTopic+destDist, message);
-        System.out.println("[REQUEST : " + payload.getId() + "] will handled at " + handledTopic+destDist);
+        System.out.println(printInformation("REQUEST", payload.getId()) + "will handled at " + handledTopic+destDist);
     }
 
     private MqttClient initiateMqttClient() throws MqttException {
@@ -111,15 +117,14 @@ public class Idle extends TaxiThread{
             public void messageArrived(String topic, MqttMessage message) throws Exception {
 
                 RideRequestOuterClass.RideRequest receivedMessage = RideRequestOuterClass.RideRequest.parseFrom(message.getPayload());
-                System.out.println("[REQUEST : " + receivedMessage.getId() + "] arrived.");
-                synchronized (inputLock){ // will be changed after election algorithm
-                    if(thisTaxi.getInput() == null && thisTaxi.getReqToHandle() == null){
-                        thisTaxi.setInput(Taxi.Input.WORK);
-                        thisTaxi.setReqToHandle(receivedMessage);
-                        publishToHandleRequest();
-                        }
-                    inputLock.notifyAll();
-                    }
+                System.out.println("Arrived" + printInformation("REQUEST", receivedMessage.getId()));
+                //TODO start the election
+                HandleRideServiceOuterClass.ElectionMsg myElectionMsg = HandleRideServiceOuterClass.ElectionMsg.newBuilder()
+                        .setRequest(translateRideRequest(receivedMessage))
+                        .setCandidateMsg(createCandidateMsg(thisTaxi, receivedMessage))
+                        .build();
+                forwardMessage(thisTaxi, myElectionMsg);
+
             }
 
             @Override
@@ -139,5 +144,42 @@ public class Idle extends TaxiThread{
     private void unsubscribe(MqttClient client) throws MqttException {
         client.unsubscribe(thisTaxi.getTopicString() + thisTaxi.getDistrict());
         System.out.println(thisStatus + " Unsubscribed from " + ridesTopic + thisTaxi.getDistrict());
+    }
+
+    private static ManagedChannel createChannel(Taxi thisTaxi){
+
+        synchronized (thisTaxi.getNextLock()) {
+            TaxiBean t = thisTaxi.getNextTaxi();
+            ManagedChannel channel = ManagedChannelBuilder.forTarget(t.getIp() + ":" + t.getPort()).usePlaintext().build();
+            thisTaxi.getNextLock().notifyAll();
+            return channel;
+        }
+
+    }
+
+
+    private static void forwardMessage(Taxi thisTaxi, HandleRideServiceOuterClass.ElectionMsg electionMsg){
+
+        final ManagedChannel channel = createChannel(thisTaxi);
+
+        HandleRideServiceGrpc.HandleRideServiceStub stub = HandleRideServiceGrpc.newStub(channel);
+
+        stub.election(electionMsg, new StreamObserver<HandleRideServiceOuterClass.ElectionOk>() {
+            @Override
+            public void onNext(HandleRideServiceOuterClass.ElectionOk value) {
+                System.out.println("Sent"+ printInformation("ELECTION", electionMsg.getRequest().getId()));
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                channel.shutdownNow();
+            }
+        });
+
     }
 }

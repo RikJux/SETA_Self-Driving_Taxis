@@ -10,6 +10,8 @@ import com.sun.jersey.api.client.WebResource;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+import static Utils.Utils.printInformation;
+
 public class Leaving extends TaxiThread{
 
     static final String serverAddress = "http://localhost:1337";
@@ -40,15 +42,15 @@ public class Leaving extends TaxiThread{
         try {
             clientResponse = webResource.type("application/json").delete(ClientResponse.class);
         } catch (ClientHandlerException e) {
-            System.out.println("[TAXI MAIN] Impossible to leave: taxi " + thisTaxi.getId() + " can't reach the server");
+            System.out.println("Impossible to leave:" + printInformation("TAXI", thisTaxi.getId()) + "can't reach the server");
             return;
         }
 
         if(clientResponse.getStatus() == Response.Status.NOT_FOUND.getStatusCode()){
-            System.out.println("[TAXI MAIN] Impossible to leave: can't find id " + thisTaxi.getId());
+            System.out.println("Impossible to leave: can't find id" + printInformation("TAXI", thisTaxi.getId()) );
             return;
         }else{
-            System.out.println("[TAXI MAIN] Taxi " + thisTaxi.getId() + " left the system");
+            System.out.println(printInformation("TAXI", thisTaxi.getId()) + " left the system");
         }
     }
 

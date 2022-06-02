@@ -6,6 +6,8 @@ import io.grpc.ServerBuilder;
 
 import java.io.IOException;
 
+import static Utils.Utils.printInformation;
+
 public class TaxiCommunicationServer extends Thread{
 
     private final Taxi thisTaxi;
@@ -22,13 +24,13 @@ public class TaxiCommunicationServer extends Thread{
             Server server = ServerBuilder.forPort(thisTaxi.getPort())
                     .addService(new JoinServiceImpl(thisTaxi))
                     .addService(new LeaveServiceImpl(thisTaxi))
-                    .addService(new HandleRideServiceImpl(thisTaxi))
                     .addService(new RechargeTokenServiceImpl(thisTaxi))
+                    .addService(new HandleRideServiceImpl(thisTaxi.getElectionData()))
                     .build();
 
             server.start();
 
-            System.out.println("Communication thread for taxi " + thisTaxi.getId() + " started");
+            System.out.println("Communication thread for" + printInformation("TAXI", thisTaxi.getId()) + "started");
 
             server.awaitTermination();
 

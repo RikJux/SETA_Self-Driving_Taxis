@@ -42,24 +42,21 @@ public class Working extends TaxiThread{
         int[] startingP = fromMsgToArray(requestToHandle.getStartingPosition());
         int[] destinationP = fromMsgToArray(requestToHandle.getDestinationPosition());
 
-        System.out.println(thisStatus + " Taxi " + thisTaxi.getId() + " located at " + thisTaxi.getX() + ", " + thisTaxi.getY() +
-                " accepted request " + requestId + " from " + getCoordX(startingP) + ", " + getCoordY(startingP)
+        System.out.println(thisStatus + printInformation("TAXI", thisTaxi.getId())
+                + " located at " + thisTaxi.getX() + ", " + thisTaxi.getY() + " accepted request " + requestId
+                + " from " + getCoordX(startingP) + ", " + getCoordY(startingP)
                 + " to " + getCoordX(destinationP) + ", " + getCoordY(destinationP));
 
         travel(thisTaxi.getCurrentP(), startingP, requestId, thisTaxi, false, 2.5f); // reach the user
         travel(startingP, destinationP, requestId, thisTaxi, true, 2.5f); // reach the final destination
 
         if(thisTaxi.getBattery() <= 30){ // after driving
-            System.out.println(thisStatus + " Taxi " + thisTaxi.getId() + " needs recharge.");
+            System.out.println(thisStatus +  printInformation("TAXI", thisTaxi.getId()) + "needs recharge.");
             thisTaxi.setRechargeRequestTimestamp(System.currentTimeMillis());
             makeTransition(Taxi.Status.REQUEST_RECHARGE);
         } else {
             makeTransition(Taxi.Status.IDLE);
         }
-
-    }
-
-    private void publishHandledRequest(){
 
     }
 

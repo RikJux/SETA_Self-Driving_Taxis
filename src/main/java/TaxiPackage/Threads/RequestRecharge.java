@@ -1,10 +1,6 @@
 package TaxiPackage.Threads;
 
 import TaxiPackage.Taxi;
-import TaxiPackage.TaxiRechargeComm;
-import taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass;
-
-import java.util.List;
 
 import static Utils.Utils.*;
 
@@ -17,7 +13,7 @@ public class RequestRecharge extends TaxiThread{
     @Override
     public void doStuff() throws InterruptedException {
 
-        System.out.println("Waiting for [RECHARGE TOKEN " + thisTaxi.getDistrict() + "]");
+        System.out.println("Waiting for" + printInformation("RECHARGE TOKEN", thisTaxi.getDistrict()));
         thisTaxi.getTokens().setInUse(createRechargeToken(thisTaxi.getDistrict()));
         makeTransition(Taxi.Status.GO_RECHARGE);
 

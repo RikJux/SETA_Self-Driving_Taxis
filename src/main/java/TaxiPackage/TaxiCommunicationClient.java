@@ -10,6 +10,8 @@ import taxi.communication.joinService.JoinServiceOuterClass;
 import taxi.communication.leaveService.LeaveServiceGrpc;
 import taxi.communication.leaveService.LeaveServiceOuterClass;
 
+import static Utils.Utils.printInformation;
+
 public class TaxiCommunicationClient extends Thread{
 
     private final Taxi thisTaxi;
@@ -53,7 +55,7 @@ public class TaxiCommunicationClient extends Thread{
         stub.join(joinMsg, new StreamObserver<JoinServiceOuterClass.JoinOk>() {
             @Override
             public void onNext(JoinServiceOuterClass.JoinOk value) {
-                System.out.println("[TAXI COMM] Taxi " + t.getId() + " is now aware of my presence.");
+                System.out.println(printInformation("TAXI", t.getId()) + "is now aware of my presence.");
             }
 
             @Override
@@ -81,7 +83,7 @@ public class TaxiCommunicationClient extends Thread{
         stub.leave(leaveMsg, new StreamObserver<LeaveServiceOuterClass.LeaveOk>() {
             @Override
             public void onNext(LeaveServiceOuterClass.LeaveOk value) {
-                System.out.println("[TAXI COMM] Taxi " + t.getId() + " is now aware of my departure.");
+                System.out.println(printInformation("TAXI", t.getId()) + "is now aware of my departure.");
             }
 
             @Override

@@ -4,6 +4,7 @@ import Simulator.Measurement;
 import TaxiPackage.Taxi;
 import beans.TaxiBean;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
+import taxi.communication.handleRideService.HandleRideServiceOuterClass;
 import taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass;
 
 import java.util.List;
@@ -74,6 +75,16 @@ public class Utils {
     }
 
     public static int[] fromMsgToArray(RideRequestOuterClass.RideRequest.Position pMsg) {
+
+        int[] p = new int[2];
+
+        p[0] = pMsg.getX();
+        p[1] = pMsg.getY();
+        return p;
+
+    }
+
+    public static int[] fromMsgToArray(HandleRideServiceOuterClass.RideRequest.Position pMsg) {
 
         int[] p = new int[2];
 
@@ -180,6 +191,49 @@ public class Utils {
 
     public static RechargeTokenServiceOuterClass.RechargeToken createRechargeToken(String district){
         return RechargeTokenServiceOuterClass.RechargeToken.newBuilder().setDistrict(district).build();
+    }
+
+    public static String printInformation(String type, String content){
+        return " [" + type + " " + content + "] ";
+    }
+
+    public static HandleRideServiceOuterClass.ElectionMsg.CandidateMsg createCandidateMsg(Taxi thisTaxi, RideRequestOuterClass.RideRequest request){
+        double distance = computeDistance(thisTaxi.getCurrentP(), fromMsgToArray(request.getStartingPosition()));
+        return HandleRideServiceOuterClass.ElectionMsg.CandidateMsg.newBuilder()
+                .setIdle(thisTaxi.getCurrentStatus() == Taxi.Status.IDLE)
+                .setDistance(distance)
+                .setBatteryLevel(thisTaxi.getBattery())
+                .setId(thisTaxi.getId())
+                .build();
+    }
+
+    public static HandleRideServiceOuterClass.RideRequest translateRideRequest(RideRequestOuterClass.RideRequest request){
+        return HandleRideServiceOuterClass.RideRequest.newBuilder()
+                .setId(request.getId())
+                .setStartingPosition(translatePosition(request.getStartingPosition()))
+                .setDestinationPosition(translatePosition(request.getDestinationPosition()))
+                .build();
+    }
+
+    public static RideRequestOuterClass.RideRequest translateRideRequest(HandleRideServiceOuterClass.RideRequest request){
+        return RideRequestOuterClass.RideRequest .newBuilder()
+                .setId(request.getId())
+                .setStartingPosition(translatePosition(request.getStartingPosition()))
+                .setDestinationPosition(translatePosition(request.getDestinationPosition()))
+                .build();
+    }
+
+    private static HandleRideServiceOuterClass.RideRequest.Position translatePosition(RideRequestOuterClass.RideRequest.Position position){
+        return HandleRideServiceOuterClass.RideRequest.Position.newBuilder()
+                .setX(position.getX())
+                .setY(position.getY())
+                .build();
+    }
+    private static RideRequestOuterClass.RideRequest.Position translatePosition(HandleRideServiceOuterClass.RideRequest.Position position){
+        return RideRequestOuterClass.RideRequest.Position.newBuilder()
+                .setX(position.getX())
+                .setY(position.getY())
+                .build();
     }
 
 }

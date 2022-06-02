@@ -7,6 +7,8 @@ import io.grpc.stub.StreamObserver;
 import taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc;
 import taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass;
 
+import static Utils.Utils.printInformation;
+
 public class TaxiRechargeTokenComm extends Thread{
 
     private final Taxi thisTaxi;
@@ -24,7 +26,7 @@ public class TaxiRechargeTokenComm extends Thread{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            sendToken(thisTaxi, thisTaxi.getTokens().remove());
+            sendToken(thisTaxi, thisTaxi.getTokens().extract());
         }
 
     }
@@ -49,7 +51,7 @@ public class TaxiRechargeTokenComm extends Thread{
         stub.rechargeToken(token, new StreamObserver<RechargeTokenServiceOuterClass.RechargeOk>() {
             @Override
             public void onNext(RechargeTokenServiceOuterClass.RechargeOk value) {
-                System.out.println("Sent [RECHARGE TOKEN " + token.getDistrict() + "]");
+                System.out.println("Sent" + printInformation("RECHARGE TOKEN", token.getDistrict()));
             }
 
             @Override

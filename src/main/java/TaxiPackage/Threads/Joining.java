@@ -16,8 +16,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Stack;
 
-import static Utils.Utils.computeDistrict;
-import static Utils.Utils.extractNextTaxi;
+import static Utils.Utils.*;
 
 
 public class Joining extends TaxiThread {
@@ -42,7 +41,7 @@ public class Joining extends TaxiThread {
         thisTaxi.setTaxiList(taxis.getTaxiList());
         thisTaxi.setCurrentP(taxis.randomCoord());
         thisTaxi.setDistrict(computeDistrict(thisTaxi.getCurrentP()));
-        System.out.println(thisStatus + " Taxi" + thisTaxi.getId() + " joined in " + thisTaxi.getDistrict());
+        System.out.println(thisStatus + printInformation("TAXI", thisTaxi.getId()) + "joined in " + thisTaxi.getDistrict());
         synchronized (thisTaxi.getNextLock()){
             thisTaxi.setNextTaxi(extractNextTaxi(thisTaxi));
         }
@@ -71,12 +70,12 @@ public class Joining extends TaxiThread {
         try {
             clientResponse = webResource.type("application/json").post(ClientResponse.class, input);
         } catch (ClientHandlerException e) {
-            System.out.println("[TAXI MAIN] Join impossible: taxi" + thisTaxi.getId() + "can't reach the server");
+            System.out.println("Join impossible: taxi" + thisTaxi.getId() + "can't reach the server");
             return null;
         }
 
         if(clientResponse.getStatus() == Response.Status.NOT_ACCEPTABLE.getStatusCode()){
-            System.out.println("[TAXI MAIN] Join impossible: duplicated id " + thisTaxi.getId());
+            System.out.println("Join impossible: duplicated id " + thisTaxi.getId());
             return null; // duplicated id
         }
         return new Gson().fromJson(clientResponse.getEntity(String.class), Taxis.class);

@@ -8,6 +8,8 @@ import io.grpc.stub.StreamObserver;
 import taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc;
 import taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass;
 
+import static Utils.Utils.printInformation;
+
 public class RechargeTokenServiceImpl extends RechargeTokenServiceGrpc.RechargeTokenServiceImplBase{
 
     private Taxi thisTaxi;
@@ -19,7 +21,7 @@ public class RechargeTokenServiceImpl extends RechargeTokenServiceGrpc.RechargeT
     @Override
     public void rechargeToken(RechargeTokenServiceOuterClass.RechargeToken request, StreamObserver<RechargeTokenServiceOuterClass.RechargeOk> responseObserver) {
 
-        System.out.println("Received [RECHARGE TOKEN " + request.getDistrict() + "]");
+        System.out.println("Received"+ printInformation("RECHARGE TOKEN", request.getDistrict()));
         thisTaxi.getTokens().add(request);
         responseObserver.onNext(RechargeTokenServiceOuterClass.RechargeOk.newBuilder().build());
 
