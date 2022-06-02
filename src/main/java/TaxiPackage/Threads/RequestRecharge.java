@@ -2,6 +2,7 @@ package TaxiPackage.Threads;
 
 import TaxiPackage.Taxi;
 import TaxiPackage.TaxiRechargeComm;
+import taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass;
 
 import java.util.List;
 
@@ -14,11 +15,11 @@ public class RequestRecharge extends TaxiThread{
     @Override
     public void doStuff() throws InterruptedException {
 
-        TaxiRechargeComm r = new TaxiRechargeComm(thisTaxi);
-        r.start();
-        r.join();
-        makeTransition(Taxi.Status.GO_RECHARGE);
-
+        RechargeTokenServiceOuterClass.RechargeToken rechargeToken = thisTaxi.getTokens().remove();
+        if(rechargeToken.getDistrict() == thisTaxi.getDistrict()){
+            makeTransition(Taxi.Status.GO_RECHARGE);
+        }
+        thisTaxi.getTokens().add(rechargeToken);
     }
 
 }

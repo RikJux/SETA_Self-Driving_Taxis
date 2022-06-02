@@ -2,6 +2,8 @@ package TaxiPackage.Threads;
 
 import TaxiPackage.Taxi;
 import TaxiPackage.TaxiCommunicationClient;
+import TaxiPackage.TaxiRechargeTokenComm;
+import TaxiPackage.TokenQueue;
 import beans.TaxiBean;
 import beans.Taxis;
 import com.google.gson.Gson;
@@ -48,6 +50,13 @@ public class Joining extends TaxiThread {
         TaxiCommunicationClient announceJoinThread = new TaxiCommunicationClient(thisTaxi, true);
         announceJoinThread.start();
         announceJoinThread.join();
+
+        new TaxiRechargeTokenComm(thisTaxi).start();
+
+
+        thisTaxi.setTokens(new TokenQueue(taxis.getTokens()));
+        System.out.println(thisTaxi.getTokens().toString());
+
         makeTransition(Taxi.Status.IDLE);
 
     }

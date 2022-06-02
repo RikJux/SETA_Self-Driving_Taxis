@@ -1,5 +1,7 @@
 package beans;
 
+import taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -8,16 +10,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static Utils.Utils.*;
+
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Taxis {
 
     @XmlElement(name="taxis")
     private List<TaxiBean> taxiList;
+    private boolean tokensGiven = false;
+    private List<RechargeTokenServiceOuterClass.RechargeToken> tokens;
 
     private static Taxis instance;
 
-    private Taxis() {this.taxiList = new ArrayList<TaxiBean>();}
+    private Taxis() {
+        this.taxiList = new ArrayList<TaxiBean>();
+        this.tokens = new ArrayList<RechargeTokenServiceOuterClass.RechargeToken>();
+        tokens.add(RechargeTokenServiceOuterClass.RechargeToken.newBuilder().setDistrict(DISTRICT_1).build());
+        tokens.add(RechargeTokenServiceOuterClass.RechargeToken.newBuilder().setDistrict(DISTRICT_2).build());
+        tokens.add(RechargeTokenServiceOuterClass.RechargeToken.newBuilder().setDistrict(DISTRICT_3).build());
+        tokens.add(RechargeTokenServiceOuterClass.RechargeToken.newBuilder().setDistrict(DISTRICT_4).build());
+    }
 
     public synchronized static Taxis getInstance(){
         if(instance==null)
@@ -42,6 +55,18 @@ public class Taxis {
 
         return isPresent;
 
+    }
+
+    public synchronized List<RechargeTokenServiceOuterClass.RechargeToken> getTokens() {
+        if(taxiList.size() <= 1){
+            return tokens;
+        }else{
+            return new ArrayList<RechargeTokenServiceOuterClass.RechargeToken>();
+        }
+    }
+
+    public void setTokens(List<RechargeTokenServiceOuterClass.RechargeToken> tokens) {
+        this.tokens = tokens;
     }
 
     public synchronized void addTaxi(TaxiBean t){taxiList.add(t);}

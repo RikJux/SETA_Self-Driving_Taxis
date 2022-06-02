@@ -23,9 +23,9 @@ public class Leaving extends TaxiThread{
     public void doStuff() throws InterruptedException {
         Client client = Client.create();
         leaveRequest(client);
-        TaxiCommunicationClient announceJoinThread = new TaxiCommunicationClient(thisTaxi, false);
-        announceJoinThread.start();
-        announceJoinThread.join();
+        TaxiCommunicationClient announceLeaveThread = new TaxiCommunicationClient(thisTaxi, false);
+        announceLeaveThread.start();
+        announceLeaveThread.join();
         for(Thread t: thisTaxi.getTaxiThreads()){
             t.interrupt();
         }

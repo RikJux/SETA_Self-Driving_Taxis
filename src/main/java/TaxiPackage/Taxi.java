@@ -16,6 +16,7 @@ import java.util.*;
 import TaxiPackage.Threads.*;
 import org.eclipse.paho.client.mqttv3.*;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
+import taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass;
 
 import static Utils.Utils.*;
 
@@ -40,6 +41,7 @@ public class Taxi {
     private static String id; // default values
     private static String ip = "localhost";
     private static int port;
+    private TokenQueue tokens;
     private List<TaxiBean> taxiList;
     private TaxiBean nextTaxi;
     private final String topicString = "seta/smartcity/rides/";
@@ -82,12 +84,13 @@ public class Taxi {
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
     public static void main(String args[]) throws InterruptedException {
-        int idOffset = 3;
+        int idOffset = 0;
         port = 1884 + idOffset;
         id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
+        thisTaxi.setTokens(new TokenQueue(new ArrayList<RechargeTokenServiceOuterClass.RechargeToken>()));
 
         Client client = Client.create();
 
@@ -102,6 +105,7 @@ public class Taxi {
                 add(new GoRecharge(thisTaxi, Status.GO_RECHARGE, statusLock));
                 add(new Working(thisTaxi, Status.WORKING, statusLock));
                 add(new TaxiCommunicationServer(thisTaxi));
+                //add(new TaxiRechargeTokenComm(thisTaxi));
                 add(pm10);
                 add(new Sensor(thisTaxi, pm10, client));
             }
@@ -336,25 +340,11 @@ public class Taxi {
         Taxi.nextLock = nextLock;
     }
 
-    private static Taxis joinRequest(Client client){
-        ClientResponse clientResponse = null;
-
-        TaxiBean t = new TaxiBean(id, ip, port);
-        WebResource webResource = client.resource(joinPath);
-        String input = new Gson().toJson(t);
-
-        try {
-            clientResponse = webResource.type("application/json").post(ClientResponse.class, input);
-        } catch (ClientHandlerException e) {
-            System.out.println("[TAXI MAIN] Join impossible: taxi" + id + "can't reach the server");
-            return null;
-        }
-
-        if(clientResponse.getStatus() == Response.Status.NOT_ACCEPTABLE.getStatusCode()){
-            System.out.println("[TAXI MAIN] Join impossible: duplicated id " + id);
-            return null; // duplicated id
-        }
-        return new Gson().fromJson(clientResponse.getEntity(String.class), Taxis.class);
+    public TokenQueue getTokens() {
+        return tokens;
     }
 
+    public void setTokens(TokenQueue tokens) {
+        this.tokens = tokens;
+    }
 }

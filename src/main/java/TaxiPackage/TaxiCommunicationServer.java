@@ -1,9 +1,6 @@
 package TaxiPackage;
 
-import TaxiPackage.Impl.HandleRideServiceImpl;
-import TaxiPackage.Impl.JoinServiceImpl;
-import TaxiPackage.Impl.LeaveServiceImpl;
-import TaxiPackage.Impl.RechargeServiceImpl;
+import TaxiPackage.Impl.*;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
@@ -26,7 +23,7 @@ public class TaxiCommunicationServer extends Thread{
                     .addService(new JoinServiceImpl(thisTaxi))
                     .addService(new LeaveServiceImpl(thisTaxi))
                     .addService(new HandleRideServiceImpl(thisTaxi))
-                    .addService(new RechargeServiceImpl(thisTaxi))
+                    .addService(new RechargeTokenServiceImpl(thisTaxi))
                     .build();
 
             server.start();

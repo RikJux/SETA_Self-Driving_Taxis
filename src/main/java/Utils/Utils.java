@@ -150,7 +150,7 @@ public class Utils {
             if(thisId > id){
                 resultingNext = joinTaxiBean;
             }else{
-                if(nextId < id){
+                if(nextId <= id){
                     resultingNext = joinTaxiBean;
                 }
             }
