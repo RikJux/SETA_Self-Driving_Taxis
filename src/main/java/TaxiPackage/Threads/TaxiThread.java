@@ -23,6 +23,13 @@ public abstract class TaxiThread extends Thread {
         synchronized (syncObj){
             try {
                 while(thisTaxi.getCurrentStatus() != thisStatus){
+                    if(!thisTaxi.isInitialized()){
+                        if(thisTaxi.getWaitingThreads() < 5){
+                            thisTaxi.setWaitingThreads();
+                            System.out.println(thisTaxi.getWaitingThreads());
+                            syncObj.notifyAll();
+                        }
+                    }
                     syncObj.wait();
                     if (thisTaxi.getCurrentStatus() == thisStatus) {
                         System.out.println(thisStatus + " acquired the lock.");

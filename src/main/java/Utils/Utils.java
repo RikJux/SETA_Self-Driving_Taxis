@@ -109,9 +109,9 @@ public class Utils {
         Thread.sleep((long) (time * 1000));
         double distance = computeDistance(startingP, destinationP);
         taxi.setCurrentP(destinationP);
+        taxi.setDistrict(computeDistrict(destinationP));
         taxi.lowerBattery(distance);
         taxi.addKilometers(distance);
-        taxi.setDistrict(computeDistrict(destinationP));
         if (accomplished) {
             taxi.addRideAccomplished();
             System.out.println("[TAXI DRIVER] Taxi " + taxi.getId() + " fulfilled request " + requestId);

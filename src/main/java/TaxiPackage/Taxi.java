@@ -64,6 +64,8 @@ public class Taxi {
     private static List<Thread> taxiThreads;
     private boolean receivedManualInput = false;
     private TaxiMQTT taxiMQTT;
+    private int waitingThreads = 0;
+    private boolean initialized = false;
 
     public Input getInput() {
         return input;
@@ -125,18 +127,12 @@ public class Taxi {
         }
 
         synchronized (statusLock) {
-            String userInput = null;
-            Scanner in = new Scanner(System.in);
-            while(thisTaxi.getCurrentStatus() == null){
-                System.out.println("Type [join] to join the system");
-                userInput = in.nextLine();
-                if(userInput.equals("join")){
-                    thisTaxi.setCurrentStatus(Status.JOINING);
-                    break;
-                }else{
-                    userInput = null;
+            while(thisTaxi.getWaitingThreads() < 5){
+                System.out.println("Waiting for all threads to wait");
+                    statusLock.wait();
                 }
-            }
+            thisTaxi.setInitialized();
+            thisTaxi.setCurrentStatus(Status.JOINING);
             statusLock.notifyAll();
         }
 
@@ -390,6 +386,36 @@ public class Taxi {
 
     public void setTaxiMQTT(TaxiMQTT taxiMQTT) {
         this.taxiMQTT = taxiMQTT;
+    }
+
+    public int getWaitingThreads() {
+        return waitingThreads;
+    }
+
+    public void setWaitingThreads() {
+        this.waitingThreads++;
+    }
+
+    public void initialize(){ // called within threads with the lock acquired
+        if(getWaitingThreads() < 5){
+            setWaitingThreads();
+            try {
+                statusLock.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }else{
+            statusLock.notifyAll();
+            waitingThreads = 0;
+        }
+    }
+
+    public void setInitialized() {
+        this.initialized = true;
+    }
+
+    public boolean isInitialized() {
+        return initialized;
     }
 }
 

@@ -1,7 +1,16 @@
 Simulator/Buffer.java
  Simulator.Buffer
-TaxiPackage/Threads/GoRecharge.java
- TaxiPackage.Threads.GoRecharge
+taxi/communication/rechargeTokenService/RechargeTokenServiceOuterClass.java
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$1
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOk
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOk$1
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOk$Builder
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOkOrBuilder
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeToken
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeToken$1
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeToken$Builder
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeTokenOrBuilder
 taxi/communication/rechargeService/RechargeServiceGrpc.java
  taxi.communication.rechargeService.RechargeServiceGrpc
  taxi.communication.rechargeService.RechargeServiceGrpc$1
@@ -57,8 +66,8 @@ taxi/communication/rechargeTokenService/RechargeTokenServiceGrpc.java
  taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$RechargeTokenServiceImplBase
  taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$RechargeTokenServiceMethodDescriptorSupplier
  taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$RechargeTokenServiceStub
-TaxiPackage/Threads/Working.java
- TaxiPackage.Threads.Working
+beans/TaxiStatistics.java
+ beans.TaxiStatistics
 services/TaxiManagement.java
  services.TaxiManagement
 taxi/communication/handleRideService/HandleRideServiceOuterClass.java
@@ -94,8 +103,10 @@ taxi/communication/handleRideService/HandleRideServiceOuterClass.java
  taxi.communication.handleRideService.HandleRideServiceOuterClass$RideRequestOrBuilder
 TaxiPackage/TaxiCommunicationServer.java
  TaxiPackage.TaxiCommunicationServer
-TaxiPackage/Threads/RequestRecharge.java
- TaxiPackage.Threads.RequestRecharge
+TaxiPackage/TaxiCommunicationClient.java
+ TaxiPackage.TaxiCommunicationClient
+ TaxiPackage.TaxiCommunicationClient$1
+ TaxiPackage.TaxiCommunicationClient$2
 taxi/communication/rechargeService/RechargeServiceOuterClass.java
  taxi.communication.rechargeService.RechargeServiceOuterClass
  taxi.communication.rechargeService.RechargeServiceOuterClass$1
@@ -147,11 +158,9 @@ TaxiPackage/Taxi.java
  TaxiPackage.Taxi$1
  TaxiPackage.Taxi$Input
  TaxiPackage.Taxi$Status
-TaxiPackage/Threads/Idle.java
- TaxiPackage.Threads.Idle
- TaxiPackage.Threads.Idle$1
- TaxiPackage.Threads.Idle$2
- TaxiPackage.Threads.Idle$3
+TaxiPackage/TaxiRechargeTokenComm.java
+ TaxiPackage.TaxiRechargeTokenComm
+ TaxiPackage.TaxiRechargeTokenComm$1
 TaxiPackage/TaxiMQTT.java
  TaxiPackage.TaxiMQTT
  TaxiPackage.TaxiMQTT$1
@@ -160,8 +169,17 @@ TaxiPackage/Sensor.java
  TaxiPackage.Sensor
 Simulator/Simulator.java
  Simulator.Simulator
-TaxiPackage/Threads/Joining.java
- TaxiPackage.Threads.Joining
+taxi/communication/joinService/JoinServiceGrpc.java
+ taxi.communication.joinService.JoinServiceGrpc
+ taxi.communication.joinService.JoinServiceGrpc$1
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceBaseDescriptorSupplier
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceBlockingStub
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceFileDescriptorSupplier
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceFutureStub
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceImplBase
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceMethodDescriptorSupplier
+ taxi.communication.joinService.JoinServiceGrpc$JoinServiceStub
+ taxi.communication.joinService.JoinServiceGrpc$MethodHandlers
 TaxiPackage/ElectionIdentifier.java
  TaxiPackage.ElectionIdentifier
 seta/smartcity/rideRequest/RideRequestOuterClass.java
@@ -175,8 +193,8 @@ seta/smartcity/rideRequest/RideRequestOuterClass.java
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$Position$Builder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$PositionOrBuilder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequestOrBuilder
-TaxiPackage/Threads/Leaving.java
- TaxiPackage.Threads.Leaving
+Simulator/PM10Simulator.java
+ Simulator.PM10Simulator
 Simulator/SimulatorData.java
  Simulator.SimulatorData
 TaxiPackage/Impl/JoinServiceImpl.java
@@ -196,42 +214,24 @@ taxi/communication/joinService/JoinServiceOuterClass.java
  taxi.communication.joinService.JoinServiceOuterClass$JoinOk$1
  taxi.communication.joinService.JoinServiceOuterClass$JoinOk$Builder
  taxi.communication.joinService.JoinServiceOuterClass$JoinOkOrBuilder
-TaxiPackage/Threads/TaxiThread.java
- TaxiPackage.Threads.TaxiThread
-AdministratorPackage/AdministratorClient.java
- AdministratorPackage.AdministratorClient
-taxi/communication/joinService/JoinServiceGrpc.java
- taxi.communication.joinService.JoinServiceGrpc
- taxi.communication.joinService.JoinServiceGrpc$1
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceBaseDescriptorSupplier
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceBlockingStub
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceFileDescriptorSupplier
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceFutureStub
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceImplBase
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceMethodDescriptorSupplier
- taxi.communication.joinService.JoinServiceGrpc$JoinServiceStub
- taxi.communication.joinService.JoinServiceGrpc$MethodHandlers
-TaxiPackage/TaxiCommunicationClient.java
- TaxiPackage.TaxiCommunicationClient
- TaxiPackage.TaxiCommunicationClient$1
- TaxiPackage.TaxiCommunicationClient$2
-beans/TaxiStatistics.java
- beans.TaxiStatistics
-TaxiPackage/TaxiRechargeTokenComm.java
- TaxiPackage.TaxiRechargeTokenComm
- TaxiPackage.TaxiRechargeTokenComm$1
 Simulator/Measurement.java
  Simulator.Measurement
-Simulator/PM10Simulator.java
- Simulator.PM10Simulator
-taxi/communication/rechargeTokenService/RechargeTokenServiceOuterClass.java
- taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass
- taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$1
- taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOk
- taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOk$1
- taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOk$Builder
- taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOkOrBuilder
- taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeToken
- taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeToken$1
- taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeToken$Builder
- taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeTokenOrBuilder
+AdministratorPackage/AdministratorClient.java
+ AdministratorPackage.AdministratorClient
+TaxiPackage/Threads/GoRecharge.java
+ TaxiPackage.Threads.GoRecharge
+TaxiPackage/Threads/Leaving.java
+ TaxiPackage.Threads.Leaving
+TaxiPackage/Threads/TaxiThread.java
+ TaxiPackage.Threads.TaxiThread
+TaxiPackage/Threads/Idle.java
+ TaxiPackage.Threads.Idle
+ TaxiPackage.Threads.Idle$1
+ TaxiPackage.Threads.Idle$2
+ TaxiPackage.Threads.Idle$3
+TaxiPackage/Threads/Working.java
+ TaxiPackage.Threads.Working
+TaxiPackage/Threads/RequestRecharge.java
+ TaxiPackage.Threads.RequestRecharge
+TaxiPackage/Threads/Joining.java
+ TaxiPackage.Threads.Joining
