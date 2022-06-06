@@ -10,7 +10,7 @@ import java.util.List;
 
 import static Utils.Utils.*;
 
-public class Working extends TaxiThread{
+public class Working extends TaxiThread {
     public Working(Taxi thisTaxi, Taxi.Status thisStatus, Object syncObj) {
         super(thisTaxi, thisStatus, syncObj);
         this.nextStatus.add(Taxi.Status.IDLE);
@@ -27,7 +27,7 @@ public class Working extends TaxiThread{
     @Override
     public void doStuff() throws InterruptedException {
 
-        if(!isConnected){
+        if (!isConnected) {
             try {
                 client = initiateMqttClient();
                 client.connect();
@@ -39,26 +39,32 @@ public class Working extends TaxiThread{
 
         RideRequestOuterClass.RideRequest requestToHandle = thisTaxi.getReqToHandle();
         String requestId = requestToHandle.getId();
+
         int[] startingP = fromMsgToArray(requestToHandle.getStartingPosition());
         int[] destinationP = fromMsgToArray(requestToHandle.getDestinationPosition());
 
         System.out.println(thisStatus + printInformation("TAXI", thisTaxi.getId())
-                + " located at " + thisTaxi.getX() + ", " + thisTaxi.getY() + " accepted request " + requestId
+                + " located at " + thisTaxi.getX() + ", " + thisTaxi.getY() + " accepted" + printInformation("REQUEST", requestId)
                 + " from " + getCoordX(startingP) + ", " + getCoordY(startingP)
                 + " to " + getCoordX(destinationP) + ", " + getCoordY(destinationP));
 
         travel(thisTaxi.getCurrentP(), startingP, requestId, thisTaxi, false, 2.5f); // reach the user
         travel(startingP, destinationP, requestId, thisTaxi, true, 2.5f); // reach the final destination
 
-        if(thisTaxi.getBattery() <= 30){ // after driving
-            System.out.println(thisStatus +  printInformation("TAXI", thisTaxi.getId()) + "needs recharge.");
+        if (thisTaxi.getBattery() <= 30) { // after driving
+            System.out.println(thisStatus + printInformation("TAXI", thisTaxi.getId()) + "needs recharge.");
             thisTaxi.setRechargeRequestTimestamp(System.currentTimeMillis());
             makeTransition(Taxi.Status.REQUEST_RECHARGE);
         } else {
+            synchronized (thisTaxi.getInputLock()){
+                thisTaxi.setInput(null);
+                thisTaxi.setReqToHandle(null);
+            }
             makeTransition(Taxi.Status.IDLE);
         }
 
     }
+
 
     private MqttClient initiateMqttClient() throws MqttException {
         MqttClient mqttClient = new MqttClient(broker, MqttClient.generateClientId(), null);

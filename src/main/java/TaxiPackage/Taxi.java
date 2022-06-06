@@ -43,7 +43,7 @@ public class Taxi {
     private static int port;
     private TokenQueue tokens;
     private List<TaxiBean> taxiList;
-    private ElectionData electionData;
+    private ElectionDataStructure electionData;
     private TaxiBean nextTaxi;
     private final String topicString = "seta/smartcity/rides/";
     private final double chargeThreshold = 30; // if battery is below this value, go recharge
@@ -85,14 +85,14 @@ public class Taxi {
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
     public static void main(String args[]) throws InterruptedException {
-        int idOffset = 1;
+        int idOffset = 0;
         port = 1884 + idOffset;
         id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
         thisTaxi.setTokens(new TokenQueue(new ArrayList<RechargeTokenServiceOuterClass.RechargeToken>()));
-        thisTaxi.setElectionData(new ElectionData(thisTaxi));
+        thisTaxi.setElectionData(new ElectionDataStructure(thisTaxi));
 
         Client client = Client.create();
 
@@ -315,15 +315,13 @@ public class Taxi {
 
     private static void manualInput(Taxi thisTaxi, Input input) throws InterruptedException {
         synchronized (inputLock){
-            if(thisTaxi.getInput() != null){
+            while(thisTaxi.getInput() != null){
                 inputLock.wait();
             }
-            if(thisTaxi.getInput() == null){
-                thisTaxi.setInput(input);
-                inputLock.notifyAll();
+            thisTaxi.setInput(input);
+            inputLock.notifyAll();
             }
         }
-    }
 
     public TaxiBean getNextTaxi() {
         return nextTaxi;
@@ -350,12 +348,16 @@ public class Taxi {
         this.tokens = tokens;
     }
 
-    public ElectionData getElectionData() {
+    public ElectionDataStructure getElectionData() {
         return electionData;
     }
 
-    public void setElectionData(ElectionData electionData) {
+    public void setElectionData(ElectionDataStructure electionData) {
         this.electionData = electionData;
+    }
+
+    public static Object getStatusLock() {
+        return statusLock;
     }
 }
 

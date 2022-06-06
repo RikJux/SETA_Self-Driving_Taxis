@@ -24,14 +24,14 @@ public class ElectionData {
                     .setCandidateMsg(createCandidateMsg(request))
                     .build();
             this.elections.put(request.getId(), myElectionMsg);
-            return true;
+            return false;
         }
-        return false; // the taxi was already participant
+        return true; // the taxi was already participant
     }
 
     public synchronized ElectionMsg computeElectionMsg(ElectionMsg otherElectionMsg){
 
-        markParticipant(translateRideRequest(otherElectionMsg.getRequest()));
+        boolean alreadyParticipant = markParticipant(translateRideRequest(otherElectionMsg.getRequest()));
         String requestId = otherElectionMsg.getRequest().getId();
 
         ElectionMsg myElectionMsg = this.elections.get(requestId);
@@ -42,20 +42,25 @@ public class ElectionData {
         if(comparison > 0){
             return myElectionMsg;
         }else if(comparison < 0){
-            return otherElectionMsg;
-        }else{
+            if(!alreadyParticipant){
+                return otherElectionMsg;
+            }else{
+                return null;
+            }
+        }else{ // received its own ELECTION
             markNonParticipant(requestId);
             return null;
         }
     }
 
     private void markNonParticipant(String requestId){
-        this.elections.remove(requestId);
+
+        translateRideRequest(this.elections.remove(requestId).getRequest());
     }
 
     public synchronized void markNonParticipant(ElectedMsg electedMsg){
-        if(this.elections.containsKey(electedMsg.getRideRequestId())){
-            markNonParticipant(electedMsg.getRideRequestId());
+        if(this.elections.containsKey(electedMsg.getRequest().getId())){
+            markNonParticipant(electedMsg.getRequest().getId());
         }
     }
 

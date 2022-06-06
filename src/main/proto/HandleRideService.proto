@@ -31,13 +31,13 @@ message ElectionMsg{
 }
 
 message ElectedMsg{
-  string rideRequestId = 1;
+  RideRequest request = 1;
   string taxiId = 2;
 }
 
-message ElectionOk{} // send to the taxi that is a worse candidate
+message ElectionOk{}
 
-message ElectedOK{} // notify all taxis if win election.
+message ElectedOK{}
 
 service HandleRideService{
   rpc election (ElectionMsg) returns (ElectionOk);

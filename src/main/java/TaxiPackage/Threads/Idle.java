@@ -1,5 +1,6 @@
 package TaxiPackage.Threads;
 
+import TaxiPackage.ElectedThread;
 import TaxiPackage.Taxi;
 import beans.TaxiBean;
 import io.grpc.ManagedChannel;
@@ -40,11 +41,7 @@ public class Idle extends TaxiThread{
                 client.connect();
                 isConnected = true;
             }
-            synchronized (inputLock){
-                thisTaxi.setInput(null);
-            }
             subscribe(client);
-            thisTaxi.setReqToHandle(null);
             synchronized (thisTaxi.getRechargeTimestampLock()){
                 thisTaxi.setRechargeRequestTimestamp(Double.MAX_VALUE); // GO_RECHARGE
             }
@@ -52,11 +49,27 @@ public class Idle extends TaxiThread{
             client.publish(availableTopic+thisTaxi.getDistrict(), new MqttMessage("".getBytes()));
             System.out.println("Made taxi available at " + availableTopic+thisTaxi.getDistrict());
 
+            new Thread(() -> {
+                for(HandleRideServiceOuterClass.ElectionMsg electionMsg: thisTaxi.getElectionData().getElected()) {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    forwardMessage(thisTaxi, electionMsg);
+                }
+            }).start();
+
             synchronized (inputLock){
                 while(thisTaxi.getCurrentStatus() == Taxi.Status.IDLE){
                     if(thisTaxi.getInput() == null){
                         System.out.println("Waiting for input.");
                         inputLock.wait();
+                        if(thisTaxi.getInput() == null){
+                            thisTaxi.setInput(Taxi.Input.WORK);
+                            thisTaxi.setReqToHandle(thisTaxi.getElectionData().getRequestToHandle());
+                            System.out.println("To handle " + thisTaxi.getReqToHandle());
+                        }
                     }
                     if(thisTaxi.getInput() != null){
                         System.out.println("Arrived [INPUT " + thisTaxi.getInput() + "]");
@@ -119,11 +132,16 @@ public class Idle extends TaxiThread{
                 RideRequestOuterClass.RideRequest receivedMessage = RideRequestOuterClass.RideRequest.parseFrom(message.getPayload());
                 System.out.println("Arrived" + printInformation("REQUEST", receivedMessage.getId()));
                 //TODO start the election
-                HandleRideServiceOuterClass.ElectionMsg myElectionMsg = HandleRideServiceOuterClass.ElectionMsg.newBuilder()
-                        .setRequest(translateRideRequest(receivedMessage))
-                        .setCandidateMsg(createCandidateMsg(thisTaxi, receivedMessage))
-                        .build();
-                forwardMessage(thisTaxi, myElectionMsg);
+                switch (thisTaxi.getElectionData().decideWhatToSend(receivedMessage)){
+                    case NOTHING:
+                        break;
+                    case SELF_ELECTION:
+                        thisTaxi.getElectionData().markParticipant(receivedMessage);
+                        HandleRideServiceOuterClass.ElectionMsg myElectionMsg = thisTaxi.getElectionData()
+                                .computeElectionMsg(receivedMessage.getId());
+                        forwardMessage(thisTaxi, myElectionMsg);
+                        break;
+                }
 
             }
 
@@ -167,7 +185,7 @@ public class Idle extends TaxiThread{
         stub.election(electionMsg, new StreamObserver<HandleRideServiceOuterClass.ElectionOk>() {
             @Override
             public void onNext(HandleRideServiceOuterClass.ElectionOk value) {
-                System.out.println("Sent"+ printInformation("ELECTION", electionMsg.getRequest().getId()));
+                //System.out.println("Sent"+ printInformation("ELECTION", electionMsg.getRequest().getId()));
             }
 
             @Override
