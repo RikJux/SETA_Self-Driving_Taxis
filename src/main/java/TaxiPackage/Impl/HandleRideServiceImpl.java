@@ -1,20 +1,13 @@
 package TaxiPackage.Impl;
 
-import TaxiPackage.ElectionData;
-import TaxiPackage.ElectionDataStructure;
 import TaxiPackage.ElectionHandle;
 import TaxiPackage.Taxi;
 import beans.TaxiBean;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
-import seta.smartcity.rideRequest.RideRequestOuterClass;
 import taxi.communication.handleRideService.HandleRideServiceGrpc;
 import taxi.communication.handleRideService.HandleRideServiceOuterClass;
-import taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc;
-import taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass;
-
-import java.util.Random;
 
 import static Utils.Utils.*;
 
@@ -55,7 +48,7 @@ public class HandleRideServiceImpl extends HandleRideServiceGrpc.HandleRideServi
 
         if(electedMsg == null){
             synchronized (inputLock){
-                if(electionHandle.getThisTaxi().getInput() == null){
+                if(electionHandle.getThisTaxi().getInput() == null){// && !electionHandle.getThisTaxi().isReceivedManualInput()){
                     electionHandle.getThisTaxi().setReqToHandle(translateRideRequest(request.getRequest()));
                     electionHandle.getThisTaxi().setInput(Taxi.Input.WORK);
                 }

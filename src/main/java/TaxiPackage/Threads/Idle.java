@@ -1,6 +1,5 @@
 package TaxiPackage.Threads;
 
-import TaxiPackage.ElectedThread;
 import TaxiPackage.Taxi;
 import beans.TaxiBean;
 import io.grpc.ManagedChannel;
@@ -10,9 +9,6 @@ import org.eclipse.paho.client.mqttv3.*;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
 import taxi.communication.handleRideService.HandleRideServiceGrpc;
 import taxi.communication.handleRideService.HandleRideServiceOuterClass;
-
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 import static Utils.Utils.*;
 
@@ -36,44 +32,19 @@ public class Idle extends TaxiThread{
     @Override
     public void doStuff() throws InterruptedException{
         try {
-            if(!isConnected){
-                client = initiateMqttClient();
-                client.connect();
-                isConnected = true;
-            }
-            subscribe(client);
-            synchronized (thisTaxi.getRechargeTimestampLock()){
-                thisTaxi.setRechargeRequestTimestamp(Double.MAX_VALUE); // GO_RECHARGE
-            }
-
-            client.publish(availableTopic+thisTaxi.getDistrict(), new MqttMessage("".getBytes()));
-            System.out.println("Made taxi available at " + availableTopic+thisTaxi.getDistrict());
-
-            new Thread(() -> {
-                for(HandleRideServiceOuterClass.ElectionMsg electionMsg: thisTaxi.getElectionData().getElected()) {
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    forwardMessage(thisTaxi, electionMsg);
-                }
-            }).start();
 
             synchronized (inputLock){
                 while(thisTaxi.getCurrentStatus() == Taxi.Status.IDLE){
                     if(thisTaxi.getInput() == null){
+                        thisTaxi.getTaxiMQTT().subscribe();
+                        thisTaxi.getTaxiMQTT().publishAvailability();
                         System.out.println("Waiting for input.");
                         inputLock.wait();
-                        if(thisTaxi.getInput() == null){
-                            thisTaxi.setInput(Taxi.Input.WORK);
-                            thisTaxi.setReqToHandle(thisTaxi.getElectionData().getRequestToHandle());
-                            System.out.println("To handle " + thisTaxi.getReqToHandle());
-                        }
                     }
                     if(thisTaxi.getInput() != null){
-                        System.out.println("Arrived [INPUT " + thisTaxi.getInput() + "]");
-                        unsubscribe(client);
+                        inputLock.notifyAll();
+                        System.out.println("Arrived INPUT " + thisTaxi.getInput());
+                        thisTaxi.getTaxiMQTT().unsubscribe();
                         switch (thisTaxi.getInput()){
                             case QUIT:
                                 makeTransition(Taxi.Status.LEAVING);
@@ -91,7 +62,6 @@ public class Idle extends TaxiThread{
                         }
                     }
                 }
-                inputLock.notifyAll();
             }
 
         } catch (Exception e) { // MqttException
@@ -105,15 +75,6 @@ public class Idle extends TaxiThread{
         super.makeTransition(s);
         thisTaxi.setInput(null);
         inputLock.notifyAll();
-    }
-
-    private void publishToHandleRequest() throws MqttException{
-        RideRequestOuterClass.RideRequest payload = thisTaxi.getReqToHandle();
-        String destDist = computeDistrict(new int[]{payload.getStartingPosition().getX(), payload.getStartingPosition().getX()});
-        MqttMessage message = new MqttMessage(payload.toByteArray());
-        message.setQos(1);
-        client.publish(handledTopic+destDist, message);
-        System.out.println(printInformation("REQUEST", payload.getId()) + "will handled at " + handledTopic+destDist);
     }
 
     private MqttClient initiateMqttClient() throws MqttException {

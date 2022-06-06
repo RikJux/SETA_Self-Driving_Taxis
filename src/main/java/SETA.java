@@ -43,23 +43,25 @@ public class SETA {
                 if(topic.contains(handledTopic)){
 
                     RideRequest handledMessage = RideRequestOuterClass.RideRequest.parseFrom(message.getPayload());
-                    System.out.println("[REQUEST : " + handledMessage.getId() + "] is being handled.");
+                    System.out.println(printInformation("REQUEST", handledMessage.getId()) + "is being handled.");
 
+                    boolean ok;
                     synchronized (unhandledLock){
-                        boolean ok = unhandledRequests.get(computeDistrict(handledMessage)).remove(handledMessage);
-                        if(ok){
-                            System.out.println("Correctly removed [REQUEST : " + handledMessage.getId() + "]");
-                        }else{
-                            System.out.println("Something wrong in removing [REQUEST : " + handledMessage.getId() + "]");
-                        }
+                        ok = unhandledRequests.get(computeDistrict(handledMessage)).remove(handledMessage);
                     }
+                    if(ok){
+                        System.out.println("Correctly removed" + printInformation("REQUEST", handledMessage.getId()));
+                    }else{
+                        System.out.println("Something wrong in removing" + printInformation("REQUEST", handledMessage.getId()));
+                    }
+
 
                 } else if (topic.contains(availableTopic)) {
 
                     String dist = fetchDistrictFromTopic(topic, availableTopic);
-                    List<RideRequest> toSend = new ArrayList<RideRequest>();
+                    List<RideRequest> toSend;
                     synchronized (unhandledLock){
-                        toSend = unhandledRequests.get(dist);
+                        toSend = new ArrayList<RideRequest>(unhandledRequests.get(dist));
                     }
                     publishManyRequests(toSend, client);
 
@@ -85,18 +87,18 @@ public class SETA {
 
         new Thread(() -> {
             int id = 0;
-            while (id > -1) {
+            while (true) {
                 try {
                     Thread.sleep(5000); // generate 2 requests each 5 seconds
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 for (int i = 0; i < 2; i++) {
+                    RideRequest r = generateRideRequest(rand, id++);
                     synchronized (unhandledLock){
-                        RideRequest r = generateRideRequest(rand, id++);
                         unhandledRequests.get(computeDistrict(r)).add(r);
-                        System.out.println("[REQUEST : " + r.getId() + "] put in unhandled data structure.");
                     }
+                    System.out.println(printInformation("REQUEST", r.getId()) + "put in unhandled data structure");
                 }
             }
         }).start();
@@ -107,8 +109,11 @@ public class SETA {
 
         for(RideRequest r: toSend){
             try {
+                Thread.sleep(1000);
                 publishRequest(r, client, ridesTopic);
             } catch (MqttException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -117,11 +122,11 @@ public class SETA {
 
     private static void publishRequest(RideRequest payload, MqttClient client, String topic) throws MqttException {
 
-        String destDist = computeDistrict(payload);
+        String dist = computeDistrict(payload);
         MqttMessage message = new MqttMessage(payload.toByteArray());
         message.setQos(1);
-        client.publish(topic+destDist, message);
-        System.out.println("[REQUEST : " + payload.getId() + "] published.");
+        client.publish(topic+dist, message);
+        System.out.println(printInformation("REQUEST", payload.getId()) + "published");
 
     }
 

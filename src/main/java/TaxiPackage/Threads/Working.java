@@ -43,7 +43,7 @@ public class Working extends TaxiThread {
         String requestId = requestToHandle.getId();
 
         try {
-            publishToHandleRequest(requestToHandle);
+            thisTaxi.getTaxiMQTT().publishToHandleRequest(requestToHandle);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -61,12 +61,11 @@ public class Working extends TaxiThread {
 
         if (thisTaxi.getBattery() <= 30) { // after driving
             System.out.println(thisStatus + printInformation("TAXI", thisTaxi.getId()) + "needs recharge.");
-            thisTaxi.setRechargeRequestTimestamp(System.currentTimeMillis());
             makeTransition(Taxi.Status.REQUEST_RECHARGE);
         } else {
             synchronized (thisTaxi.getInputLock()){
-                thisTaxi.setInput(null);
                 thisTaxi.setReqToHandle(null);
+                thisTaxi.getInputLock().notifyAll();
             }
             makeTransition(Taxi.Status.IDLE);
         }

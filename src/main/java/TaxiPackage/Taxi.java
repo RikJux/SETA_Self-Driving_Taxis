@@ -43,7 +43,6 @@ public class Taxi {
     private static int port;
     private TokenQueue tokens;
     private List<TaxiBean> taxiList;
-    private ElectionDataStructure electionData;
     private ElectionHandle electionHandle;
     private TaxiBean nextTaxi;
     private final String topicString = "seta/smartcity/rides/";
@@ -63,6 +62,8 @@ public class Taxi {
     private static Object rechargeTimestampLock = new Object();
     private static Object nextLock = new Object();
     private static List<Thread> taxiThreads;
+    private boolean receivedManualInput = false;
+    private TaxiMQTT taxiMQTT;
 
     public Input getInput() {
         return input;
@@ -86,15 +87,19 @@ public class Taxi {
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
     public static void main(String args[]) throws InterruptedException {
-        int idOffset = 3;
+        int idOffset = 0;
         port = 1884 + idOffset;
         id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
         thisTaxi.setTaxiStats(new TaxiStatistics(id));
         thisTaxi.setBattery(100.0);
         thisTaxi.setTokens(new TokenQueue(new ArrayList<RechargeTokenServiceOuterClass.RechargeToken>()));
-        thisTaxi.setElectionData(new ElectionDataStructure(thisTaxi));
         thisTaxi.setElectionHandle(new ElectionHandle(thisTaxi));
+        try {
+            thisTaxi.setTaxiMQTT(new TaxiMQTT(thisTaxi));
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
 
         Client client = Client.create();
 
@@ -141,15 +146,24 @@ public class Taxi {
         while (userInput == null) {
             System.out.println("Type [quit] to exit the system or [recharge] to go to recharge");
             userInput = in.nextLine();
-            if (userInput.equals("quit")) {
-                manualInput(thisTaxi, Input.QUIT);
-                return;
+            synchronized (inputLock){
+                //thisTaxi.setReceivedManualInput(true);
+                if (userInput.equals("quit")) {
+                    while(thisTaxi.getInput() != null){
+                        inputLock.wait();
+                    }
+                    thisTaxi.setInput(Input.QUIT);
+                    return;
+                }
+                if(userInput.equals("recharge")){
+                    while(thisTaxi.getInput() != null){
+                        inputLock.wait();
+                    }
+                    thisTaxi.setInput(Input.RECHARGE);
+                }
+                //thisTaxi.setReceivedManualInput(false);
+                inputLock.notifyAll();
             }
-
-            if(userInput.equals("recharge")){
-                manualInput(thisTaxi, Input.RECHARGE);
-            }
-
             userInput = null;
         }
 
@@ -350,14 +364,6 @@ public class Taxi {
         this.tokens = tokens;
     }
 
-    public ElectionDataStructure getElectionData() {
-        return electionData;
-    }
-
-    public void setElectionData(ElectionDataStructure electionData) {
-        this.electionData = electionData;
-    }
-
     public static Object getStatusLock() {
         return statusLock;
     }
@@ -368,6 +374,22 @@ public class Taxi {
 
     public void setElectionHandle(ElectionHandle electionHandle) {
         this.electionHandle = electionHandle;
+    }
+
+    public boolean isReceivedManualInput() {
+        return receivedManualInput;
+    }
+
+    public void setReceivedManualInput(boolean receivedManualInput) {
+        this.receivedManualInput = receivedManualInput;
+    }
+
+    public TaxiMQTT getTaxiMQTT() {
+        return taxiMQTT;
+    }
+
+    public void setTaxiMQTT(TaxiMQTT taxiMQTT) {
+        this.taxiMQTT = taxiMQTT;
     }
 }
 
