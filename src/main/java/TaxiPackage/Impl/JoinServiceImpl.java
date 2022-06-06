@@ -28,6 +28,7 @@ public class JoinServiceImpl extends JoinServiceGrpc.JoinServiceImplBase {
             System.out.println("[JOIN SRV] Taxi "+ request.getId() + " was added to taxi list.");
             synchronized (thisTaxi.getNextLock()){
                 thisTaxi.setNextTaxi(updateNextOnJoin(thisTaxi, joinTaxiBean));
+                thisTaxi.getNextLock().notifyAll();
             }
         }
 

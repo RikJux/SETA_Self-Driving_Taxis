@@ -27,6 +27,7 @@ public class LeaveServiceImpl extends LeaveServiceGrpc.LeaveServiceImplBase {
                     System.out.println("[LEAVE SRV] Taxi " + request.getId() + " was removed from taxi list.");
                     synchronized (thisTaxi.getNextLock()){
                         thisTaxi.setNextTaxi(updateNextOnLeave(thisTaxi, request.getId()));
+                        thisTaxi.getNextLock().notifyAll();
                     }
                     break;
                 }

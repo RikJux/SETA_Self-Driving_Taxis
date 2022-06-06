@@ -2,6 +2,7 @@ package TaxiPackage.Impl;
 
 import TaxiPackage.ElectionData;
 import TaxiPackage.ElectionDataStructure;
+import TaxiPackage.ElectionHandle;
 import TaxiPackage.Taxi;
 import beans.TaxiBean;
 import io.grpc.ManagedChannel;
@@ -19,45 +20,51 @@ import static Utils.Utils.*;
 
 public class HandleRideServiceImpl extends HandleRideServiceGrpc.HandleRideServiceImplBase {
 
-    private ElectionDataStructure electionData;
+    private ElectionHandle electionHandle;
     private Object inputLock;
 
-    public HandleRideServiceImpl(ElectionDataStructure electionData){
-        this.electionData = electionData;
-        this.inputLock = this.electionData.getThisTaxi().getInputLock();
+    public HandleRideServiceImpl(ElectionHandle electionHandle){
+        this.electionHandle = electionHandle;
+        this.inputLock = this.electionHandle.getThisTaxi().getInputLock();
     }
 
     @Override
     public void election(HandleRideServiceOuterClass.ElectionMsg request, StreamObserver<HandleRideServiceOuterClass.ElectionOk> responseObserver) {
         System.out.println("Received"+ printInformation("ELECTION", request.getRequest().getId()));
-        switch (electionData.decideWhatToSend(request)){
-            case NOTHING:
-                break;
-            case ELECTED:
-                sendElected(electionData.getThisTaxi(), request.getRequest());
-                break;
-            case SELF_ELECTION:
-                HandleRideServiceOuterClass.ElectionMsg myElectionMsg = electionData.computeElectionMsg(request.getRequest().getId());
-                forwardMessage(electionData.getThisTaxi(), myElectionMsg);
-                break;
-            case OTHER_ELECTION:
-                forwardMessage(electionData.getThisTaxi(), request);
-                break;
+
+        HandleRideServiceOuterClass.ElectionMsg myElectionMsg = electionHandle.receiveElectionMsg(request);
+        System.out.println(request.getCandidateMsg().getId());
+        System.out.println(electionHandle.getThisTaxi().getId());
+
+        if(myElectionMsg != null){
+            forwardMessage(electionHandle.getThisTaxi(), myElectionMsg);
+        }else{
+            if(request.getCandidateMsg().getId().equals(electionHandle.getThisTaxi().getId())){
+                sendElected(electionHandle.getThisTaxi(), request.getRequest());
+            }
         }
+
         responseObserver.onNext(HandleRideServiceOuterClass.ElectionOk.newBuilder().build());
     }
 
     @Override
     public void elected(HandleRideServiceOuterClass.ElectedMsg request, StreamObserver<HandleRideServiceOuterClass.ElectedOK> responseObserver) {
         System.out.println("Received"+ printInformation("ELECTED", request.getRequest().getId()));
-        if (request.getTaxiId().equals(electionData.getThisTaxi().getId())){
-            electionData.putInElected(request.getRequest().getId());
-            synchronized (electionData.getThisTaxi().getInputLock()){
-                electionData.getThisTaxi().getInputLock().notifyAll();
+
+        HandleRideServiceOuterClass.ElectedMsg electedMsg = electionHandle.receiveElectedMsg(request);
+
+        if(electedMsg == null){
+            synchronized (inputLock){
+                if(electionHandle.getThisTaxi().getInput() == null){
+                    electionHandle.getThisTaxi().setReqToHandle(translateRideRequest(request.getRequest()));
+                    electionHandle.getThisTaxi().setInput(Taxi.Input.WORK);
+                }
+                inputLock.notifyAll();
             }
         }else{
-            electionData.markNonParticipant(request.getRequest().getId());
+            sendElected(electionHandle.getThisTaxi(), electedMsg);
         }
+
         responseObserver.onNext(HandleRideServiceOuterClass.ElectedOK.newBuilder().build());
     }
 
@@ -72,20 +79,14 @@ public class HandleRideServiceImpl extends HandleRideServiceGrpc.HandleRideServi
 
     }
 
-    private static void sendElected(Taxi thisTaxi, HandleRideServiceOuterClass.RideRequest rideRequest){
+    private static void sendElected(Taxi thisTaxi, HandleRideServiceOuterClass.ElectedMsg electedMsg){
         final ManagedChannel channel = createChannel(thisTaxi);
 
         HandleRideServiceGrpc.HandleRideServiceStub stub = HandleRideServiceGrpc.newStub(channel);
 
-        HandleRideServiceOuterClass.ElectedMsg myElectedMsg = HandleRideServiceOuterClass.ElectedMsg.newBuilder()
-                .setRequest(rideRequest)
-                .setTaxiId(thisTaxi.getId())
-                .build();
-
-        stub.elected(myElectedMsg, new StreamObserver<HandleRideServiceOuterClass.ElectedOK>() {
+        stub.elected(electedMsg, new StreamObserver<HandleRideServiceOuterClass.ElectedOK>() {
             @Override
             public void onNext(HandleRideServiceOuterClass.ElectedOK value) {
-                System.out.println("Sent"+ printInformation("ELECTED", myElectedMsg.getRequest().getId()));
             }
 
             @Override
@@ -98,6 +99,16 @@ public class HandleRideServiceImpl extends HandleRideServiceGrpc.HandleRideServi
                 channel.shutdownNow();
             }
         });
+    }
+
+    private static void sendElected(Taxi thisTaxi, HandleRideServiceOuterClass.RideRequest rideRequest){
+
+        HandleRideServiceOuterClass.ElectedMsg myElectedMsg = HandleRideServiceOuterClass.ElectedMsg.newBuilder()
+                .setRequest(rideRequest)
+                .setTaxiId(thisTaxi.getId())
+                .build();
+
+        sendElected(thisTaxi, myElectedMsg);
 
     }
 

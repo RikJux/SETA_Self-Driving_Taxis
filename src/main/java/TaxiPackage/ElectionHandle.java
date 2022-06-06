@@ -19,13 +19,15 @@ public class ElectionHandle {
         this.thisTaxi = thisTaxi;
     }
 
-    public RideRequestOuterClass.RideRequest receiveElectedMsg(HandleRideServiceOuterClass.ElectedMsg electedMsg){
+    public HandleRideServiceOuterClass.ElectedMsg receiveElectedMsg(HandleRideServiceOuterClass.ElectedMsg electedMsg){
 
 
         String requestId = electedMsg.getRequest().getId();
-        if(electedMsg.getTaxiId().equals(thisTaxi.getId())){
-            markNonParticipant(electedMsg);
-            return this.elections.get(requestId).getRideRequest();
+
+        markNonParticipant(electedMsg);
+
+        if(!electedMsg.getTaxiId().equals(thisTaxi.getId())){ // this taxi was not elected
+            return electedMsg;
         }
 
         return null;
@@ -35,12 +37,12 @@ public class ElectionHandle {
     public HandleRideServiceOuterClass.ElectionMsg receiveElectionMsg(HandleRideServiceOuterClass.ElectionMsg otherElectionMsg){
 
         String requestId = otherElectionMsg.getRequest().getId();
+        boolean alreadyParticipant = markParticipant(otherElectionMsg);
 
         ElectionIdentifier thisElectionId = this.elections.get(requestId).getElectionIdentifier();
         ElectionIdentifier otherElectionId = new ElectionIdentifier(otherElectionMsg.getCandidateMsg());
 
         int comparison = otherElectionId.compareTo(thisElectionId);
-        boolean alreadyParticipant = markParticipant(otherElectionMsg);
 
         if(comparison > 0){ // receives a better candidate
             return otherElectionMsg;
@@ -62,6 +64,20 @@ public class ElectionHandle {
 
     }
 
+    public HandleRideServiceOuterClass.ElectionMsg receiveRideRequest(RideRequestOuterClass.RideRequest rideRequest){
+
+        String requestId = rideRequest.getId();
+
+        if(!markParticipant(rideRequest)){
+            return HandleRideServiceOuterClass.ElectionMsg.newBuilder()
+                    .setRequest(translateRideRequest(rideRequest))
+                    .setCandidateMsg(this.elections.get(requestId).getElectionIdentifier().toMsg())
+                    .build();
+        }
+        // this taxi was already participant, so it already sent its own candidature
+        return null;
+    }
+
     private boolean markParticipant(RideRequestOuterClass.RideRequest rideRequest){
 
         String requestId = rideRequest.getId();
@@ -73,6 +89,9 @@ public class ElectionHandle {
                     new ElectionIdentifier(thisTaxi, distance),
                     true));
             alreadyParticipant = false;
+            System.out.println(printInformation("TAXI", thisTaxi.getId()) +
+                    "marked PARTICIPANT in election for" +
+                    printInformation("REQUEST", requestId));
         }
 
         return alreadyParticipant;
@@ -91,7 +110,12 @@ public class ElectionHandle {
 
         // this taxi is elected!
         if(electionMsg.getCandidateMsg().getId().equals(thisTaxi.getId())){
-            this.elections.remove(requestId);
+            if(isParticipant(requestId)){
+                this.elections.remove(requestId);
+                System.out.println(printInformation("TAXI", thisTaxi.getId()) +
+                        "marked NON-PARTICIPANT in election for" +
+                        printInformation("REQUEST", requestId));
+            }
         }
 
     }
@@ -99,7 +123,12 @@ public class ElectionHandle {
     private void markNonParticipant(HandleRideServiceOuterClass.ElectedMsg electedMsg){
 
         String requestId = electedMsg.getRequest().getId();
-        this.elections.remove(requestId);
+        if(isParticipant(requestId)){
+            this.elections.remove(requestId);
+            System.out.println(printInformation("TAXI", thisTaxi.getId()) +
+                    "marked NON-PARTICIPANT in election for" +
+                    printInformation("REQUEST", requestId));
+        }
 
     }
 
@@ -107,4 +136,7 @@ public class ElectionHandle {
         return this.elections.containsKey(requestId);
     }
 
+    public Taxi getThisTaxi() {
+        return thisTaxi;
+    }
 }

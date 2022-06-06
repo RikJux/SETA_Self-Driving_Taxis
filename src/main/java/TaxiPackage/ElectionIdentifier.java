@@ -65,7 +65,7 @@ public class ElectionIdentifier implements Comparable<ElectionIdentifier> {
                 .setIdle(stackCopy.pop()==1.0d)
                 .setDistance(-1*stackCopy.pop())
                 .setBatteryLevel(stackCopy.pop())
-                .setId(String.valueOf(stackCopy.pop()))
+                .setId(String.valueOf((int) Math.round(stackCopy.pop())))
                 .build();
 
     }

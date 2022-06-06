@@ -4,11 +4,13 @@ import TaxiPackage.Taxi;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
 
 import java.util.List;
 
 import static Utils.Utils.*;
+import static Utils.Utils.handledTopic;
 
 public class Working extends TaxiThread {
     public Working(Taxi thisTaxi, Taxi.Status thisStatus, Object syncObj) {
@@ -40,6 +42,12 @@ public class Working extends TaxiThread {
         RideRequestOuterClass.RideRequest requestToHandle = thisTaxi.getReqToHandle();
         String requestId = requestToHandle.getId();
 
+        try {
+            publishToHandleRequest(requestToHandle);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+
         int[] startingP = fromMsgToArray(requestToHandle.getStartingPosition());
         int[] destinationP = fromMsgToArray(requestToHandle.getDestinationPosition());
 
@@ -63,6 +71,7 @@ public class Working extends TaxiThread {
             makeTransition(Taxi.Status.IDLE);
         }
 
+
     }
 
 
@@ -72,6 +81,15 @@ public class Working extends TaxiThread {
         connOpts.setCleanSession(true);
 
         return mqttClient;
+    }
+
+    private void publishToHandleRequest(RideRequestOuterClass.RideRequest requestToHandle) throws MqttException{
+        RideRequestOuterClass.RideRequest payload = requestToHandle;
+        String destDist = computeDistrict(new int[]{payload.getStartingPosition().getX(), payload.getStartingPosition().getX()});
+        MqttMessage message = new MqttMessage(payload.toByteArray());
+        message.setQos(1);
+        client.publish(handledTopic+destDist, message);
+        System.out.println(printInformation("REQUEST", payload.getId()) + "will handled at " + handledTopic+destDist);
     }
 
 }

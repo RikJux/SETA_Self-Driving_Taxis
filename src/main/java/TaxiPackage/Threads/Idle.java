@@ -131,16 +131,10 @@ public class Idle extends TaxiThread{
 
                 RideRequestOuterClass.RideRequest receivedMessage = RideRequestOuterClass.RideRequest.parseFrom(message.getPayload());
                 System.out.println("Arrived" + printInformation("REQUEST", receivedMessage.getId()));
-                //TODO start the election
-                switch (thisTaxi.getElectionData().decideWhatToSend(receivedMessage)){
-                    case NOTHING:
-                        break;
-                    case SELF_ELECTION:
-                        thisTaxi.getElectionData().markParticipant(receivedMessage);
-                        HandleRideServiceOuterClass.ElectionMsg myElectionMsg = thisTaxi.getElectionData()
-                                .computeElectionMsg(receivedMessage.getId());
-                        forwardMessage(thisTaxi, myElectionMsg);
-                        break;
+
+                HandleRideServiceOuterClass.ElectionMsg myElectionMsg = thisTaxi.getElectionHandle().receiveRideRequest(receivedMessage);
+                if(myElectionMsg != null){
+                    forwardMessage(thisTaxi, myElectionMsg);
                 }
 
             }

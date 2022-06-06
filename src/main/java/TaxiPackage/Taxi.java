@@ -44,6 +44,7 @@ public class Taxi {
     private TokenQueue tokens;
     private List<TaxiBean> taxiList;
     private ElectionDataStructure electionData;
+    private ElectionHandle electionHandle;
     private TaxiBean nextTaxi;
     private final String topicString = "seta/smartcity/rides/";
     private final double chargeThreshold = 30; // if battery is below this value, go recharge
@@ -85,7 +86,7 @@ public class Taxi {
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
     public static void main(String args[]) throws InterruptedException {
-        int idOffset = 0;
+        int idOffset = 3;
         port = 1884 + idOffset;
         id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
@@ -93,6 +94,7 @@ public class Taxi {
         thisTaxi.setBattery(100.0);
         thisTaxi.setTokens(new TokenQueue(new ArrayList<RechargeTokenServiceOuterClass.RechargeToken>()));
         thisTaxi.setElectionData(new ElectionDataStructure(thisTaxi));
+        thisTaxi.setElectionHandle(new ElectionHandle(thisTaxi));
 
         Client client = Client.create();
 
@@ -358,6 +360,14 @@ public class Taxi {
 
     public static Object getStatusLock() {
         return statusLock;
+    }
+
+    public ElectionHandle getElectionHandle() {
+        return electionHandle;
+    }
+
+    public void setElectionHandle(ElectionHandle electionHandle) {
+        this.electionHandle = electionHandle;
     }
 }
 

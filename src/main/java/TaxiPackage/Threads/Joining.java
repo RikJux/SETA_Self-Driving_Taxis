@@ -37,13 +37,14 @@ public class Joining extends TaxiThread {
             System.out.println("Cannot enter the system");
             return;
         }
-        // should not receive the whole taxis object, migrate to gson
+
         thisTaxi.setTaxiList(taxis.getTaxiList());
         thisTaxi.setCurrentP(taxis.randomCoord());
         thisTaxi.setDistrict(computeDistrict(thisTaxi.getCurrentP()));
         System.out.println(thisStatus + printInformation("TAXI", thisTaxi.getId()) + "joined in " + thisTaxi.getDistrict());
         synchronized (thisTaxi.getNextLock()){
             thisTaxi.setNextTaxi(extractNextTaxi(thisTaxi));
+            thisTaxi.getNextLock().notifyAll();
         }
 
         TaxiCommunicationClient announceJoinThread = new TaxiCommunicationClient(thisTaxi, true);

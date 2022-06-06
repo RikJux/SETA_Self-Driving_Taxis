@@ -25,7 +25,7 @@ public class TaxiCommunicationServer extends Thread{
                     .addService(new JoinServiceImpl(thisTaxi))
                     .addService(new LeaveServiceImpl(thisTaxi))
                     .addService(new RechargeTokenServiceImpl(thisTaxi))
-                    .addService(new HandleRideServiceImpl(thisTaxi.getElectionData()))
+                    .addService(new HandleRideServiceImpl(thisTaxi.getElectionHandle()))
                     .build();
 
             server.start();
