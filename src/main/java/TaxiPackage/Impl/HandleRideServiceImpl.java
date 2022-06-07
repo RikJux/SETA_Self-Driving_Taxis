@@ -47,13 +47,27 @@ public class HandleRideServiceImpl extends HandleRideServiceGrpc.HandleRideServi
         HandleRideServiceOuterClass.ElectedMsg electedMsg = electionHandle.receiveElectedMsg(request);
 
         if(electedMsg == null){
-            synchronized (inputLock){
-                if(electionHandle.getThisTaxi().getInput() == null){// && !electionHandle.getThisTaxi().isReceivedManualInput()){
-                    electionHandle.getThisTaxi().setReqToHandle(translateRideRequest(request.getRequest()));
-                    electionHandle.getThisTaxi().setInput(Taxi.Input.WORK);
+            synchronized (electionHandle.getThisTaxi().getElectedLock()){
+                if(electionHandle.getElectedSize() == 0){
+                    try {
+                        System.out.println("Wait for elected lock");
+                        electionHandle.getThisTaxi().getElectedLock().wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-                inputLock.notifyAll();
-            }
+                System.out.println("Acquired elected lock");
+                synchronized (inputLock){
+                        System.out.println("Acquired input lock");
+                        if(electionHandle.getThisTaxi().getInput() == null){// && !electionHandle.getThisTaxi().isReceivedManualInput()){
+                            //electionHandle.getThisTaxi().setReqToHandle(translateRideRequest(request.getRequest()));
+                            electionHandle.getThisTaxi().setReqToHandle(electionHandle.getFirst());
+                            electionHandle.getThisTaxi().setInput(Taxi.Input.WORK);
+                        }
+                        inputLock.notifyAll();
+                    }
+                electionHandle.getThisTaxi().getElectedLock().notifyAll();
+                }
         }else{
             sendElected(electionHandle.getThisTaxi(), electedMsg);
         }

@@ -22,7 +22,7 @@ public abstract class TaxiThread extends Thread {
     public void run() {
         synchronized (syncObj){
             try {
-                while(thisTaxi.getCurrentStatus() != thisStatus){
+                while(true){
                     if(!thisTaxi.isInitialized()){
                         if(thisTaxi.getWaitingThreads() < 5){
                             thisTaxi.setWaitingThreads();
@@ -30,13 +30,13 @@ public abstract class TaxiThread extends Thread {
                             syncObj.notifyAll();
                         }
                     }
-                    syncObj.wait();
                     if (thisTaxi.getCurrentStatus() == thisStatus) {
                         System.out.println(thisStatus + " acquired the lock.");
                         doStuff();
                         System.out.println(thisStatus + " released the lock.");
                         syncObj.notifyAll();
-                        }
+                    }
+                    syncObj.wait();
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();

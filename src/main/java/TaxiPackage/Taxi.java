@@ -56,9 +56,11 @@ public class Taxi {
     private int rechargeReqCounter = 0;
     private double rechargeRequestTimestamp = Double.MAX_VALUE;
     private RideRequestOuterClass.RideRequest reqToHandle = null;
+    private List<RideRequestOuterClass.RideRequest> reqElected = new ArrayList<RideRequestOuterClass.RideRequest>();
     private static Object statusLock = new Object();
     private static Object inputLock = new Object();
     private static Object rechargeLock = new Object();
+    private static Object electedLock = new Object();
     private static Object rechargeTimestampLock = new Object();
     private static Object nextLock = new Object();
     private static List<Thread> taxiThreads;
@@ -89,7 +91,7 @@ public class Taxi {
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
     public static void main(String args[]) throws InterruptedException {
-        int idOffset = 0;
+        int idOffset = 5;
         port = 1884 + idOffset;
         id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
@@ -143,6 +145,7 @@ public class Taxi {
             System.out.println("Type [quit] to exit the system or [recharge] to go to recharge");
             userInput = in.nextLine();
             synchronized (inputLock){
+                System.out.println("Input lock in taxi");
                 //thisTaxi.setReceivedManualInput(true);
                 if (userInput.equals("quit")) {
                     while(thisTaxi.getInput() != null){
@@ -325,16 +328,6 @@ public class Taxi {
         Taxi.rechargeTimestampLock = rechargeTimestampLock;
     }
 
-    private static void manualInput(Taxi thisTaxi, Input input) throws InterruptedException {
-        synchronized (inputLock){
-            while(thisTaxi.getInput() != null){
-                inputLock.wait();
-            }
-            thisTaxi.setInput(input);
-            inputLock.notifyAll();
-            }
-        }
-
     public TaxiBean getNextTaxi() {
         return nextTaxi;
     }
@@ -416,6 +409,26 @@ public class Taxi {
 
     public boolean isInitialized() {
         return initialized;
+    }
+
+    public List<RideRequestOuterClass.RideRequest> getReqElected() {
+        return reqElected;
+    }
+
+    public void setReqElected(List<RideRequestOuterClass.RideRequest> reqElected) {
+        this.reqElected = reqElected;
+    }
+
+    public void addReqElected(RideRequestOuterClass.RideRequest rideRequest){
+        this.reqElected.add(rideRequest);
+    }
+
+    public static Object getElectedLock() {
+        return electedLock;
+    }
+
+    public static void setElectedLock(Object electedLock) {
+        Taxi.electedLock = electedLock;
     }
 }
 

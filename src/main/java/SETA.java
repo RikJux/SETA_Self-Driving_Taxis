@@ -62,6 +62,7 @@ public class SETA {
                     List<RideRequest> toSend;
                     synchronized (unhandledLock){
                         toSend = new ArrayList<RideRequest>(unhandledRequests.get(dist));
+                        unhandledRequests.put(dist, new ArrayList<RideRequest>());
                     }
                     publishManyRequests(toSend, client);
 

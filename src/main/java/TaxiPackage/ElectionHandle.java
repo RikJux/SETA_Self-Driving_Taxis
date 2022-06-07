@@ -12,15 +12,16 @@ import static Utils.Utils.*;
 public class ElectionHandle {
 
     private HashMap<String, ElectionInfo> elections;
+    private List<RideRequestOuterClass.RideRequest> elected;
     private Taxi thisTaxi;
 
     public ElectionHandle(Taxi thisTaxi){
         this.elections = new HashMap<String, ElectionInfo>();
+        this.elected = new ArrayList<RideRequestOuterClass.RideRequest>();
         this.thisTaxi = thisTaxi;
     }
 
     public HandleRideServiceOuterClass.ElectedMsg receiveElectedMsg(HandleRideServiceOuterClass.ElectedMsg electedMsg){
-
 
         String requestId = electedMsg.getRequest().getId();
 
@@ -28,6 +29,12 @@ public class ElectionHandle {
 
         if(!electedMsg.getTaxiId().equals(thisTaxi.getId())){ // this taxi was not elected
             return electedMsg;
+        }else{
+            synchronized (thisTaxi.getElectedLock()){
+                this.elected.add(translateRideRequest(electedMsg.getRequest()));
+                System.out.println(this.elected.toString());
+                thisTaxi.getElectedLock().notifyAll();
+            }
         }
 
         return null;
@@ -139,4 +146,17 @@ public class ElectionHandle {
     public Taxi getThisTaxi() {
         return thisTaxi;
     }
+
+    public RideRequestOuterClass.RideRequest getFirst(){
+        return this.elected.remove(0);
+    }
+
+    public int getElectedSize(){
+        int result = 0;
+        synchronized (thisTaxi.getElectedLock()){
+            result = this.elected.size();
+        }
+        return result;
+    }
+
 }
