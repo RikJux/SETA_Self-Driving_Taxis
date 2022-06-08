@@ -6,6 +6,7 @@ import beans.TaxiBean;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
+import seta.smartcity.rideRequest.RideRequestOuterClass;
 import taxi.communication.handleRideService.HandleRideServiceGrpc;
 import taxi.communication.handleRideService.HandleRideServiceOuterClass;
 
@@ -26,8 +27,7 @@ public class HandleRideServiceImpl extends HandleRideServiceGrpc.HandleRideServi
         System.out.println("Received"+ printInformation("ELECTION", request.getRequest().getId()));
 
         HandleRideServiceOuterClass.ElectionMsg myElectionMsg = electionHandle.receiveElectionMsg(request);
-        System.out.println(request.getCandidateMsg().getId());
-        System.out.println(electionHandle.getThisTaxi().getId());
+        System.out.println(myElectionMsg);
 
         if(myElectionMsg != null){
             forwardMessage(electionHandle.getThisTaxi(), myElectionMsg);
@@ -59,10 +59,18 @@ public class HandleRideServiceImpl extends HandleRideServiceGrpc.HandleRideServi
                 System.out.println("Acquired elected lock");
                 synchronized (inputLock){
                         System.out.println("Acquired input lock");
-                        if(electionHandle.getThisTaxi().getInput() == null){// && !electionHandle.getThisTaxi().isReceivedManualInput()){
-                            //electionHandle.getThisTaxi().setReqToHandle(translateRideRequest(request.getRequest()));
+                        if(electionHandle.getThisTaxi().getInput() == null &&
+                        electionHandle.getThisTaxi().getReqToHandle() == null){
                             electionHandle.getThisTaxi().setReqToHandle(electionHandle.getFirst());
                             electionHandle.getThisTaxi().setInput(Taxi.Input.WORK);
+                        }else{
+                            for(RideRequestOuterClass.RideRequest rideRequest: electionHandle.getElected()){
+                                HandleRideServiceOuterClass.ElectionMsg electionMsg = electionHandle.receiveRideRequest(rideRequest);
+                                if(electedMsg != null){
+                                    System.out.println("Sent again election for"+printInformation("REQUEST", rideRequest.getId()));
+                                    forwardMessage(electionHandle.getThisTaxi(), electionMsg);
+                                }
+                            }
                         }
                         inputLock.notifyAll();
                     }

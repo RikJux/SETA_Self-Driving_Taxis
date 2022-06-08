@@ -13,11 +13,13 @@ public class ElectionHandle {
 
     private HashMap<String, ElectionInfo> elections;
     private List<RideRequestOuterClass.RideRequest> elected;
+    private List<RideRequestOuterClass.RideRequest> handled;
     private Taxi thisTaxi;
 
     public ElectionHandle(Taxi thisTaxi){
         this.elections = new HashMap<String, ElectionInfo>();
         this.elected = new ArrayList<RideRequestOuterClass.RideRequest>();
+        this.handled = new ArrayList<RideRequestOuterClass.RideRequest>();
         this.thisTaxi = thisTaxi;
     }
 
@@ -27,13 +29,20 @@ public class ElectionHandle {
 
         markNonParticipant(electedMsg);
 
+        if(isHandling(electedMsg.getRequest()) || alreadyElected(electedMsg.getRequest())){
+            System.out.println(printInformation("TAXI", thisTaxi.getId())+"already elected for this request");
+            return null;
+        }
+
         if(!electedMsg.getTaxiId().equals(thisTaxi.getId())){ // this taxi was not elected
             return electedMsg;
         }else{
             synchronized (thisTaxi.getElectedLock()){
-                this.elected.add(translateRideRequest(electedMsg.getRequest()));
-                System.out.println(this.elected.toString());
-                thisTaxi.getElectedLock().notifyAll();
+                if(!isHandling(electedMsg.getRequest()) && !alreadyElected(electedMsg.getRequest())){
+                    this.elected.add(translateRideRequest(electedMsg.getRequest()));
+                    System.out.println(this.elected.toString());
+                    thisTaxi.getElectedLock().notifyAll();
+                }
             }
         }
 
@@ -44,6 +53,12 @@ public class ElectionHandle {
     public HandleRideServiceOuterClass.ElectionMsg receiveElectionMsg(HandleRideServiceOuterClass.ElectionMsg otherElectionMsg){
 
         String requestId = otherElectionMsg.getRequest().getId();
+
+        if(isHandling(otherElectionMsg.getRequest()) || alreadyElected(otherElectionMsg.getRequest())){
+            System.out.println(printInformation("TAXI", thisTaxi.getId())+"already elected for this request");
+            return null;
+        }
+
         boolean alreadyParticipant = markParticipant(otherElectionMsg);
 
         ElectionIdentifier thisElectionId = this.elections.get(requestId).getElectionIdentifier();
@@ -76,11 +91,13 @@ public class ElectionHandle {
         String requestId = rideRequest.getId();
 
         if(!markParticipant(rideRequest)){
+            System.out.println("Was not already participant");
             return HandleRideServiceOuterClass.ElectionMsg.newBuilder()
                     .setRequest(translateRideRequest(rideRequest))
                     .setCandidateMsg(this.elections.get(requestId).getElectionIdentifier().toMsg())
                     .build();
         }
+        System.out.println("Was already participant");
         // this taxi was already participant, so it already sent its own candidature
         return null;
     }
@@ -159,4 +176,35 @@ public class ElectionHandle {
         return result;
     }
 
+    public List<RideRequestOuterClass.RideRequest> getElected(){
+        List<RideRequestOuterClass.RideRequest> toSend;
+        synchronized (thisTaxi.getElectedLock()){
+            toSend = this.elected;
+            this.elected = new ArrayList<RideRequestOuterClass.RideRequest>();
+        }
+        System.out.println(toSend);
+        return toSend;
+    }
+
+    private boolean isHandling(HandleRideServiceOuterClass.RideRequest rideRequest){
+        synchronized (this.handled){
+            return this.handled.contains(rideRequest);
+        }
+    }
+
+    private boolean alreadyElected(HandleRideServiceOuterClass.RideRequest rideRequest){
+        boolean alreadyElected = false;
+        synchronized (thisTaxi.getElectedLock()){
+            alreadyElected = this.elected.contains(translateRideRequest(rideRequest).getId());
+            thisTaxi.getElectedLock().notifyAll();
+        }
+        return alreadyElected;
+    }
+
+    public void addHandled(RideRequestOuterClass.RideRequest rideRequest){
+        synchronized (this.handled){
+            this.handled.add(rideRequest);
+            System.out.println(this.handled);
+        }
+    }
 }

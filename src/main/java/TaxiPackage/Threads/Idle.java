@@ -44,7 +44,7 @@ public class Idle extends TaxiThread{
                     if(thisTaxi.getInput() != null){
                         inputLock.notifyAll();
                         System.out.println("Arrived INPUT " + thisTaxi.getInput());
-                        thisTaxi.getTaxiMQTT().unsubscribe();
+                        //thisTaxi.getTaxiMQTT().unsubscribe();
                         switch (thisTaxi.getInput()){
                             case QUIT:
                                 makeTransition(Taxi.Status.LEAVING);

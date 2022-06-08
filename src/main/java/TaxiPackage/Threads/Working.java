@@ -21,6 +21,7 @@ public class Working extends TaxiThread {
 
         RideRequestOuterClass.RideRequest requestToHandle = thisTaxi.getReqToHandle();
         String requestId = requestToHandle.getId();
+        thisTaxi.getElectionHandle().addHandled(requestToHandle);
 
         try {
             thisTaxi.getTaxiMQTT().publishToHandleRequest(requestToHandle);

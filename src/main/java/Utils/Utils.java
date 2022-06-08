@@ -118,74 +118,43 @@ public class Utils {
         }
     }
 
-    public static TaxiBean extractNextTaxi(Taxi taxi) {
+    public static TaxiBean extractNextTaxi(Taxi taxi){
 
-        TaxiBean resultingNext = new TaxiBean(taxi.getId(), taxi.getIp(), taxi.getPort());
+        TaxiBean thisTaxiBean = new TaxiBean(taxi.getId(), taxi.getIp(), taxi.getPort());
+        TaxiBean nextTaxiBean = thisTaxiBean;
+        TaxiBean minTaxiBean = thisTaxiBean;
 
-        int id = Integer.parseInt(taxi.getId());
-
-        for (TaxiBean t : taxi.getTaxiList()) {
-            int thisId = Integer.parseInt(t.getId());
-            int nextId = Integer.parseInt(resultingNext.getId());
-
-            if(thisId > id){
-                if(nextId <= id){
-                    // taxi t is the next because it has greater id than this taxi and current next is lower
-                    resultingNext = t;
-                }else{ // both the two candidates (this and next) have greater id than taxi
-                    if(thisId < nextId){
-                        // among two taxis with greater id, pick the one with minimum id
-                        resultingNext = t;
-                    }
-                }
-            }else{
-                if(nextId <= id && thisId < nextId){
-                    // condition needed in case that the taxi has maximum id, so the next will be the taxi with minimum id
-                    resultingNext = t;
-                }
+        for(TaxiBean taxiBean: taxi.getTaxiList()){
+            int thisId = Integer.parseInt(thisTaxiBean.getId());
+            int nextId = Integer.parseInt(nextTaxiBean.getId());
+            int beanId = Integer.parseInt(taxiBean.getId());
+            int minId = Integer.parseInt(minTaxiBean.getId());
+            System.out.println(taxiBean);
+            if(beanId > thisId && (beanId < nextId || nextId == thisId)){
+                nextTaxiBean = taxiBean;
+                System.out.println(nextTaxiBean);
+            }
+            if(beanId < minId){
+                minTaxiBean = taxiBean;
             }
         }
 
-        return resultingNext;
+        if(nextTaxiBean.getId().equals(thisTaxiBean.getId())){
+            return minTaxiBean;
+        }
+
+        return nextTaxiBean;
 
     }
 
     public static TaxiBean updateNextOnJoin(Taxi taxi, TaxiBean joinTaxiBean){
 
-        TaxiBean resultingNext = taxi.getNextTaxi();
-
-        int id = Integer.parseInt(taxi.getId());
-        int nextId = Integer.parseInt(resultingNext.getId());
-        int thisId = Integer.parseInt(joinTaxiBean.getId());
-
-        if(thisId < nextId){
-            if(thisId > id){
-                resultingNext = joinTaxiBean;
-            }else{
-                if(nextId <= id){
-                    resultingNext = joinTaxiBean;
-                }
-            }
-        }else{
-            if(thisId > id && nextId < id){
-                resultingNext = joinTaxiBean;
-            }
-            if(id == nextId){
-                resultingNext = joinTaxiBean;
-            }
-        }
-        return resultingNext;
+        return extractNextTaxi(taxi);
     }
 
     public static TaxiBean updateNextOnLeave(Taxi taxi, String leaveId){
 
-        TaxiBean resultingNext = taxi.getNextTaxi();
-
-        if(resultingNext.getId().equals(leaveId)){
-            resultingNext = extractNextTaxi(taxi);
-        }
-
-        return resultingNext;
+        return extractNextTaxi(taxi);
 
     }
 

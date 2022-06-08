@@ -110,11 +110,8 @@ public class SETA {
 
         for(RideRequest r: toSend){
             try {
-                Thread.sleep(1000);
                 publishRequest(r, client, ridesTopic);
             } catch (MqttException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
