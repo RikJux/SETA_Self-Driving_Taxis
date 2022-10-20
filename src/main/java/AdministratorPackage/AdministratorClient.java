@@ -154,7 +154,8 @@ public class AdministratorClient {
     public static List<TaxiBean> getTaxis(Client client){
         String url = serverAddress+taxisPath;
         ClientResponse clientResponse = getRequest(client, url, MediaType.APPLICATION_JSON);
-        List<TaxiBean> taxiList = clientResponse.getEntity(Taxis.class).getTaxiList();
+        Taxis taxis = new Gson().fromJson(clientResponse.getEntity(String.class), Taxis.class);
+        List<TaxiBean> taxiList = taxis.getTaxiList();
         return taxiList;
     }
 

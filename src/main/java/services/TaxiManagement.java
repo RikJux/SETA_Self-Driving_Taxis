@@ -19,9 +19,12 @@ public class TaxiManagement {
     @Produces({"application/json", "application/xml", MediaType.TEXT_PLAIN})
     public Response getTaxiList(){
 
-        String taxiListString = new Gson().toJson(Taxis.getInstance().getTaxiList());
+        String taxiListString = new Gson().toJson(Taxis.getInstance()); //.getTaxiList()
 
-        return Response.ok(taxiListString).build();
+        return Response
+                .status(Response.Status.OK)
+                .entity(taxiListString)
+                .build();
     }
 
     @Path("join")

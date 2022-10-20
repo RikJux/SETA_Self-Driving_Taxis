@@ -14,6 +14,7 @@ import com.sun.jersey.api.client.WebResource;
 import javax.ws.rs.core.Response;
 import java.util.*;
 import TaxiPackage.Threads.*;
+import io.grpc.Server;
 import org.eclipse.paho.client.mqttv3.*;
 import seta.smartcity.rideRequest.RideRequestOuterClass;
 import taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass;
@@ -57,16 +58,19 @@ public class Taxi {
     private double rechargeRequestTimestamp = Double.MAX_VALUE;
     private RideRequestOuterClass.RideRequest reqToHandle = null;
     private List<RideRequestOuterClass.RideRequest> reqElected = new ArrayList<RideRequestOuterClass.RideRequest>();
+    private Server server;
     private static Object statusLock = new Object();
     private static Object inputLock = new Object();
     private static Object rechargeLock = new Object();
     private static Object electedLock = new Object();
     private static Object rechargeTimestampLock = new Object();
     private static Object nextLock = new Object();
+    private static Object leavingLock = new Object();
     private static List<Thread> taxiThreads;
     private boolean receivedManualInput = false;
     private TaxiMQTT taxiMQTT;
     private int waitingThreads = 0;
+    private int waitingLeave = 0;
     private boolean initialized = false;
 
     public Input getInput() {
@@ -91,7 +95,7 @@ public class Taxi {
     private static final String leavePath = serverAddress+"/taxi/leave/";
 
     public static void main(String args[]) throws InterruptedException {
-        int idOffset = 2;
+        int idOffset = 3;
         port = 1884 + idOffset;
         id = String.valueOf(port);
         Taxi thisTaxi = getInstance();
@@ -389,6 +393,14 @@ public class Taxi {
         this.waitingThreads++;
     }
 
+    public int getWaitingLeave() {
+        return waitingThreads;
+    }
+
+    public void setWaitingLeave() {
+        this.waitingLeave++;
+    }
+
     public void initialize(){ // called within threads with the lock acquired
         if(getWaitingThreads() < 5){
             setWaitingThreads();
@@ -429,6 +441,18 @@ public class Taxi {
 
     public static void setElectedLock(Object electedLock) {
         Taxi.electedLock = electedLock;
+    }
+
+    public Server getServer() {
+        return server;
+    }
+
+    public void setServer(Server server) {
+        this.server = server;
+    }
+
+    public static Object getLeavingLock() {
+        return leavingLock;
     }
 }
 

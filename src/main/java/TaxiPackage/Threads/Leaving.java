@@ -28,9 +28,8 @@ public class Leaving extends TaxiThread{
         TaxiCommunicationClient announceLeaveThread = new TaxiCommunicationClient(thisTaxi, false);
         announceLeaveThread.start();
         announceLeaveThread.join();
-        for(Thread t: thisTaxi.getTaxiThreads()){
-            t.interrupt();
-        }
+
+        thisTaxi.getServer().shutdownNow();
 
     }
 

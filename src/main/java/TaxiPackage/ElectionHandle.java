@@ -15,6 +15,7 @@ public class ElectionHandle {
     private List<RideRequestOuterClass.RideRequest> elected;
     private List<RideRequestOuterClass.RideRequest> handled;
     private Taxi thisTaxi;
+    private Object markLock = new Object();
 
     public ElectionHandle(Taxi thisTaxi){
         this.elections = new HashMap<String, ElectionInfo>();
@@ -30,7 +31,6 @@ public class ElectionHandle {
         markNonParticipant(electedMsg);
 
         if(isHandling(electedMsg.getRequest()) || alreadyElected(electedMsg.getRequest())){
-            System.out.println(printInformation("TAXI", thisTaxi.getId())+"already elected for this request");
             return null;
         }
 
@@ -40,7 +40,6 @@ public class ElectionHandle {
             synchronized (thisTaxi.getElectedLock()){
                 if(!isHandling(electedMsg.getRequest()) && !alreadyElected(electedMsg.getRequest())){
                     this.elected.add(translateRideRequest(electedMsg.getRequest()));
-                    System.out.println(this.elected.toString());
                     thisTaxi.getElectedLock().notifyAll();
                 }
             }
@@ -55,14 +54,18 @@ public class ElectionHandle {
         String requestId = otherElectionMsg.getRequest().getId();
 
         if(isHandling(otherElectionMsg.getRequest()) || alreadyElected(otherElectionMsg.getRequest())){
-            System.out.println(printInformation("TAXI", thisTaxi.getId())+"already elected for this request");
             return null;
         }
 
-        boolean alreadyParticipant = markParticipant(otherElectionMsg);
+        ElectionIdentifier thisElectionId;
+        ElectionIdentifier otherElectionId;
+        boolean alreadyParticipant;
 
-        ElectionIdentifier thisElectionId = this.elections.get(requestId).getElectionIdentifier();
-        ElectionIdentifier otherElectionId = new ElectionIdentifier(otherElectionMsg.getCandidateMsg());
+        synchronized (markLock){
+            alreadyParticipant = markParticipant(otherElectionMsg);
+            thisElectionId = this.elections.get(requestId).getElectionIdentifier();
+            otherElectionId = new ElectionIdentifier(otherElectionMsg.getCandidateMsg());
+        }
 
         int comparison = otherElectionId.compareTo(thisElectionId);
 
@@ -91,13 +94,11 @@ public class ElectionHandle {
         String requestId = rideRequest.getId();
 
         if(!markParticipant(rideRequest)){
-            System.out.println("Was not already participant");
             return HandleRideServiceOuterClass.ElectionMsg.newBuilder()
                     .setRequest(translateRideRequest(rideRequest))
                     .setCandidateMsg(this.elections.get(requestId).getElectionIdentifier().toMsg())
                     .build();
         }
-        System.out.println("Was already participant");
         // this taxi was already participant, so it already sent its own candidature
         return null;
     }
@@ -107,15 +108,13 @@ public class ElectionHandle {
         String requestId = rideRequest.getId();
         boolean alreadyParticipant = true;
 
-        if(!isParticipant(requestId)){
-            double distance = computeDistance(thisTaxi.getCurrentP(), fromMsgToArray(rideRequest.getStartingPosition()));
-            this.elections.put(requestId, new ElectionInfo(rideRequest,
-                    new ElectionIdentifier(thisTaxi, distance),
-                    true));
-            alreadyParticipant = false;
-            System.out.println(printInformation("TAXI", thisTaxi.getId()) +
-                    "marked PARTICIPANT in election for" +
-                    printInformation("REQUEST", requestId));
+        synchronized (markLock){
+            if(!isParticipant(requestId)){
+                double distance = computeDistance(thisTaxi.getCurrentP(), fromMsgToArray(rideRequest.getStartingPosition()));
+                this.elections.put(requestId, new ElectionInfo(rideRequest,
+                        new ElectionIdentifier(thisTaxi, distance), true));
+                alreadyParticipant = false;
+            }
         }
 
         return alreadyParticipant;
@@ -131,14 +130,11 @@ public class ElectionHandle {
     private void markNonParticipant(HandleRideServiceOuterClass.ElectionMsg electionMsg){
 
         String requestId = electionMsg.getRequest().getId();
-
-        // this taxi is elected!
-        if(electionMsg.getCandidateMsg().getId().equals(thisTaxi.getId())){
-            if(isParticipant(requestId)){
-                this.elections.remove(requestId);
-                System.out.println(printInformation("TAXI", thisTaxi.getId()) +
-                        "marked NON-PARTICIPANT in election for" +
-                        printInformation("REQUEST", requestId));
+        synchronized (markLock) {
+            if(electionMsg.getCandidateMsg().getId().equals(thisTaxi.getId())){
+                if(isParticipant(requestId)){
+                    this.elections.remove(requestId);
+                }
             }
         }
 
@@ -147,11 +143,10 @@ public class ElectionHandle {
     private void markNonParticipant(HandleRideServiceOuterClass.ElectedMsg electedMsg){
 
         String requestId = electedMsg.getRequest().getId();
-        if(isParticipant(requestId)){
-            this.elections.remove(requestId);
-            System.out.println(printInformation("TAXI", thisTaxi.getId()) +
-                    "marked NON-PARTICIPANT in election for" +
-                    printInformation("REQUEST", requestId));
+        synchronized (markLock){
+            if(isParticipant(requestId)){
+                this.elections.remove(requestId);
+            }
         }
 
     }
@@ -182,7 +177,6 @@ public class ElectionHandle {
             toSend = this.elected;
             this.elected = new ArrayList<RideRequestOuterClass.RideRequest>();
         }
-        System.out.println(toSend);
         return toSend;
     }
 
@@ -204,7 +198,6 @@ public class ElectionHandle {
     public void addHandled(RideRequestOuterClass.RideRequest rideRequest){
         synchronized (this.handled){
             this.handled.add(rideRequest);
-            System.out.println(this.handled);
         }
     }
 }

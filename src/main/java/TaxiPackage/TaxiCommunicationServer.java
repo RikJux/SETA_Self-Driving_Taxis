@@ -29,10 +29,11 @@ public class TaxiCommunicationServer extends Thread{
                     .build();
 
             server.start();
+            thisTaxi.setServer(server);
 
             System.out.println("Communication thread for" + printInformation("TAXI", thisTaxi.getId()) + "started");
 
-            server.awaitTermination();
+            thisTaxi.getServer().awaitTermination();
 
         } catch (IOException e) {
 

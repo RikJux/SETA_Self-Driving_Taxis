@@ -53,6 +53,9 @@ public class Joining extends TaxiThread {
 
         new TaxiRechargeTokenComm(thisTaxi).start();
 
+        /*
+
+
         new Thread(() -> {
             synchronized (thisTaxi.getElectedLock()){
                 while(thisTaxi.getReqElected().size()  == 0){
@@ -67,6 +70,8 @@ public class Joining extends TaxiThread {
                 }
             }
         });
+
+         */
 
         thisTaxi.setTokens(new TokenQueue(taxis.getTokens()));
         System.out.println(thisTaxi.getTokens().toString());

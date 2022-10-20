@@ -18,6 +18,12 @@ public class TokenQueue {
         inUse = null;
     }
 
+    public int size(){
+        synchronized (rechargeLock){
+            return this.tokens.size();
+        }
+    }
+
     public void add(RechargeTokenServiceOuterClass.RechargeToken token){
         synchronized (rechargeLock){
             this.tokens.add(token);

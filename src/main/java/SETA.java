@@ -81,7 +81,6 @@ public class SETA {
         System.out.println(clientId + " Connecting Broker " + broker);
         client.connect(connOpts);
         System.out.println(clientId + " Connected");
-        client.subscribe(handledTopic+"+", 1);
         client.subscribe(availableTopic+"+", 1);
 
         Random rand = new Random();

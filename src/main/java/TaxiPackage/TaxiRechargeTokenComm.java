@@ -20,7 +20,7 @@ public class TaxiRechargeTokenComm extends Thread{
     @Override
     public void run() {
 
-        while(true){
+        while(thisTaxi.getInput() != Taxi.Input.QUIT){
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
@@ -28,6 +28,13 @@ public class TaxiRechargeTokenComm extends Thread{
             }
             sendToken(thisTaxi, thisTaxi.getTokens().extract());
         }
+
+        while(thisTaxi.getTokens().size() != 0 && thisTaxi.getNextTaxi() !=
+                new TaxiBean(thisTaxi.getId(), thisTaxi.getIp(), thisTaxi.getPort())){
+            sendToken(thisTaxi, thisTaxi.getTokens().extract());
+        }
+
+        System.out.println("Send away all the recharge tokens");
 
     }
 

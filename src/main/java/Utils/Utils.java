@@ -114,7 +114,7 @@ public class Utils {
         taxi.addKilometers(distance);
         if (accomplished) {
             taxi.addRideAccomplished();
-            System.out.println("[TAXI DRIVER] Taxi " + taxi.getId() + " fulfilled request " + requestId);
+            System.out.println("Taxi " + taxi.getId() + " fulfilled request " + requestId);
         }
     }
 
@@ -129,10 +129,8 @@ public class Utils {
             int nextId = Integer.parseInt(nextTaxiBean.getId());
             int beanId = Integer.parseInt(taxiBean.getId());
             int minId = Integer.parseInt(minTaxiBean.getId());
-            System.out.println(taxiBean);
             if(beanId > thisId && (beanId < nextId || nextId == thisId)){
                 nextTaxiBean = taxiBean;
-                System.out.println(nextTaxiBean);
             }
             if(beanId < minId){
                 minTaxiBean = taxiBean;

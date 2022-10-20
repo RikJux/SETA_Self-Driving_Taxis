@@ -26,7 +26,6 @@ public abstract class TaxiThread extends Thread {
                     if(!thisTaxi.isInitialized()){
                         if(thisTaxi.getWaitingThreads() < 5){
                             thisTaxi.setWaitingThreads();
-                            System.out.println(thisTaxi.getWaitingThreads());
                             syncObj.notifyAll();
                         }
                     }
@@ -35,6 +34,9 @@ public abstract class TaxiThread extends Thread {
                         doStuff();
                         System.out.println(thisStatus + " released the lock.");
                         syncObj.notifyAll();
+                    }
+                    if(thisTaxi.getCurrentStatus() == Taxi.Status.LEAVING && thisStatus != Taxi.Status.LEAVING){
+                        return;
                     }
                     syncObj.wait();
                     }
