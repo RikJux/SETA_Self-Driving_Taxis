@@ -15,7 +15,7 @@ public class ElectionIdentifier implements Comparable<ElectionIdentifier> {
         stack.push(Double.parseDouble(thisTaxi.getId()));
         stack.push(thisTaxi.getBattery());
         stack.push(-1*distance);
-        stack.push(thisTaxi.getCurrentStatus()== Taxi.Status.IDLE ? 1d : 0d);
+        stack.push(thisTaxi.getCurrentStatus() == Taxi.Status.IDLE ? 1d : 0d);
 
     }
 
@@ -51,7 +51,7 @@ public class ElectionIdentifier implements Comparable<ElectionIdentifier> {
             }else if(el1 < el2){
                 return -1;
             }
-        }while(this.stack.isEmpty());
+        }while(!stackCopy.isEmpty());
 
         return 0; // the two are identical
     }
@@ -65,7 +65,7 @@ public class ElectionIdentifier implements Comparable<ElectionIdentifier> {
                 .setIdle(stackCopy.pop()==1.0d)
                 .setDistance(-1*stackCopy.pop())
                 .setBatteryLevel(stackCopy.pop())
-                .setId(String.valueOf(stackCopy.pop()))
+                .setId(String.valueOf((int) Math.round(stackCopy.pop())))
                 .build();
 
     }

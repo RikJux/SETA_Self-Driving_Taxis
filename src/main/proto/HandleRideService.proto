@@ -2,6 +2,20 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 package taxi.communication.handleRideService;
 
+message RideRequest {
+
+  string id = 1;
+
+  message Position {
+    int32 x = 1;
+    int32 y = 2;
+  }
+
+  Position startingPosition = 2;
+  Position destinationPosition = 3;
+
+}
+
 message ElectionMsg{
 
   message CandidateMsg{
@@ -11,17 +25,22 @@ message ElectionMsg{
     string id = 4;
   }
 
-  string RideRequest = 1;
+  RideRequest request = 1;
   CandidateMsg candidateMsg = 2;
 
 }
 
-message HandleRideOk{ string id = 1;} // send to the taxi that is a worse candidate
+message ElectedMsg{
+  RideRequest request = 1;
+  string taxiId = 2;
+}
 
-message TakeChargeRide{ string id = 1;} // notify all taxis if win election.
+message ElectionOk{}
+
+message ElectedOK{}
 
 service HandleRideService{
-  rpc election (ElectionMsg) returns (HandleRideOk);
+  rpc election (ElectionMsg) returns (ElectionOk);
 
-  rpc takeCharge (TakeChargeRide) returns (google.protobuf.Empty);
+  rpc elected (ElectedMsg) returns (ElectedOK);
 }

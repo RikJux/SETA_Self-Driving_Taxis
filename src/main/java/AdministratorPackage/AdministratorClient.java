@@ -38,11 +38,13 @@ public class AdministratorClient {
                     String[] idN = getTaxiIdN(in);
                     System.out.println("Retrieving averages for " + idN[1] + " measurements for taxi " + idN[0]);
                     taxiStats = statsOfTaxi(idN[0], Integer.parseInt(idN[1]));
+                    System.out.println(taxiStats.toString());
                     break;
                 case ("W"):
                     double[] window = getWindow(in);
                     System.out.println("Retrieving averages for time window [" + window[0] + ", " + window[1] + "]");
                     taxiStats = statsInTempWindow(window[0], window[1]);
+                    System.out.println(taxiStats.toString());
                     break;
                 case ("L"):
                     List<TaxiBean> taxiList = getTaxis(client);
@@ -56,7 +58,6 @@ public class AdministratorClient {
                 default:
                     System.out.println("Invalid statistics selection");
             }
-                System.out.println(taxiStats.toString());
             statsType = null;
         }
 
@@ -114,7 +115,6 @@ public class AdministratorClient {
             for(TaxiBean t: getTaxis(client)){
                 if(t.getId().equals(id)){
                     id = t.getId();
-                    System.out.println("Insert how many measurements are to take into account:");
                     break; // id found
                 }
                 id = null;
@@ -125,6 +125,7 @@ public class AdministratorClient {
                 idN[0] = id;
                 while(n <= 0){
                     try {
+                        System.out.println("Insert how many measurements are to take into account:");
                         n = Integer.parseInt(in.nextLine());
                     }catch(NumberFormatException e){
                         System.out.println("Invalid input: n not an int");
@@ -153,10 +154,12 @@ public class AdministratorClient {
     public static List<TaxiBean> getTaxis(Client client){
         String url = serverAddress+taxisPath;
         ClientResponse clientResponse = getRequest(client, url, MediaType.APPLICATION_JSON);
-        List<TaxiBean> taxiList = clientResponse.getEntity(Taxis.class).getTaxiList();
+        Taxis taxis = new Gson().fromJson(clientResponse.getEntity(String.class), Taxis.class);
+        List<TaxiBean> taxiList = taxis.getTaxiList();
         return taxiList;
     }
 
+    //HERE
     public static TaxiStatistics getTaxiStats(Client client, String url){
         ClientResponse clientResponse = getRequest(client, url, MediaType.TEXT_PLAIN);
         TaxiStatistics taxiStats = new Gson().fromJson(clientResponse.getEntity(String.class), TaxiStatistics.class);

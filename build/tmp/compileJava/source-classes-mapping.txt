@@ -1,5 +1,7 @@
 Simulator/Buffer.java
  Simulator.Buffer
+TaxiPackage/Threads/GoRecharge.java
+ TaxiPackage.Threads.GoRecharge
 taxi/communication/rechargeService/RechargeServiceGrpc.java
  taxi.communication.rechargeService.RechargeServiceGrpc
  taxi.communication.rechargeService.RechargeServiceGrpc$1
@@ -13,15 +15,18 @@ taxi/communication/rechargeService/RechargeServiceGrpc.java
  taxi.communication.rechargeService.RechargeServiceGrpc$RechargeServiceStub
 beans/Taxis.java
  beans.Taxis
+TaxiPackage/ElectionHandle.java
+ TaxiPackage.ElectionHandle
 AdministratorPackage/AdministratorServer.java
  AdministratorPackage.AdministratorServer
-TaxiPackage/TaxiRechargeComm.java
- TaxiPackage.TaxiRechargeComm
- TaxiPackage.TaxiRechargeComm$1
+TaxiPackage/Impl/RechargeTokenServiceImpl.java
+ TaxiPackage.Impl.RechargeTokenServiceImpl
 beans/Statistics.java
  beans.Statistics
 TaxiPackage/Impl/HandleRideServiceImpl.java
  TaxiPackage.Impl.HandleRideServiceImpl
+ TaxiPackage.Impl.HandleRideServiceImpl$1
+ TaxiPackage.Impl.HandleRideServiceImpl$2
 taxi/communication/leaveService/LeaveServiceOuterClass.java
  taxi.communication.leaveService.LeaveServiceOuterClass
  taxi.communication.leaveService.LeaveServiceOuterClass$1
@@ -39,15 +44,34 @@ beans/TaxiBean.java
  beans.TaxiBean
 TaxiPackage/Impl/RechargeServiceImpl.java
  TaxiPackage.Impl.RechargeServiceImpl
-Simulator/PM10Simulator.java
- Simulator.PM10Simulator
 TaxiPackage/Impl/LeaveServiceImpl.java
  TaxiPackage.Impl.LeaveServiceImpl
+taxi/communication/rechargeTokenService/RechargeTokenServiceGrpc.java
+ taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc
+ taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$1
+ taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$MethodHandlers
+ taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$RechargeTokenServiceBaseDescriptorSupplier
+ taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$RechargeTokenServiceBlockingStub
+ taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$RechargeTokenServiceFileDescriptorSupplier
+ taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$RechargeTokenServiceFutureStub
+ taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$RechargeTokenServiceImplBase
+ taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$RechargeTokenServiceMethodDescriptorSupplier
+ taxi.communication.rechargeTokenService.RechargeTokenServiceGrpc$RechargeTokenServiceStub
+TaxiPackage/Threads/Working.java
+ TaxiPackage.Threads.Working
 services/TaxiManagement.java
  services.TaxiManagement
 taxi/communication/handleRideService/HandleRideServiceOuterClass.java
  taxi.communication.handleRideService.HandleRideServiceOuterClass
  taxi.communication.handleRideService.HandleRideServiceOuterClass$1
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectedMsg
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectedMsg$1
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectedMsg$Builder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectedMsgOrBuilder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectedOK
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectedOK$1
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectedOK$Builder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectedOKOrBuilder
  taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg
  taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg$1
  taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg$Builder
@@ -56,16 +80,22 @@ taxi/communication/handleRideService/HandleRideServiceOuterClass.java
  taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg$CandidateMsg$Builder
  taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsg$CandidateMsgOrBuilder
  taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionMsgOrBuilder
- taxi.communication.handleRideService.HandleRideServiceOuterClass$HandleRideOk
- taxi.communication.handleRideService.HandleRideServiceOuterClass$HandleRideOk$1
- taxi.communication.handleRideService.HandleRideServiceOuterClass$HandleRideOk$Builder
- taxi.communication.handleRideService.HandleRideServiceOuterClass$HandleRideOkOrBuilder
- taxi.communication.handleRideService.HandleRideServiceOuterClass$TakeChargeRide
- taxi.communication.handleRideService.HandleRideServiceOuterClass$TakeChargeRide$1
- taxi.communication.handleRideService.HandleRideServiceOuterClass$TakeChargeRide$Builder
- taxi.communication.handleRideService.HandleRideServiceOuterClass$TakeChargeRideOrBuilder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionOk
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionOk$1
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionOk$Builder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$ElectionOkOrBuilder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$RideRequest
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$RideRequest$1
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$RideRequest$Builder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$RideRequest$Position
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$RideRequest$Position$1
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$RideRequest$Position$Builder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$RideRequest$PositionOrBuilder
+ taxi.communication.handleRideService.HandleRideServiceOuterClass$RideRequestOrBuilder
 TaxiPackage/TaxiCommunicationServer.java
  TaxiPackage.TaxiCommunicationServer
+TaxiPackage/Threads/RequestRecharge.java
+ TaxiPackage.Threads.RequestRecharge
 taxi/communication/rechargeService/RechargeServiceOuterClass.java
  taxi.communication.rechargeService.RechargeServiceOuterClass
  taxi.communication.rechargeService.RechargeServiceOuterClass$1
@@ -81,6 +111,8 @@ taxi/communication/rechargeService/RechargeServiceOuterClass.java
  taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeRequest$RechargePosition$Builder
  taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeRequest$RechargePositionOrBuilder
  taxi.communication.rechargeService.RechargeServiceOuterClass$RechargeRequestOrBuilder
+TaxiPackage/TokenQueue.java
+ TaxiPackage.TokenQueue
 taxi/communication/leaveService/LeaveServiceGrpc.java
  taxi.communication.leaveService.LeaveServiceGrpc
  taxi.communication.leaveService.LeaveServiceGrpc$1
@@ -94,6 +126,7 @@ taxi/communication/leaveService/LeaveServiceGrpc.java
  taxi.communication.leaveService.LeaveServiceGrpc$MethodHandlers
 SETA.java
  SETA
+ SETA$1
 taxi/communication/handleRideService/HandleRideServiceGrpc.java
  taxi.communication.handleRideService.HandleRideServiceGrpc
  taxi.communication.handleRideService.HandleRideServiceGrpc$1
@@ -107,12 +140,30 @@ taxi/communication/handleRideService/HandleRideServiceGrpc.java
  taxi.communication.handleRideService.HandleRideServiceGrpc$MethodHandlers
 Utils/Utils.java
  Utils.Utils
-Simulator/Measurement.java
- Simulator.Measurement
+TaxiPackage/ElectionInfo.java
+ TaxiPackage.ElectionInfo
+TaxiPackage/Taxi.java
+ TaxiPackage.Taxi
+ TaxiPackage.Taxi$1
+ TaxiPackage.Taxi$Input
+ TaxiPackage.Taxi$Status
+TaxiPackage/Threads/Idle.java
+ TaxiPackage.Threads.Idle
+ TaxiPackage.Threads.Idle$1
+ TaxiPackage.Threads.Idle$2
+ TaxiPackage.Threads.Idle$3
+TaxiPackage/TaxiMQTT.java
+ TaxiPackage.TaxiMQTT
+ TaxiPackage.TaxiMQTT$1
+ TaxiPackage.TaxiMQTT$2
 TaxiPackage/Sensor.java
  TaxiPackage.Sensor
 Simulator/Simulator.java
  Simulator.Simulator
+TaxiPackage/Threads/Joining.java
+ TaxiPackage.Threads.Joining
+TaxiPackage/ElectionIdentifier.java
+ TaxiPackage.ElectionIdentifier
 seta/smartcity/rideRequest/RideRequestOuterClass.java
  seta.smartcity.rideRequest.RideRequestOuterClass
  seta.smartcity.rideRequest.RideRequestOuterClass$1
@@ -124,6 +175,8 @@ seta/smartcity/rideRequest/RideRequestOuterClass.java
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$Position$Builder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequest$PositionOrBuilder
  seta.smartcity.rideRequest.RideRequestOuterClass$RideRequestOrBuilder
+TaxiPackage/Threads/Leaving.java
+ TaxiPackage.Threads.Leaving
 Simulator/SimulatorData.java
  Simulator.SimulatorData
 TaxiPackage/Impl/JoinServiceImpl.java
@@ -143,6 +196,8 @@ taxi/communication/joinService/JoinServiceOuterClass.java
  taxi.communication.joinService.JoinServiceOuterClass$JoinOk$1
  taxi.communication.joinService.JoinServiceOuterClass$JoinOk$Builder
  taxi.communication.joinService.JoinServiceOuterClass$JoinOkOrBuilder
+TaxiPackage/Threads/TaxiThread.java
+ TaxiPackage.Threads.TaxiThread
 AdministratorPackage/AdministratorClient.java
  AdministratorPackage.AdministratorClient
 taxi/communication/joinService/JoinServiceGrpc.java
@@ -162,11 +217,21 @@ TaxiPackage/TaxiCommunicationClient.java
  TaxiPackage.TaxiCommunicationClient$2
 beans/TaxiStatistics.java
  beans.TaxiStatistics
-TaxiPackage/Taxi.java
- TaxiPackage.Taxi
- TaxiPackage.Taxi$Status
-TaxiPackage/TaxiDriver.java
- TaxiPackage.TaxiDriver
- TaxiPackage.TaxiDriver$1
-TaxiPackage/ElectionIdentifier.java
- TaxiPackage.ElectionIdentifier
+TaxiPackage/TaxiRechargeTokenComm.java
+ TaxiPackage.TaxiRechargeTokenComm
+ TaxiPackage.TaxiRechargeTokenComm$1
+Simulator/Measurement.java
+ Simulator.Measurement
+Simulator/PM10Simulator.java
+ Simulator.PM10Simulator
+taxi/communication/rechargeTokenService/RechargeTokenServiceOuterClass.java
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$1
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOk
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOk$1
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOk$Builder
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeOkOrBuilder
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeToken
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeToken$1
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeToken$Builder
+ taxi.communication.rechargeTokenService.RechargeTokenServiceOuterClass$RechargeTokenOrBuilder

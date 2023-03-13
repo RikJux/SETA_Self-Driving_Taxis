@@ -1,13 +1,12 @@
 package TaxiPackage;
 
-import TaxiPackage.Impl.HandleRideServiceImpl;
-import TaxiPackage.Impl.JoinServiceImpl;
-import TaxiPackage.Impl.LeaveServiceImpl;
-import TaxiPackage.Impl.RechargeServiceImpl;
+import TaxiPackage.Impl.*;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
 import java.io.IOException;
+
+import static Utils.Utils.printInformation;
 
 public class TaxiCommunicationServer extends Thread{
 
@@ -25,15 +24,16 @@ public class TaxiCommunicationServer extends Thread{
             Server server = ServerBuilder.forPort(thisTaxi.getPort())
                     .addService(new JoinServiceImpl(thisTaxi))
                     .addService(new LeaveServiceImpl(thisTaxi))
-                    .addService(new HandleRideServiceImpl())
-                    .addService(new RechargeServiceImpl(thisTaxi))
+                    .addService(new RechargeTokenServiceImpl(thisTaxi))
+                    .addService(new HandleRideServiceImpl(thisTaxi.getElectionHandle()))
                     .build();
 
             server.start();
+            thisTaxi.setServer(server);
 
-            System.out.println("Communication thread for taxi " + thisTaxi.getId() + " started");
+            System.out.println("Communication thread for" + printInformation("TAXI", thisTaxi.getId()) + "started");
 
-            server.awaitTermination();
+            thisTaxi.getServer().awaitTermination();
 
         } catch (IOException e) {
 

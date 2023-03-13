@@ -7,6 +7,7 @@ import taxi.communication.leaveService.LeaveServiceGrpc;
 import taxi.communication.leaveService.LeaveServiceOuterClass;
 
 import java.util.List;
+import static Utils.Utils.*;
 
 public class LeaveServiceImpl extends LeaveServiceGrpc.LeaveServiceImplBase {
 
@@ -24,6 +25,10 @@ public class LeaveServiceImpl extends LeaveServiceGrpc.LeaveServiceImplBase {
                 if(t.getId().equals(request.getId())){
                     thisTaxi.getTaxiList().remove(t);
                     System.out.println("[LEAVE SRV] Taxi " + request.getId() + " was removed from taxi list.");
+                    synchronized (thisTaxi.getNextLock()){
+                        thisTaxi.setNextTaxi(updateNextOnLeave(thisTaxi, request.getId()));
+                        thisTaxi.getNextLock().notifyAll();
+                    }
                     break;
                 }
             }

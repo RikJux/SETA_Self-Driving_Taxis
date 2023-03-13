@@ -1,0 +1,12 @@
+syntax = "proto3";
+package taxi.communication.rechargeTokenService;
+
+message RechargeToken{
+  string district = 1;
+}
+
+message RechargeOk{}
+
+service RechargeTokenService{
+  rpc rechargeToken (RechargeToken) returns (RechargeOk);
+}

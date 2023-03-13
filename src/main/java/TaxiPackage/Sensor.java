@@ -28,7 +28,8 @@ public class Sensor extends Thread{
 
     public void run() {
 
-        while(true){
+
+        while(thisTaxi.getInput() != Taxi.Input.QUIT){
             try {
                 Thread.sleep(15000);
                 handleStatistics(client, thisTaxi, pm10.getBuffer());
@@ -43,6 +44,7 @@ public class Sensor extends Thread{
         thisTaxi.getTaxiStats().setPollution(avgPollution(pollution));
         thisTaxi.getTaxiStats().setTimestamp(System.currentTimeMillis());
         sendStatistics(client, thisTaxi.getTaxiStats());
+        System.out.println(thisTaxi.getTaxiStats());
         double battLeft = thisTaxi.getTaxiStats().getBatteryLevel();
         thisTaxi.setTaxiStats(new TaxiStatistics(thisTaxi.getId()));
         thisTaxi.setBattery(battLeft);

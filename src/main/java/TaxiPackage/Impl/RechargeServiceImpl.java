@@ -20,7 +20,6 @@ public class RechargeServiceImpl extends RechargeServiceGrpc.RechargeServiceImpl
     public void recharge(RechargeServiceOuterClass.RechargeRequest request, StreamObserver<RechargeServiceOuterClass.RechargeOk> responseObserver) {
 
         int[] destinationRecharge = new int[] {request.getRechargePosition().getX(), request.getRechargePosition().getY()};
-        //fromMsgToArray(request.getRechargePosition().getX());
         String district = computeDistrict(destinationRecharge);
 
         System.out.println("[RECHARGE SRV] Taxi " + request.getId() + " requested recharge service at station " +
@@ -29,15 +28,19 @@ public class RechargeServiceImpl extends RechargeServiceGrpc.RechargeServiceImpl
         System.out.println("[RECHARGE SRV] Taxi " + request.getId() + " is waiting for recharge in district " + district);
 
         if(!thisTaxi.getId().equals(request.getId())){
-            synchronized (thisTaxi){
-                while(notOkCondition(thisTaxi, district, request.getTimestamp())){
-                    try {
-                        thisTaxi.wait();
-                        if(!notOkCondition(thisTaxi, district, request.getTimestamp())){
-                            notifyAll(); // now can acknowledge the request
+            synchronized (thisTaxi.getRechargeLock()){
+                if(thisTaxi.getDistrict().equals(district)){
+                    synchronized (thisTaxi.getRechargeTimestampLock()){
+                        if(thisTaxi.getCurrentStatus() == Taxi.Status.REQUEST_RECHARGE && request.getTimestamp() >=
+                                thisTaxi.getRechargeRequestTimestamp()){ // put to wait
+                            while(thisTaxi.getCurrentStatus() != Taxi.Status.IDLE){
+                                try {
+                                    thisTaxi.getRechargeLock().wait();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
                 }
             }
